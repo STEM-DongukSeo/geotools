@@ -3,7 +3,7 @@ package org.geotools.indoorgml.core;
 
 import org.geotools.xml.*;
 import org.geotools.xml.AbstractSimpleBinding;
-
+import org.opengis.feature.Feature;
 
 import javax.xml.namespace.QName;
 
@@ -46,7 +46,7 @@ public class SpaceLayerClassTypeTypeBinding extends AbstractSimpleBinding {
 	 * @generated modifiable
 	 */	
 	public Class getType() {
-		return null;
+		return String.class;
 	}
 	
 	/**
@@ -58,8 +58,11 @@ public class SpaceLayerClassTypeTypeBinding extends AbstractSimpleBinding {
 	public Object parse(InstanceComponent instance, Object value) 
 		throws Exception {
 		
+		System.out.println("SpaceLayerClassTypeBinding");
+        System.out.println(value);
+		
 		//TODO: implement and remove call to super
-		return super.parse(instance,value);
+		return value;
 	}
 
 }

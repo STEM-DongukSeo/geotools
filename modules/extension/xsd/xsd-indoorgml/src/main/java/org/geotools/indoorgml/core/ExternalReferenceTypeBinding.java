@@ -3,7 +3,7 @@ package org.geotools.indoorgml.core;
 
 import org.geotools.xml.*;
 import org.geotools.xml.AbstractComplexBinding;
-
+import org.opengis.feature.Association;
 
 import javax.xml.namespace.QName;
 
@@ -42,7 +42,7 @@ public class ExternalReferenceTypeBinding extends AbstractComplexBinding {
 	 * @generated modifiable
 	 */	
 	public Class getType() {
-		return null;
+		return Association.class;
 	}
 	
 	/**

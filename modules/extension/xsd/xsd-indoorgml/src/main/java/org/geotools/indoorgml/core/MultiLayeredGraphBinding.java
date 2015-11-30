@@ -3,7 +3,7 @@ package org.geotools.indoorgml.core;
 
 import org.geotools.xml.*;
 import org.geotools.xml.AbstractSimpleBinding;
-
+import org.opengis.feature.Feature;
 
 import javax.xml.namespace.QName;
 
@@ -42,7 +42,7 @@ public class MultiLayeredGraphBinding extends AbstractSimpleBinding {
 	 * @generated modifiable
 	 */	
 	public Class getType() {
-		return null;
+		return Feature.class;
 	}
 	
 	/**
