@@ -1,11 +1,13 @@
 package org.geotools.indoorgml.core;
 
 
-import org.geotools.xml.*;
-import org.geotools.xml.AbstractComplexBinding;
-
-
 import javax.xml.namespace.QName;
+
+import org.geotools.xml.AbstractComplexBinding;
+import org.geotools.xml.ElementInstance;
+import org.geotools.xml.Node;
+import org.opengis.feature.Association;
+import org.opengis.feature.Feature;
 
 /**
  * Binding object for the type http://www.opengis.net/indoorgml/1.0/core:StateMemberType.
@@ -46,7 +48,7 @@ public class StateMemberTypeBinding extends AbstractComplexBinding {
 	 * @generated modifiable
 	 */	
 	public Class getType() {
-		return null;
+		return Association.class;
 	}
 	
 	/**
@@ -57,9 +59,16 @@ public class StateMemberTypeBinding extends AbstractComplexBinding {
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
+
+		System.out.println("StateMemberTypeBinding");
+        
+        System.out.println(node.toString());
+        System.out.println(node.getChildValue(Feature.class));
+        System.out.println(value);
+		
 		
 		//TODO: implement and remove call to super
-		return super.parse(instance,node,value);
+		return node.getChildValue(Feature.class);
 	}
 
 }

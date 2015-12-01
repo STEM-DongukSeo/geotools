@@ -1,11 +1,18 @@
 package org.geotools.indoorgml.core;
 
 
-import org.geotools.xml.*;
-import org.geotools.xml.AbstractComplexBinding;
-
-
 import javax.xml.namespace.QName;
+
+import org.geotools.gml2.FeatureTypeCache;
+import org.geotools.gml3.XSDIdRegistry;
+import org.geotools.gml3.bindings.AbstractFeatureTypeBinding;
+import org.geotools.gml3.bindings.GML3EncodingUtils;
+import org.geotools.xml.BindingWalkerFactory;
+import org.geotools.xml.Configuration;
+import org.geotools.xml.ElementInstance;
+import org.geotools.xml.Node;
+import org.geotools.xml.SchemaIndex;
+import org.opengis.feature.Feature;
 
 /**
  * Binding object for the type http://www.opengis.net/indoorgml/1.0/core:TransitionType.
@@ -33,7 +40,13 @@ import javax.xml.namespace.QName;
  *
  * @generated
  */
-public class TransitionTypeBinding extends AbstractComplexBinding {
+public class TransitionTypeBinding extends AbstractFeatureTypeBinding {
+
+	public TransitionTypeBinding(FeatureTypeCache ftCache, BindingWalkerFactory bwFactory, SchemaIndex schemaIndex,
+			Configuration configuration, XSDIdRegistry idRegistry, GML3EncodingUtils encodingUtils) {
+		super(ftCache, bwFactory, schemaIndex, configuration, idRegistry, encodingUtils);
+		// TODO Auto-generated constructor stub
+	}
 
 	/**
 	 * @generated
@@ -49,7 +62,7 @@ public class TransitionTypeBinding extends AbstractComplexBinding {
 	 * @generated modifiable
 	 */	
 	public Class getType() {
-		return null;
+		return Feature.class;
 	}
 	
 	/**
@@ -60,9 +73,16 @@ public class TransitionTypeBinding extends AbstractComplexBinding {
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
+
+		System.out.println("TransitionTypeBinding");
+        
+        System.out.println(node.toString());
+        System.out.println(node.getChildValue(Feature.class));
+        System.out.println(value);
 		
 		//TODO: implement and remove call to super
 		return super.parse(instance,node,value);
+
 	}
 
 }

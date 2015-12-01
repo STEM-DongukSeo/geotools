@@ -184,7 +184,7 @@ public class GML2ParsingUtils {
         ftBuilder.setCRS(null); //JD: set explicitly to null to avoid warning
 
         CoordinateReferenceSystem crs = null;
-
+        
         //mandatory gml attributes
         if (!node.hasChild("description")) {
             ftBuilder.add("description", String.class);
