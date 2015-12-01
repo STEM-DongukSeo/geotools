@@ -1,9 +1,13 @@
 package org.geotools.indoorgml.core;
 
 
+import org.geotools.gml2.FeatureTypeCache;
+import org.geotools.gml3.XSDIdRegistry;
+import org.geotools.gml3.bindings.AbstractFeatureTypeBinding;
+import org.geotools.gml3.bindings.GML3EncodingUtils;
+import org.geotools.gml3.bindings.GML3ParsingUtils;
 import org.geotools.xml.*;
-import org.geotools.xml.AbstractComplexBinding;
-
+import org.opengis.feature.Feature;
 
 import javax.xml.namespace.QName;
 
@@ -30,9 +34,18 @@ import javax.xml.namespace.QName;
  *
  * @generated
  */
-public class IndoorFeaturesTypeBinding extends AbstractComplexBinding {
+public class IndoorFeaturesTypeBinding extends AbstractFeatureTypeBinding {
 
-	/**
+	public IndoorFeaturesTypeBinding(FeatureTypeCache ftCache,
+            BindingWalkerFactory bwFactory, SchemaIndex schemaIndex,
+            Configuration configuration, XSDIdRegistry idRegistry,
+            GML3EncodingUtils encodingUtils) {
+        super(ftCache, bwFactory, schemaIndex, configuration, idRegistry,
+                encodingUtils);
+        // TODO Auto-generated constructor stub
+    }
+
+    /**
 	 * @generated
 	 */
 	public QName getTarget() {
@@ -46,7 +59,7 @@ public class IndoorFeaturesTypeBinding extends AbstractComplexBinding {
 	 * @generated modifiable
 	 */	
 	public Class getType() {
-		return null;
+		return Feature.class;
 	}
 	
 	/**
@@ -57,10 +70,13 @@ public class IndoorFeaturesTypeBinding extends AbstractComplexBinding {
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
-		
-	       System.out.println("IndoorFeaturesTypeBinding");
+	    System.out.println("IndoorFeaturesTypeBinding");
+	    
+	    System.out.println(node.toString());
+	    
+	    System.out.println(value);
             
-	       return null;
+	    return super.parse(instance, node, value);
 	}
 
 }

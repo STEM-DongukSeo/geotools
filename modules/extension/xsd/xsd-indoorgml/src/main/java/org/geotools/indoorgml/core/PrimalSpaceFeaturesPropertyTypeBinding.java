@@ -3,7 +3,8 @@ package org.geotools.indoorgml.core;
 
 import org.geotools.xml.*;
 import org.geotools.xml.AbstractComplexBinding;
-
+import org.opengis.feature.Association;
+import org.opengis.feature.Feature;
 
 import javax.xml.namespace.QName;
 
@@ -42,7 +43,7 @@ public class PrimalSpaceFeaturesPropertyTypeBinding extends AbstractComplexBindi
 	 * @generated modifiable
 	 */	
 	public Class getType() {
-		return null;
+		return Feature.class;
 	}
 	
 	/**
@@ -53,9 +54,13 @@ public class PrimalSpaceFeaturesPropertyTypeBinding extends AbstractComplexBindi
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
-		
+	    System.out.println("PrimalSpaceFeaturesPropertyTypeBinding");
+            
+            System.out.println(node.toString());
+            System.out.println(node.getChildValue(Feature.class));
+            System.out.println(value);
 		//TODO: implement and remove call to super
-		return super.parse(instance,node,value);
+            return node.getChildValue(Feature.class);
 	}
 
 }
