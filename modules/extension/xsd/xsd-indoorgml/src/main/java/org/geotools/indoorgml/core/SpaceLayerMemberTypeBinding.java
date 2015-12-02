@@ -58,16 +58,9 @@ public class SpaceLayerMemberTypeBinding extends AbstractComplexBinding {
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
-		
-		System.out.println("SpaceLayerMemberTypeBinding");
-        
-        System.out.println(node.toString());
-        System.out.println(node.getChildValue(Feature.class));
-        System.out.println(value);
-		
-		
+	        System.out.println("### SpaceLayerMemberTypeBinding ###");
 		//TODO: implement and remove call to super
-		return node.getChildValue(Feature.class);
+		return node.getChildValues(Feature.class);
 	}
 
 }

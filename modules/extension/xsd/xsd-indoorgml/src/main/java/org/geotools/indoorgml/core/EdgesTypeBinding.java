@@ -67,14 +67,7 @@ public class EdgesTypeBinding extends AbstractFeatureTypeBinding {
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
-
-		System.out.println("EdgesTypeBinding");
-        
-        System.out.println(node.toString());
-        System.out.println(node.getChildValue(Feature.class));
-        System.out.println(value);
-		
-		//TODO: implement and remove call to super
+		System.out.println("### EdgesTypeBinding ###");
 		return super.parse(instance,node,value);
 	}
 

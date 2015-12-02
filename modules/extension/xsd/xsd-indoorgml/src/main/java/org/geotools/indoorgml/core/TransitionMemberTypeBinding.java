@@ -58,14 +58,7 @@ public class TransitionMemberTypeBinding extends AbstractComplexBinding {
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
-
-		System.out.println("TransitionMemberTypeBinding");
-        
-        System.out.println(node.toString());
-        System.out.println(node.getChildValue(Feature.class));
-        System.out.println(value);
-		
-		
+		System.out.println("### TransitionMemberTypeBinding ###");
 		//TODO: implement and remove call to super
 		return node.getChildValue(Feature.class);
 	}

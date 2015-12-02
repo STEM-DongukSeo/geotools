@@ -55,15 +55,9 @@ public class StatePropertyTypeBinding extends AbstractComplexBinding {
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
 
-		System.out.println("StatePropertyTypeBinding");
-        
-        System.out.println(node.toString());
-        System.out.println(node.getChildValue(Feature.class));
-        System.out.println(value);
-		
-		
-		//TODO: implement and remove call to super
-		return node.getChildValue(Feature.class);
+	    System.out.println("### StatePropertyTypeBinding ###");
+            //TODO: implement and remove call to super
+            return node.getChildValue(Feature.class);
 	}
 
 }

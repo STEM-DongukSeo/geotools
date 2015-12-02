@@ -70,13 +70,7 @@ public class IndoorFeaturesTypeBinding extends AbstractFeatureTypeBinding {
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
-		
-	    System.out.println("IndoorFeaturesTypeBinding");
-	    
-	    System.out.println(node.toString());
-	    
-	    System.out.println(value);
-            
+	    System.out.println("### IndoorFeaturesTypeBinding ###");
 	    return super.parse(instance, node, value);
 	}
 

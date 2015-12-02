@@ -1,8 +1,6 @@
 package org.geotools.indoorgml.core;
 
-import org.eclipse.xsd.util.XSDSchemaLocationResolver;
 import org.geotools.gml3.v3_2.GMLConfiguration;
-import org.geotools.xlink.XLINKConfiguration;
 import org.geotools.xml.Configuration;
 import org.picocontainer.MutablePicoContainer;
 
@@ -66,7 +64,8 @@ public class INDOORCOREConfiguration extends Configuration {
         container.registerComponentImplementation(INDOORCORE.typeOfTopoExpressionCodeOtherType,TypeOfTopoExpressionCodeOtherTypeBinding.class);
         container.registerComponentImplementation(INDOORCORE.typeOfTopoExpressionCodeType,TypeOfTopoExpressionCodeTypeBinding.class);
 
-        //Elements
+        /*        
+         * //Elements
         container.registerComponentImplementation(INDOORCORE.CellSpace,CellSpaceBinding.class);
         container.registerComponentImplementation(INDOORCORE.CellSpaceBoundary,CellSpaceBoundaryBinding.class);
         container.registerComponentImplementation(INDOORCORE.IndoorFeatures,IndoorFeaturesBinding.class);
@@ -76,6 +75,7 @@ public class INDOORCOREConfiguration extends Configuration {
         container.registerComponentImplementation(INDOORCORE.SpaceLayer,SpaceLayerBinding.class);
         container.registerComponentImplementation(INDOORCORE.State,StateBinding.class);
         container.registerComponentImplementation(INDOORCORE.Transition,TransitionBinding.class);
+        */
 
     
     }

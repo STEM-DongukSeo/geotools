@@ -54,15 +54,7 @@ public class CellSpacePropertyTypeBinding extends AbstractComplexBinding {
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
-
-		System.out.println("CellSpacePropertyTypeBinding");
-        
-        System.out.println(node.toString());
-        System.out.println(node.getChildValue(Feature.class));
-        System.out.println(value);
-		
-		
-		//TODO: implement and remove call to super
+		System.out.println("### CellSpacePropertyTypeBinding ###");
 		return node.getChildValue(Feature.class);
 	}
 

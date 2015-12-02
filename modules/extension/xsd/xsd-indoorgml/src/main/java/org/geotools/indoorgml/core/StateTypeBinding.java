@@ -72,15 +72,8 @@ public class StateTypeBinding extends AbstractFeatureTypeBinding {
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
-		System.out.println("StateTypeBinding");
-        
-        System.out.println(node.toString());
-        System.out.println(node.getChildValue(Feature.class));
-        System.out.println(value);
-		
-		//TODO: implement and remove call to super
+		System.out.println("### StateTypeBinding ###");
 		return super.parse(instance,node,value);
-
 	}
 
 }

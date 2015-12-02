@@ -1,14 +1,18 @@
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.geotools.indoorgml.core.INDOORCOREConfiguration;
 import org.geotools.xml.Parser;
+import org.geotools.xml.impl.NodeImpl;
 import org.junit.Test;
 import org.opengis.feature.Feature;
+import org.opengis.feature.Property;
 
 public class IndoorCoreParseTest {
 
@@ -35,7 +39,7 @@ public class IndoorCoreParseTest {
                 
                 Map<String, List<Feature>> m = (Map<String, List<Feature>>) fc;
                 for( Map.Entry<String, List<Feature>> e : m.entrySet() ){
-                    System.out.println( String.format("키 : %s, 값 : %s", e.getKey(), e.getValue()) );
+                    System.out.println( String.format("키 : %s", e.getKey()) );
                 }
                 
                 assertNotNull(fc);
@@ -82,12 +86,118 @@ public class IndoorCoreParseTest {
                 URL url = getClass().getResource("indoor.gml");
                 InputStream in = url.openStream();
 
-                System.out.println(in.available());
-                
                 //parse
                 Object fc = parser.parse( in );
                 
-                assertNotNull(fc);
+                //InodoorFeatures
+                Feature ifs = (Feature) fc;
+                assertNotNull(ifs);
+                System.out.println( 
+                        "Name : " + ifs.getName() + "\n" +
+                        "FeatureId : " + ifs.getIdentifier() 
+                );
+                
+                Collection<? extends Property> ifsValues = ifs.getValue();
+                Iterator<? extends Property> ifsIter = ifsValues.iterator();
+                
+                Feature psf = null;
+                Feature mls = null;
+                while(ifsIter.hasNext()) {
+                    Property p = ifsIter.next();
+                    System.out.println("Attr : " + p.getName());
+                    if("primalSpaceFeatures".equals(p.getName().getLocalPart())) {
+                        psf = (Feature) p.getValue();
+                    } else if("MultiLayeredGraph".equals(p.getName().getLocalPart())) {
+                        mls = (Feature) p.getValue();
+                    } else {
+                        System.out.println("Value : " + p.getValue());
+                    }
+                }
+                System.out.println();
+                assertNotNull(psf);
+                assertNotNull(mls);
+                
+                //MultiLayeredGraph
+                System.out.println( 
+                        "Name : " + mls.getName() + "\n" +
+                        "FeatureId : " + mls.getIdentifier() 
+                );
+                Collection<? extends Property> mlsValues = mls.getValue();
+                Iterator<? extends Property> mlsIter = mlsValues.iterator();
+                
+                Feature spaceLayers = null;
+                while(mlsIter.hasNext()) {
+                    Property p = mlsIter.next();
+                    System.out.println("Attr : " + p.getName());
+                    System.out.println("Value : " + p.getValue());
+                    
+                    if("spaceLayers".equals(p.getName().getLocalPart())) {
+                        spaceLayers = (Feature) p.getValue();
+                    }
+                    
+                }
+                System.out.println();
+                
+                //SpaceLayersType
+                System.out.println( 
+                        "Name : " + spaceLayers.getName() + "\n" +
+                        "FeatureId : " + spaceLayers.getIdentifier() 
+                );
+                Collection<? extends Property> spaceLayersValues = spaceLayers.getValue();
+                Iterator<? extends Property> spaceLayersIter = spaceLayersValues.iterator();
+                
+                List<Feature> sl = null;
+                while(spaceLayersIter.hasNext()) {
+                    Property p = spaceLayersIter.next();
+                    System.out.println("Attr : " + p.getName());
+                    System.out.println("Value : " + p.getValue());
+                    
+                    if("spaceLayerMember".equals(p.getName().getLocalPart())) {
+                        sl = (List<Feature>) p.getValue();
+                    }
+                    
+                }
+                System.out.println();
+                
+                //SpaceLayerType List
+                for(int i = 0; i < sl.size(); i++) {
+                    Feature f = sl.get(i);
+                    System.out.println("SpaceLayer[" + i + "]");
+                    System.out.println( 
+                            "Name : " + f.getName() + "\n" +
+                            "FeatureId : " + f.getIdentifier() 
+                    );
+                    Collection<? extends Property> spaceLayerValues = f.getValue();
+                    Iterator<? extends Property> spaceLayerIter = spaceLayerValues.iterator();
+
+                    while(spaceLayerIter.hasNext()) {
+                        Property p = spaceLayerIter.next();
+                        System.out.println("Attr : " + p.getName());
+                        System.out.println("Value : " + p.getValue());
+                    }
+                    System.out.println();
+                    
+                }
+                
+                
+                //primalSpaceFeatures
+                System.out.println( 
+                        "Name : " + psf.getName() + "\n" +
+                        "FeatureId : " + psf.getIdentifier() 
+                );
+                Collection<? extends Property> psfValues = psf.getValue();
+                Iterator<? extends Property> psfIter = psfValues.iterator();
+                while(psfIter.hasNext()) {
+                    Property p = psfIter.next();
+                    System.out.println("Attr : " + p.getName());
+                    System.out.println("Value : " + p.getValue());
+                }
+                System.out.println();
+                
+                
+               
+                
+                
         }
         catch(Exception e) {
                 e.printStackTrace();

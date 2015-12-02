@@ -67,17 +67,10 @@ public class SpaceLayersTypeBinding extends AbstractFeatureTypeBinding {
 	 * <!-- end-user-doc -->
 	 *	
 	 * @generated modifiable
-	 */	
+	 */
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
-		
-		System.out.println("SpaceLayersTypeBinding");
-	    
-	    System.out.println(node.toString());
-	    
-	    System.out.println(value);
-        
-		
+		System.out.println("### SpaceLayersTypeBinding ###");
 		//TODO: implement and remove call to super
 		return super.parse(instance,node,value);
 	}

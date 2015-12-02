@@ -71,15 +71,7 @@ public class NodesTypeBinding extends AbstractFeatureTypeBinding {
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
-		
-
-		System.out.println("NodesTypeBinding");
-        
-        System.out.println(node.toString());
-        System.out.println(node.getChildValue(Feature.class));
-        System.out.println(value);
-		
-		//TODO: implement and remove call to super
+		System.out.println("### NodesTypeBinding ###");
 		return super.parse(instance,node,value);
 	}
 

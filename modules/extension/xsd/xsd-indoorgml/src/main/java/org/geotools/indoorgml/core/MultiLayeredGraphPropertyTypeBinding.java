@@ -3,7 +3,8 @@ package org.geotools.indoorgml.core;
 
 import org.geotools.xml.*;
 import org.geotools.xml.AbstractComplexBinding;
-
+import org.opengis.feature.Association;
+import org.opengis.feature.Feature;
 
 import javax.xml.namespace.QName;
 
@@ -42,7 +43,7 @@ public class MultiLayeredGraphPropertyTypeBinding extends AbstractComplexBinding
 	 * @generated modifiable
 	 */	
 	public Class getType() {
-		return null;
+		return Association.class;
 	}
 	
 	/**
@@ -53,9 +54,9 @@ public class MultiLayeredGraphPropertyTypeBinding extends AbstractComplexBinding
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
-		
+		System.out.println("### MultiLayeredGraphPropertyTypeBinding ###");
 		//TODO: implement and remove call to super
-		return super.parse(instance,node,value);
+		return node.getChildValue(Feature.class);	
 	}
 
 }
