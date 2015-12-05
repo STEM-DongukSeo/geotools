@@ -35,6 +35,8 @@ import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.gml2.FeatureTypeCache;
 import org.geotools.gml2.GML;
 import org.geotools.referencing.CRS;
+import org.geotools.referencing.ReferencingFactoryFinder;
+import org.geotools.referencing.factory.HTTP_AuthorityFactory;
 import org.geotools.util.Converters;
 import org.geotools.util.logging.Logging;
 import org.geotools.xml.Binding;
@@ -51,6 +53,8 @@ import org.opengis.feature.type.AttributeType;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
+import org.opengis.referencing.crs.CRSAuthorityFactory;
+import org.opengis.referencing.crs.CRSFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -368,10 +372,27 @@ public class GML2ParsingUtils {
                     //failed, continue on
                 }
             }
+            
 
             if (srs != null) {
+                try {
+                    return CRS.decode(srs.toString());
+                } catch (Exception e) {
+                    throw new RuntimeException("Could not create crs: " + srs, e);
+                }
+            }
+                /*try {
+                    CRSFactory factory = ReferencingFactoryFinder.getCRSFactory(null);
+                    return factory.create
+                } catch (Exception e) {
+                    try {
+                        return CRS.decode(srs.toString());
+                    } catch (Exception e1) {
+                        throw new RuntimeException("Could not create crs: " + srs, e1);
+                    }
+                }*/
                 //TODO: JD, this is a hack until GEOT-1136 has been resolved
-                if ("http".equals(srs.getScheme()) && "www.opengis.net".equals(srs.getAuthority())
+                /*if ("http".equals(srs.getScheme()) && "www.opengis.net".equals(srs.getAuthority())
                         && "/gml/srs/epsg.xml".equals(srs.getPath()) && (srs.getFragment() != null)) {
                     try {
                         return CRS.decode("EPSG:" + srs.getFragment());
@@ -383,15 +404,14 @@ public class GML2ParsingUtils {
                             //failed again, do nothing ,should fail below as well
                         }
                     }
-                }
-            }
+                }*/
 
-            try {
-                return CRS.decode(raw.toString());
+            /*try {
+                return CRS.decode(srs.toString());
             } catch (NoSuchAuthorityCodeException e) {
                 // HACK HACK HACK!: remove when
                 // http://jira.codehaus.org/browse/GEOT-1659 is fixed
-                final String crs = raw.toString();
+                final String crs = srs.toString();
                 if (crs.toUpperCase().startsWith("URN")) {
                     String code = crs.substring(crs.lastIndexOf(":") + 1);
                     try {
@@ -402,9 +422,8 @@ public class GML2ParsingUtils {
                 }
             } catch (FactoryException e) {
                 throw new RuntimeException("Could not create crs: " + srs, e);
-            }
+            }*/
         }
-
         return null;
     }
 

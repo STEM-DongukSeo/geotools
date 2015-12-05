@@ -2,13 +2,12 @@ package org.geotools.indoorgml.core;
 
 
 import java.util.Set;
+
 import javax.xml.namespace.QName;
 
 import org.geotools.gml3.v3_2.GML;
-import org.geotools.xlink.XLINK;
 import org.geotools.xml.XSD;
 import org.opengis.feature.type.Schema;
-
 /**
  * This interface contains the qualified names of all the types,elements, and 
  * attributes in the http://www.opengis.net/indoorgml/1.0/core schema.

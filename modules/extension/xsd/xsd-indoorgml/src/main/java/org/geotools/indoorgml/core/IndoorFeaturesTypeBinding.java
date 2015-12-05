@@ -1,15 +1,18 @@
 package org.geotools.indoorgml.core;
 
 
+import javax.xml.namespace.QName;
+
 import org.geotools.gml2.FeatureTypeCache;
 import org.geotools.gml3.XSDIdRegistry;
-import org.geotools.gml3.bindings.AbstractFeatureTypeBinding;
-import org.geotools.gml3.bindings.GML3EncodingUtils;
-import org.geotools.gml3.bindings.GML3ParsingUtils;
-import org.geotools.xml.*;
+import org.geotools.indoorgml.core.binding.GMLComplexParsingUtils;
+import org.geotools.xml.AbstractComplexBinding;
+import org.geotools.xml.BindingWalkerFactory;
+import org.geotools.xml.Configuration;
+import org.geotools.xml.ElementInstance;
+import org.geotools.xml.Node;
+import org.geotools.xml.SchemaIndex;
 import org.opengis.feature.Feature;
-
-import javax.xml.namespace.QName;
 
 /**
  * Binding object for the type http://www.opengis.net/indoorgml/1.0/core:IndoorFeaturesType.
@@ -34,44 +37,51 @@ import javax.xml.namespace.QName;
  *
  * @generated
  */
-public class IndoorFeaturesTypeBinding extends AbstractFeatureTypeBinding {
+public class IndoorFeaturesTypeBinding extends AbstractComplexBinding {
 
-	public IndoorFeaturesTypeBinding(FeatureTypeCache ftCache,
+    FeatureTypeCache ftCache;
+    XSDIdRegistry idSet;
+    BindingWalkerFactory bwFactory;
+    SchemaIndex schemaIndex;
+    Configuration configuration;
+
+    public IndoorFeaturesTypeBinding(FeatureTypeCache ftCache,
             BindingWalkerFactory bwFactory, SchemaIndex schemaIndex,
-            Configuration configuration, XSDIdRegistry idRegistry,
-            GML3EncodingUtils encodingUtils) {
-        super(ftCache, bwFactory, schemaIndex, configuration, idRegistry,
-                encodingUtils);
-        // TODO Auto-generated constructor stub
+            Configuration configuration, XSDIdRegistry idRegistry) {
+    
+        this.ftCache = ftCache;
+        this.bwFactory = bwFactory;
+        this.schemaIndex = schemaIndex;
+        this.configuration = configuration;
+        this.idSet = idRegistry;
     }
 
     /**
-	 * @generated
-	 */
-	public QName getTarget() {
-		return INDOORCORE.IndoorFeaturesType;
-	}
-	
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 *	
-	 * @generated modifiable
-	 */	
-	public Class getType() {
-		return Feature.class;
-	}
-	
-	/**
-	 * <!-- begin-user-doc -->
-	 * <!-- end-user-doc -->
-	 *	
-	 * @generated modifiable
-	 */	
-	public Object parse(ElementInstance instance, Node node, Object value) 
-		throws Exception {
-	    System.out.println("### IndoorFeaturesTypeBinding ###");
-	    return super.parse(instance, node, value);
-	}
+     * @generated
+     */
+    public QName getTarget() {
+        return INDOORCORE.IndoorFeaturesType;
+    }
 
+    /**
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     *	
+     * @generated modifiable
+     */	
+    public Class getType() {
+        return Feature.class;
+    }
+
+    /**
+     * <!-- begin-user-doc -->
+     * <!-- end-user-doc -->
+     *	
+     * @generated modifiable
+     */	
+    public Object parse(ElementInstance instance, Node node, Object value) 
+            throws Exception {
+        System.out.println("### IndoorFeaturesTypeBinding ###");
+        return GMLComplexParsingUtils.parseFeature(instance, node, value, ftCache, bwFactory);
+    }
 }
