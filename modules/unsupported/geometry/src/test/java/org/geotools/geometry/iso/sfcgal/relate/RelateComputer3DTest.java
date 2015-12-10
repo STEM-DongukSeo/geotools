@@ -56,11 +56,12 @@ public class RelateComputer3DTest extends TestCase {
         hints.put(Hints.GEOMETRY_VALIDATE, false);
         builder = new GeometryBuilder(hints);
         
+        _testCurveCurve();
         //_testCurveSurface();
         //_testCurveSolid();
         //_testSurfaceSurface();
         //_testSurfaceSolid();
-        _testSolidSolid();
+        //_testSolidSolid();
     }
     
     public void _testPointPoint() {
@@ -80,7 +81,15 @@ public class RelateComputer3DTest extends TestCase {
     }
     
     public void _testCurveCurve() {
+        ArrayList<Curve> curves = getCurves(builder);
+        Curve curve = curves.get(0);
         
+        System.out.println(curve.toString());
+        for(int i = 1; i < curves.size(); i++) {
+            System.out.println("------- Test -------");
+            System.out.println(curves.get(i).toString());
+            relateTest(curve, curves.get(i));
+        }
     }
     
     public void _testCurveSurface() {
@@ -109,14 +118,13 @@ public class RelateComputer3DTest extends TestCase {
     
     public void _testSurfaceSurface() {
         ArrayList<Surface> surfaces = getSurfaces(builder);
-        Surface firstSurface = surfaces.get(0);
+        Surface surface = surfaces.get(0);
         
-        System.out.println(firstSurface.toString());
+        System.out.println(surface.toString());
         for(int i = 1; i < surfaces.size(); i++) {
-            Surface nextSurface = surfaces.get(i);
-            
-            System.out.println(nextSurface.toString());
-            relateTest(firstSurface, nextSurface);
+            System.out.println("------- Test -------");            
+            System.out.println(surfaces.get(i).toString());
+            relateTest(surface, surfaces.get(i));
         }
     }
     
@@ -156,7 +164,7 @@ public class RelateComputer3DTest extends TestCase {
         System.out.println("overlaps : " + ((GeometryImpl) gA).overlaps(gB));
         
         
-        System.out.println("union : " + gA.union(gB).toString());
+        //System.out.println("union : " + gA.union(gB).toString());
         /*
         System.out.println("difference : " + gA.difference(gB).toString());
         */

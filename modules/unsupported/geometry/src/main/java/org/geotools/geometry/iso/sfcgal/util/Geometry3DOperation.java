@@ -42,14 +42,14 @@ public class Geometry3DOperation {
     public static Geometry getConvexHull(GeometryImpl GeometryImpl) {
         SFGeometry g = SFCGALConvertor.geometryToSFCGALGeometry(GeometryImpl);
         SFGeometry convex = SFAlgorithm.convexHull3D(g);
-        
+
         return SFCGALConvertor.geometryFromSFCGALGeometry(convex);
     }
 
     public static boolean relate(GeometryImpl gA, GeometryImpl gB, String intersectionPatternMatrix) {
         return false;
     }
-    
+
     public static boolean equals(GeometryImpl gA, GeometryImpl gB) {
         SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
         SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
@@ -98,14 +98,19 @@ public class Geometry3DOperation {
     public static boolean within(GeometryImpl gA, GeometryImpl gB) {
         return contains(gB, gA);
     }
-    
+
     public static boolean overlaps(GeometryImpl gA, GeometryImpl gB) {
         SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
         SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
         SFGeometry intersection = SFAlgorithm.intersection3D(geometryA, geometryB);
         boolean rValue = false;
 
-        if (!intersection.isEmpty() && !contains(gA, gB) && !contains(gB, gA) && !touches(gA, gB)) {
+        if (geometryA.dimension() == 1 && geometryB.dimension() == 1) {
+            if (intersection.dimension() == 1) {
+                rValue = true;
+            }
+        } else if (!intersection.isEmpty() && !contains(gA, gB) && !contains(gB, gA)
+                && !touches(gA, gB)) {
             rValue = true;
         }
 
@@ -113,12 +118,20 @@ public class Geometry3DOperation {
     }
 
     public static boolean crosses(GeometryImpl gA, GeometryImpl gB) {
+        SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
+        SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
+        SFGeometry intersection = SFAlgorithm.intersection3D(geometryA, geometryB);
         boolean rValue = false;
-        
-        if(intersects(gA, gB) && !touches(gA, gB) && !contains(gA, gB) && !contains(gB, gA)) {
+
+        if (geometryA.dimension() == 1 && geometryB.dimension() == 1) {
+            if (intersection.dimension() == 0) {
                 rValue = true;
+            }
+        } else if (!intersection.isEmpty() && !touches(gA, gB) && !contains(gA, gB)
+                && !contains(gB, gA)) {
+            rValue = true;
         }
-        
+
         return rValue;
     }
 
