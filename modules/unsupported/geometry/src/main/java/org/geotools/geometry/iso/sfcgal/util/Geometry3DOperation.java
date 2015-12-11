@@ -105,12 +105,14 @@ public class Geometry3DOperation {
         SFGeometry intersection = SFAlgorithm.intersection3D(geometryA, geometryB);
         boolean rValue = false;
 
-        if (geometryA.dimension() == 1 && geometryB.dimension() == 1) {
-            if (intersection.dimension() == 1) {
-                rValue = true;
+        if (equals(gA, gB))
+            return rValue;
+        if (!intersection.isEmpty() && !contains(gA, gB) && !contains(gB, gA) && !touches(gA, gB)) {
+            if (geometryA.dimension() == 1 && geometryB.dimension() == 1) {
+                if (intersection.dimension() == 1) {
+                    rValue = true;
+                }
             }
-        } else if (!intersection.isEmpty() && !contains(gA, gB) && !contains(gB, gA)
-                && !touches(gA, gB)) {
             rValue = true;
         }
 
@@ -147,9 +149,7 @@ public class Geometry3DOperation {
         SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
         SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
         SFGeometry intersection = SFAlgorithm.intersection3D(geometryA, geometryB);
-        SFGeometry boundary = intersection.boundary();
-        System.out.println("boundary : " + boundary.asText(1));
-
+        
         return SFCGALConvertor.geometryFromSFCGALGeometry(intersection);
     }
 

@@ -44,12 +44,7 @@ public class SFWrapperTest extends TestCase {
         this._testSFSurface();
         this._testSFPolygon();
         this._testSFTriangle();
-        this._testSFCoordiante();
-        this._testSFCoordiante();
-        this._testSFCoordiante();
-        this._testSFCoordiante();
-        this._testSFCoordiante();
-        this._testSFCoordiante();
+        this._testSFPolyhedralSurface();
     }
 
     public void _testSFCoordiante() {
@@ -298,6 +293,7 @@ public class SFWrapperTest extends TestCase {
         System.out.println("polygon1 <-> polygon2 distance3D : " + polygon1.distance3D(polygon2));
 
         System.out.println("PolyhedralSurface toString() : " + polyhedral.asText(0));
+        System.out.println("PolyhedralSurface boundary.toString() : " + polyhedral.boundary().asText(0));
         System.out.println("PolyhedralSurface GeometryType() : " + polyhedral.geometryType());
         System.out.println("PolyhedralSurface numPolygons() : " + polyhedral.numPolygons());
         System.out.println("PolyhedralSurface polygonN(3).geometryType() : "

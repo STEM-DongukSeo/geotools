@@ -36,6 +36,7 @@ import org.opengis.geometry.primitive.Curve;
 import org.opengis.geometry.primitive.CurveSegment;
 import org.opengis.geometry.primitive.OrientableCurve;
 import org.opengis.geometry.primitive.OrientableSurface;
+import org.opengis.geometry.primitive.Point;
 import org.opengis.geometry.primitive.Ring;
 import org.opengis.geometry.primitive.Shell;
 import org.opengis.geometry.primitive.Solid;
@@ -56,7 +57,11 @@ public class RelateComputer3DTest extends TestCase {
         hints.put(Hints.GEOMETRY_VALIDATE, false);
         builder = new GeometryBuilder(hints);
         
-        _testCurveCurve();
+        //_testPointPoint();
+        //_testPointCurve();
+        _testPointSurface();
+        //_testPointSolid();
+        //_testCurveCurve();
         //_testCurveSurface();
         //_testCurveSolid();
         //_testSurfaceSurface();
@@ -65,19 +70,49 @@ public class RelateComputer3DTest extends TestCase {
     }
     
     public void _testPointPoint() {
+        Point point1 = builder.createPoint(0, 0, 0);
+        Point point2 = builder.createPoint(0, 0, 0);
+        Point point3 = builder.createPoint(0, 1, 0);
+                
+        System.out.println(point1.toString());
+        System.out.println(point2.toString());
+        relateTest(point1, point2);
         
+        System.out.println(point3.toString());
+        relateTest(point1, point3);
     }
     
     public void _testPointCurve() {
+        Point point = builder.createPoint(0, -1,  2);
+        ArrayList<Curve> curves = getCurves(builder);
         
+        System.out.println(point.toString());
+        for(Curve curve : curves) {
+            System.out.println(curve.toString());
+            relateTest(point, curve);
+        }
     }
     
     public void _testPointSurface() {
+        Point point = builder.createPoint(0, -1, 2);
+        ArrayList<Surface> surfaces = getSurfaces(builder);
         
+        System.out.println(point.toString());
+        for(Surface surface : surfaces) {
+            System.out.println(surface.toString());
+            relateTest(point, surface);
+        }
     }
     
     public void _testPointSolid() {
+        Point point = builder.createPoint(0, -1,  0);
+        ArrayList<Solid> solids = getSolids(builder);
         
+        System.out.println(point.toString());
+        for(Solid solid : solids) {
+            System.out.println(solid.toString());
+            relateTest(point, solid);
+        }
     }
     
     public void _testCurveCurve() {
@@ -85,7 +120,7 @@ public class RelateComputer3DTest extends TestCase {
         Curve curve = curves.get(0);
         
         System.out.println(curve.toString());
-        for(int i = 1; i < curves.size(); i++) {
+        for(int i = 0; i < curves.size(); i++) {
             System.out.println("------- Test -------");
             System.out.println(curves.get(i).toString());
             relateTest(curve, curves.get(i));
@@ -100,7 +135,7 @@ public class RelateComputer3DTest extends TestCase {
         for(Curve curve : curves) {
             System.out.println("------- Test -------");
             System.out.println(curve.toString());
-            relateTest(surface, curve);
+            relateTest(curve, surface);
         }
     }
     
@@ -112,7 +147,7 @@ public class RelateComputer3DTest extends TestCase {
         for(Curve curve : curves) {
             System.out.println("------- Test -------");
             System.out.println(curve.toString());
-            relateTest(solid, curve);
+            relateTest(curve, solid);
         }
     }
     
@@ -121,7 +156,7 @@ public class RelateComputer3DTest extends TestCase {
         Surface surface = surfaces.get(0);
         
         System.out.println(surface.toString());
-        for(int i = 1; i < surfaces.size(); i++) {
+        for(int i = 0; i < surfaces.size(); i++) {
             System.out.println("------- Test -------");            
             System.out.println(surfaces.get(i).toString());
             relateTest(surface, surfaces.get(i));
@@ -136,7 +171,7 @@ public class RelateComputer3DTest extends TestCase {
         for(Surface surface : surfaces) {
             System.out.println("------- Test -------");
             System.out.println(surface.toString());
-            relateTest(solid, surface);
+            relateTest(surface, solid);
         }
         
     }
@@ -146,7 +181,7 @@ public class RelateComputer3DTest extends TestCase {
         Solid solid = solids.get(0);
         
         System.out.println(solid.toString());
-        for(int i = 1; i < solids.size(); i++) {
+        for(int i = 0; i < solids.size(); i++) {
             System.out.println("------- Test " + i + " -------");
             System.out.println("Solid " + i + " : " + solids.get(i).toString());
             relateTest(solid, solids.get(i));
@@ -155,6 +190,7 @@ public class RelateComputer3DTest extends TestCase {
     }    
     
     public void relateTest(Geometry gA, Geometry gB) {
+        System.out.println("equals : " + gA.equals(gB));
         System.out.println("intersects : " + gA.intersects(gB));
         System.out.println("disjoint : " + ((GeometryImpl) gA).disjoint(gB));
         System.out.println("touches : " + ((GeometryImpl) gA).touches(gB));
@@ -164,15 +200,10 @@ public class RelateComputer3DTest extends TestCase {
         System.out.println("overlaps : " + ((GeometryImpl) gA).overlaps(gB));
         
         
-        //System.out.println("union : " + gA.union(gB).toString());
-        /*
+        System.out.println("union : " + gA.union(gB).toString());
         System.out.println("difference : " + gA.difference(gB).toString());
-        */
-        /*
         System.out.println("intersection : " + gA.intersection(gB).toString());
-        
         System.out.println("symmetric difference : " + gA.symmetricDifference(gB).toString());
-        */
     }    
     
     public static Curve makeCurve(GeometryBuilder builder, DirectPosition position1,
@@ -214,7 +245,7 @@ public class RelateComputer3DTest extends TestCase {
         DirectPosition position14 = builder.createDirectPosition(new double[] { 1, -1, 3 });
         DirectPosition position15 = builder.createDirectPosition(new double[] { 2.5, -1, 0 });
         
-        DirectPosition position16 = builder.createDirectPosition(new double[] { 0.5, -1.5, 2 });
+        DirectPosition position16 = builder.createDirectPosition(new double[] { 0.5, -1, 2 });
         DirectPosition position17 = builder.createDirectPosition(new double[] { 1.5, -1, 2 });
 
         List<DirectPosition> tps1 = new ArrayList<DirectPosition>();

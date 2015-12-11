@@ -42,7 +42,9 @@ import org.geotools.geometry.iso.primitive.PointImpl;
 import org.geotools.geometry.iso.primitive.PrimitiveFactoryImpl;
 import org.geotools.geometry.iso.primitive.RingImplUnsafe;
 import org.geotools.geometry.iso.primitive.SolidImpl;
+import org.geotools.geometry.iso.primitive.SurfaceBoundaryImpl;
 import org.geotools.geometry.iso.primitive.SurfaceImpl;
+import org.geotools.geometry.iso.sfcgal.wrapper.SFAlgorithm;
 import org.geotools.geometry.iso.sfcgal.wrapper.SFGeometry;
 import org.geotools.geometry.iso.sfcgal.wrapper.SFGeometryCollection;
 import org.geotools.geometry.iso.sfcgal.wrapper.SFLineString;
@@ -491,14 +493,18 @@ public class SFCGALConvertor {
             SFPolyhedralSurface polyhedral) {
         PolyhedralSurface polyhedralSurface = null;
 
-        List<Polygon> tiles = new ArrayList<Polygon>();
-        for (int i = 0; i < polyhedral.numPolygons(); i++) {
-            Polygon polygon = polygonFromSFCGALPolygon(polyhedral.polygonN(i));
-            tiles.add(polygon);
+        SFGeometry boundary = polyhedral.boundary();
+        SFGeometry merge = boundary.geometryN(0);
+        if (boundary.geometryTypeId() == SFCGAL_GEOMETRYCOLLECTION_ID
+                || boundary.geometryTypeId() == SFCGAL_MULTILINESTRING_ID) {
+            merge = SFAlgorithm.union3D(merge, boundary);
         }
-
-        polyhedralSurface = builder.createPolyhedralSurface(tiles);
-
+        merge = getSFGeometry(merge);
+        
+        Curve exterior = curveFromSFCGALLineString((SFLineString) merge);
+        SurfaceBoundary surfaceBoundary = builder.createSurfaceBoundary(exterior);
+        polyhedralSurface = new PolyhedralSurfaceImpl((SurfaceBoundaryImpl) surfaceBoundary);
+        
         return polyhedralSurface;
     }
 
@@ -506,14 +512,19 @@ public class SFCGALConvertor {
             SFTriangulatedSurface triangulated) {
         TriangulatedSurface triangulatedSurface = null;
 
-        List<Polygon> tiles = new ArrayList<Polygon>();
-        for (int i = 0; i < triangulated.numTriangles(); i++) {
-            Polygon triangle = polygonFromSFCGALPolygon(triangulated.triangleN(i).toPolygon());
-            tiles.add(triangle);
+        SFGeometry boundary = triangulated.boundary();
+        System.out.println("boundary of TIN : " + boundary.asText(1));
+        SFGeometry merge = boundary.geometryN(0);
+        if (boundary.geometryTypeId() == SFCGAL_GEOMETRYCOLLECTION_ID
+                || boundary.geometryTypeId() == SFCGAL_MULTILINESTRING_ID) {
+            merge = SFAlgorithm.union3D(merge, boundary);
         }
+        merge = getSFGeometry(merge);
+        
+        Curve exterior = curveFromSFCGALLineString((SFLineString) merge);
+        SurfaceBoundary surfaceBoundary = builder.createSurfaceBoundary(exterior);
+        triangulatedSurface = new TriangulatedSurfaceImpl((SurfaceBoundaryImpl) surfaceBoundary);
 
-        triangulatedSurface = new TriangulatedSurfaceImpl(builder.getCoordinateReferenceSystem(),
-                tiles);
         return triangulatedSurface;
     }
 
@@ -692,8 +703,7 @@ public class SFCGALConvertor {
         } else if (geom.geometryTypeId() == SFCGAL_TRIANGLE_ID) {
             geometry = surfaceFromSFCGALTriangle((SFTriangle) geom);
         } else if (geom.geometryTypeId() == SFCGAL_POLYHEDRALSURFACE_ID) {
-            SFSolid solid = new SFSolid((SFPolyhedralSurface) geom);
-            geometry = solidFromSFCGALSolid(solid);
+            geometry = polyhedralSurfaceFromSFCGALPolyhedralSurface((SFPolyhedralSurface) geom);
         } else if (geom.geometryTypeId() == SFCGAL_TRIANGULATEDSURFACE_ID) {
             geometry = triangulatedSurfaceFromSFCGALTriangulatedSurface((SFTriangulatedSurface) geom);
         } else if (geom.geometryTypeId() == SFCGAL_SOLID_ID) {

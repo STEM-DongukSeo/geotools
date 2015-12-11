@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import org.geotools.geometry.iso.aggregate.MultiSolidImpl;
 import org.geotools.geometry.iso.primitive.SolidImpl;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.geometry.Geometry;
@@ -118,6 +119,8 @@ public class GeometryToWKTString {
             return multiCurveToString((MultiCurve) mp);
         else if (mp instanceof MultiSurface)
             return multiSurfaceToString((MultiSurface) mp);
+        else if (mp instanceof MultiSolidImpl)
+            return multiSolidToString((MultiSolidImpl) mp);
         else
             return "MultiPrimitive(" + this.multiPrimitiveCoordToString(mp) + ")";
     }
@@ -132,6 +135,10 @@ public class GeometryToWKTString {
 
     private String multiSurfaceToString(MultiSurface ms) {
         return "MultiSurface(" + this.multiSurfaceCoordToString(ms) + ")";
+    }
+
+    private String multiSolidToString(MultiSolidImpl ms) {
+        return "MultiSolid(" + this.multiSolidCoordToString(ms) + ")";
     }
 
     private String compositePointToString(CompositePoint cp) {
@@ -233,7 +240,8 @@ public class GeometryToWKTString {
     private String shellCoordToString(Shell s) {
         Collection<? extends Primitive> elements = s.getElements();
         Iterator sIter = s.getElements().iterator();
-        String rString = "(" + this.surfaceBoundaryCoordToString(((Surface) sIter.next()).getBoundary()) + ")";
+        String rString = "("
+                + this.surfaceBoundaryCoordToString(((Surface) sIter.next()).getBoundary()) + ")";
         while (sIter.hasNext()) {
             if (this.lineBreak) {
                 rString += "\n\t";
@@ -304,6 +312,23 @@ public class GeometryToWKTString {
         return rString;
     }
 
+    private String multiSolidCoordToString(MultiSolidImpl ms) {
+        Iterator msIter = ms.getElements().iterator();
+        String rString = "("
+                + this.solidBoundaryCoordToString((SolidBoundary) ((Solid) msIter.next())
+                        .getBoundary()) + ")";
+        while(msIter.hasNext()) {
+            if(this.lineBreak) {
+                rString += "\n\t";
+            }
+            rString += ", ";
+            rString += "("
+                    + this.solidBoundaryCoordToString((SolidBoundary) ((Solid) msIter.next())
+                            .getBoundary()) + ")";
+        }
+        return rString;
+    }
+
     private String pointCoordToString(Point p) {
         return this.directPositionToString(p.getDirectPosition());
     }
@@ -319,6 +344,8 @@ public class GeometryToWKTString {
                 rString += "\n\t" + curveToString((Curve) p);
             else if (p instanceof Surface)
                 rString += "\n\t" + surfaceToString((Surface) p);
+            else if (p instanceof Solid)
+                rString += "\n\t" + solidToString((Solid) p);
             else
                 rString += "\n[INVALID TYPE in MULTIPRIMITIVE]";
         }
