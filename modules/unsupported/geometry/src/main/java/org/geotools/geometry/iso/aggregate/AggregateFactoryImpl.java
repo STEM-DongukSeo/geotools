@@ -3,6 +3,7 @@
  *    http://geotools.org
  *    
  *    (C) 2006-2008, Open Source Geospatial Foundation (OSGeo)
+ *    (C) 2006-2015, Spatio-temporal Databases Laboratory (STEMLab)
  *    
  *    This library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -23,7 +24,6 @@ import java.util.Set;
 
 import org.geotools.factory.Factory;
 import org.geotools.factory.Hints;
-import org.geotools.geometry.iso.PrecisionModel;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.geometry.aggregate.AggregateFactory;
 import org.opengis.geometry.aggregate.MultiCurve;
@@ -140,5 +140,13 @@ public class AggregateFactoryImpl implements Factory, AggregateFactory {
 		return new MultiSurfaceImpl(crs, surfaces);
 	}
 
+	/**
+         * Creates a MultiSolid by a set of Solids.
+         * @param primitives Set of Primitives which shall be contained by the MultiSolid
+         * @return
+         */
+        public MultiPrimitive createMultiSolid(Set<Primitive> primitives) {
+                return new MultiSolidImpl(crs, primitives);
+        }
 	
 }
