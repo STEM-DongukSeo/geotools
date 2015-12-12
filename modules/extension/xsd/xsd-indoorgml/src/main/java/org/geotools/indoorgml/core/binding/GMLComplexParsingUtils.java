@@ -13,6 +13,7 @@ import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.ComplexFeatureBuilder;
 import org.geotools.feature.NameImpl;
 import org.geotools.feature.TypeBuilder;
+import org.geotools.feature.complex.FeatureTypeBuilder;
 import org.geotools.feature.type.FeatureTypeFactoryImpl;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.gml2.FeatureTypeCache;
@@ -29,8 +30,11 @@ import org.geotools.xs.bindings.XSAnyTypeBinding;
 import org.opengis.feature.Association;
 import org.opengis.feature.Attribute;
 import org.opengis.feature.Feature;
+import org.opengis.feature.type.AttributeType;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.FeatureTypeFactory;
+import org.opengis.feature.type.GeometryType;
+import org.opengis.feature.type.Name;
 import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.feature.type.PropertyType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -105,12 +109,11 @@ public class GMLComplexParsingUtils {
     public static FeatureType featureType(XSDElementDeclaration element,
             BindingWalkerFactory bwFactory, CoordinateReferenceSystem crs) throws Exception {
             
-            FeatureTypeFactory ftFactory = new FeatureTypeFactoryImpl();
-            TypeBuilder tBuilder = new TypeBuilder(ftFactory);
-            
+            FeatureTypeBuilder tBuilder = new FeatureTypeBuilder();
             tBuilder.setName(element.getName());
             tBuilder.setNamespaceURI(element.getTargetNamespace());
             
+            FeatureTypeBuilder propBuilder = new FeatureTypeBuilder();
             // build the feature type by walking through the elements of the
             // actual xml schema type
             List children = Schemas.getChildElementParticles(element.getType(), true);
@@ -149,40 +152,60 @@ public class GMLComplexParsingUtils {
                 // get the attribute properties
                 int min = particle.getMinOccurs();
                 int max = particle.getMaxOccurs();
-
                 //check for uninitialized values
                 //TODO
-                if (min == -1) {
-                    min = 0;
-                }
-
-                if (max == -1) {
-                    max = 1;
-                }
-
+                if (min == -1) min = 0;
+                if (max == -1) max = 1;
+                propBuilder.cardinality(min, max);
+                
                 // create the type
                 
                 // if the next property is of type geometry, let's set its CRS
                 if (Geometry.class.isAssignableFrom(theClass) && crs != null) {
-                    tBuilder.crs(crs);
-                } 
+                    propBuilder.crs(crs);
+                }
                 
-
-                tBuilder.cardinality(min, max);
+                String propName = property.getName();
+                Class<?> binding = theClass;
                 
-                if(Geometry.class.isAssignableFrom(theClass)) {
+                PropertyDescriptor descriptor = null;
+                
+                propBuilder.setBinding(binding);
+                propBuilder.setName(propName);
+                
+                Name defaultGeom = tBuilder.getDefaultGeometry();
+                if( defaultGeom != null && defaultGeom.equals(propName) || Geometry.class.isAssignableFrom(binding)) {
                     
-                }
-                else if (Association.class.isAssignableFrom(theClass)) {
-                    System.out.println("associaton");
-                }
-                else if(Feature.class.isAssignableFrom(theClass)) {
-                    FeatureType fProp = featureType(property, bwFactory, crs);
-                    System.out.println("feature");
+                    //TODO if default crs is not set
+                    
+                    if(propBuilder.getCRS() == null) {
+                        //TODO
+                        //set default crs
+                    }
+                    
+                    GeometryType type = propBuilder.geometry();
+                    propBuilder.reset();
+                    propBuilder.setName(propName);
+                    propBuilder.setPropertyType(type);
+                    descriptor = propBuilder.attributeDescriptor();
                 }
                 else {
-                    tBuilder.addAttribute(property.getName(), theClass);
+                    PropertyType type = null;
+                    if (Feature.class.isAssignableFrom(binding)) {
+                        type = propBuilder.feature();
+                    }
+                    else if(Association.class.isAssignableFrom(binding)) {
+                        type = propBuilder.association();
+                    }
+                    else {
+                        type = propBuilder.attribute();
+                    }
+                    propBuilder.setName(propName);
+                    propBuilder.setPropertyType(type);
+                    descriptor = propBuilder.attributeDescriptor();
                 }
+                
+                tBuilder.add(descriptor);
                 
                 //set the default geometry explicitly. Note we're comparing the GML namespace
                 //with String.startsWith to catch up on the GML 3.2 namespace too, which is hacky.
@@ -204,8 +227,7 @@ public class GMLComplexParsingUtils {
     public static FeatureType featureType(Node node)
             throws Exception {
             
-            FeatureTypeFactory ftFactory = new FeatureTypeFactoryImpl();
-            TypeBuilder tBuilder = new TypeBuilder(ftFactory);
+            FeatureTypeBuilder tBuilder = new FeatureTypeBuilder();
             
             tBuilder.setName(node.getComponent().getName());
             tBuilder.setNamespaceURI(node.getComponent().getNamespace());

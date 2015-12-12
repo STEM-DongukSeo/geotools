@@ -14,7 +14,7 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *    Lesser General Public License for more details.
  */
-package org.geotools.feature.simple;
+package org.geotools.feature.complex;
 
 import java.net.URI;
 import java.util.ArrayList;
@@ -31,12 +31,15 @@ import java.util.logging.Logger;
 import org.geotools.feature.AttributeBuilder;
 import org.geotools.feature.AttributeTypeBuilder;
 import org.geotools.feature.NameImpl;
+import org.geotools.feature.TypeBuilder;
+import org.geotools.feature.simple.SimpleSchema;
 import org.geotools.feature.type.BasicFeatureTypes;
 import org.geotools.feature.type.FeatureTypeFactoryImpl;
 import org.geotools.referencing.CRS;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.AttributeType;
+import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.FeatureTypeFactory;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.feature.type.GeometryType;
@@ -109,7 +112,7 @@ import com.vividsolutions.jts.geom.Geometry;
  *
  * @source $URL$
  */
-public class SimpleFeatureTypeBuilder {
+public class ComplexFeatureTypeBuilder {
     /**
      * logger
      */
@@ -171,12 +174,12 @@ public class SimpleFeatureTypeBuilder {
 	/**
 	 * the parent type.
 	 */
-	protected SimpleFeatureType superType;
+	protected FeatureType superType;
 	
 	/**
 	 * attribute builder
 	 */
-	protected AttributeTypeBuilder attributeBuilder;
+	protected NewTypeBuilder typeBuilder;
 
 	/** Length for next filter */
 	//private int length = -1;
@@ -184,7 +187,7 @@ public class SimpleFeatureTypeBuilder {
 	/**
 	 * Constructs the builder.
 	 */
-	public SimpleFeatureTypeBuilder() {
+	public ComplexFeatureTypeBuilder() {
 		this( new FeatureTypeFactoryImpl() );
 	}
 	
@@ -192,11 +195,11 @@ public class SimpleFeatureTypeBuilder {
 	 * Constructs the builder specifying the factory for creating feature and 
 	 * feature collection types.
 	 */
-	public SimpleFeatureTypeBuilder(FeatureTypeFactory factory) {
+	public ComplexFeatureTypeBuilder(FeatureTypeFactory factory) {
 		this.factory = factory;
 		
-		attributeBuilder = new AttributeTypeBuilder();
-		setBindings( new SimpleSchema() );
+		typeBuilder = new NewTypeBuilder();
+		setBindings( new SimpleSchema() ); //TODO
 		reset();
 	}   
 	
@@ -220,6 +223,7 @@ public class SimpleFeatureTypeBuilder {
 	/**
 	 * Initializes the builder with state from a pre-existing feature type.
 	 */
+	//TODO
 	public void init(SimpleFeatureType type) {
 		init();
 		if (type == null)
@@ -250,6 +254,7 @@ public class SimpleFeatureTypeBuilder {
 	 * Completely resets all builder state.
 	 *
 	 */
+	//TODO
 	protected void reset() {
 		uri = BasicFeatureTypes.DEFAULT_NAMESPACE;
 		local = null;
@@ -393,7 +398,8 @@ public class SimpleFeatureTypeBuilder {
 	/**
 	 * The super type of the built type.
 	 */
-	public SimpleFeatureType getSuperType() {
+	//@Edited
+	public FeatureType getSuperType() {
         return superType;
     }
 	
@@ -459,7 +465,7 @@ public class SimpleFeatureTypeBuilder {
 	 * This value is reset after a call to {@link #add(String, Class)}
 	 * </p>
 	 */
-	public SimpleFeatureTypeBuilder minOccurs( int minOccurs ) {
+	public ComplexFeatureTypeBuilder minOccurs( int minOccurs ) {
 		attributeBuilder.setMinOccurs(minOccurs);
 		return this;
 	}
@@ -469,7 +475,7 @@ public class SimpleFeatureTypeBuilder {
 	 * This value is reset after a call to {@link #add(String, Class)}
 	 * </p>
 	 */
-	public SimpleFeatureTypeBuilder maxOccurs( int maxOccurs ) {
+	public ComplexFeatureTypeBuilder maxOccurs( int maxOccurs ) {
 		attributeBuilder.setMaxOccurs(maxOccurs);
 		return this;
 	}
@@ -479,7 +485,7 @@ public class SimpleFeatureTypeBuilder {
 	 * This value is reset after a call to {@link #add(String, Class)}
 	 * </p>
 	 */
-	public SimpleFeatureTypeBuilder nillable( boolean isNillable ) {
+	public ComplexFeatureTypeBuilder nillable( boolean isNillable ) {
 		attributeBuilder.setNillable(isNillable);
 		return this;
 	}
@@ -492,7 +498,7 @@ public class SimpleFeatureTypeBuilder {
      * </p>
      * @return length Used to limit the length of the next attribute created
      */
-    public SimpleFeatureTypeBuilder length( int length) {
+    public ComplexFeatureTypeBuilder length( int length) {
         attributeBuilder.setLength(length);
         return this;
     }
@@ -503,7 +509,7 @@ public class SimpleFeatureTypeBuilder {
 	 * This value is reset after a call to {@link #add(String, Class)}
 	 * </p>
 	 */
-	public SimpleFeatureTypeBuilder restriction( Filter filter ) {
+	public ComplexFeatureTypeBuilder restriction( Filter filter ) {
 		attributeBuilder.addRestriction( filter );
 		return this;
 	}
@@ -513,7 +519,7 @@ public class SimpleFeatureTypeBuilder {
      * This value is reset after a call to {@link #add(String, Class)}
      * </p>
 	 */
-	public SimpleFeatureTypeBuilder restrictions( List<Filter> filters ) {
+	public ComplexFeatureTypeBuilder restrictions( List<Filter> filters ) {
 	    for ( Filter f : filters ) {
 	        attributeBuilder.addRestriction(f);
 	    }
@@ -526,7 +532,7 @@ public class SimpleFeatureTypeBuilder {
 	 * This value is reset after a call to {@link #add(String, Class)}
 	 * </p>
 	 */
-	public SimpleFeatureTypeBuilder description( String description ) {
+	public ComplexFeatureTypeBuilder description( String description ) {
 		attributeBuilder.setDescription( description );
 		return this;
 	}
@@ -536,7 +542,7 @@ public class SimpleFeatureTypeBuilder {
 	 * This value is reset after a call to {@link #add(String, Class)}
 	 * </p>
 	 */
-	public SimpleFeatureTypeBuilder defaultValue( Object defaultValue ) {
+	public ComplexFeatureTypeBuilder defaultValue( Object defaultValue ) {
 		attributeBuilder.setDefaultValue( defaultValue );
 		return this;
 	}
@@ -551,7 +557,7 @@ public class SimpleFeatureTypeBuilder {
      * This value is reset after a call to {@link #add(String, Class)}
      * </p>
      */
-    public SimpleFeatureTypeBuilder crs(CoordinateReferenceSystem crs) {
+    public ComplexFeatureTypeBuilder crs(CoordinateReferenceSystem crs) {
         attributeBuilder.setCRS(crs);
         return this;
     }
@@ -571,7 +577,7 @@ public class SimpleFeatureTypeBuilder {
      * 
      * @param srs The spatial reference system.
 	 */
-	public SimpleFeatureTypeBuilder srs( String srs ) {
+	public ComplexFeatureTypeBuilder srs( String srs ) {
 	    if ( srs == null ) {
 	        return crs( null );
 	    }
@@ -594,7 +600,7 @@ public class SimpleFeatureTypeBuilder {
 	 * 
 	 * @param srid The id of a spatial reference system.
 	 */
-	public SimpleFeatureTypeBuilder srid( Integer srid ) {
+	public ComplexFeatureTypeBuilder srid( Integer srid ) {
 	    if ( srid == null ) {
 	        return crs( null );
 	    }
@@ -610,7 +616,7 @@ public class SimpleFeatureTypeBuilder {
 	 * @param key  The key of the user data.
 	 * @param value The value of the user data.
 	 */
-	public SimpleFeatureTypeBuilder userData( Object key, Object value ) {
+	public ComplexFeatureTypeBuilder userData( Object key, Object value ) {
 	    attributeBuilder.addUserData( key, value );
 	    return this;
 	}
@@ -625,7 +631,8 @@ public class SimpleFeatureTypeBuilder {
 	 * </code>
 	 * </p>
 	 */
-	public SimpleFeatureTypeBuilder descriptor( AttributeDescriptor descriptor ) {
+	//TODO
+	public ComplexFeatureTypeBuilder descriptor( AttributeDescriptor descriptor ) {
 	    minOccurs( descriptor.getMinOccurs() );
 	    maxOccurs( descriptor.getMaxOccurs() );
 	    nillable( descriptor.isNillable() );
@@ -1093,7 +1100,7 @@ public class SimpleFeatureTypeBuilder {
 	}
 	
     public static SimpleFeatureType retype(SimpleFeatureType original, List<String> types) {
-        SimpleFeatureTypeBuilder b = new SimpleFeatureTypeBuilder();
+        ComplexFeatureTypeBuilder b = new ComplexFeatureTypeBuilder();
 
         // initialize the builder
         b.init(original);
@@ -1123,7 +1130,7 @@ public class SimpleFeatureTypeBuilder {
          * @return SimpleFeatureType updated with the provided CoordinateReferenceSystem
          */
         public static SimpleFeatureType retype( SimpleFeatureType original,CoordinateReferenceSystem crs ) {
-            SimpleFeatureTypeBuilder b = new SimpleFeatureTypeBuilder();
+            ComplexFeatureTypeBuilder b = new ComplexFeatureTypeBuilder();
             
             //initialize the builder
             b.init( original );
@@ -1153,7 +1160,7 @@ public class SimpleFeatureTypeBuilder {
          * </p>
          */
         public static SimpleFeatureType copy( SimpleFeatureType original ) {
-            SimpleFeatureTypeBuilder b = new SimpleFeatureTypeBuilder();
+            ComplexFeatureTypeBuilder b = new ComplexFeatureTypeBuilder();
             
             //initialize the builder
             b.init( original );

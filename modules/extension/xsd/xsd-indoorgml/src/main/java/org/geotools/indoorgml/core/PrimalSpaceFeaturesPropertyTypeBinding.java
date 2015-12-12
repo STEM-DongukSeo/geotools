@@ -43,7 +43,7 @@ public class PrimalSpaceFeaturesPropertyTypeBinding extends AbstractComplexBindi
 	 * @generated modifiable
 	 */	
 	public Class getType() {
-		return Feature.class;
+		return Association.class;
 	}
 	
 	/**

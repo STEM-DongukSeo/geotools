@@ -5,8 +5,8 @@ import javax.xml.namespace.QName;
 
 import org.geotools.gml2.FeatureTypeCache;
 import org.geotools.gml3.XSDIdRegistry;
+import org.geotools.gml3.bindings.AbstractFeatureTypeBinding;
 import org.geotools.indoorgml.core.binding.GMLComplexParsingUtils;
-import org.geotools.xml.AbstractComplexBinding;
 import org.geotools.xml.BindingWalkerFactory;
 import org.geotools.xml.Configuration;
 import org.geotools.xml.ElementInstance;
@@ -37,7 +37,7 @@ import org.opengis.feature.Feature;
  *
  * @generated
  */
-public class IndoorFeaturesTypeBinding extends AbstractComplexBinding {
+public class IndoorFeaturesTypeBinding extends AbstractFeatureTypeBinding {
 
     FeatureTypeCache ftCache;
     XSDIdRegistry idSet;
@@ -48,12 +48,7 @@ public class IndoorFeaturesTypeBinding extends AbstractComplexBinding {
     public IndoorFeaturesTypeBinding(FeatureTypeCache ftCache,
             BindingWalkerFactory bwFactory, SchemaIndex schemaIndex,
             Configuration configuration, XSDIdRegistry idRegistry) {
-    
-        this.ftCache = ftCache;
-        this.bwFactory = bwFactory;
-        this.schemaIndex = schemaIndex;
-        this.configuration = configuration;
-        this.idSet = idRegistry;
+        super(ftCache, bwFactory, schemaIndex, configuration, idRegistry, null);
     }
 
     /**
@@ -82,6 +77,6 @@ public class IndoorFeaturesTypeBinding extends AbstractComplexBinding {
     public Object parse(ElementInstance instance, Node node, Object value) 
             throws Exception {
         System.out.println("### IndoorFeaturesTypeBinding ###");
-        return GMLComplexParsingUtils.parseFeature(instance, node, value, ftCache, bwFactory);
+        return GMLComplexParsingUtils.parseFeature(instance, node, value, super.getFeatureTypeCache(), super.getBindingWalkerFactory());
     }
 }

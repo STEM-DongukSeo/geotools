@@ -14,6 +14,7 @@ import org.junit.Test;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
 
+
 public class IndoorCoreParseTest {
 
     @Test
