@@ -2,6 +2,7 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -9,14 +10,13 @@ import java.util.Map;
 
 import org.geotools.indoorgml.core.INDOORCOREConfiguration;
 import org.geotools.xml.Parser;
-import org.geotools.xml.impl.NodeImpl;
 import org.junit.Test;
 import org.opengis.feature.Association;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
 
 
-public class IndoorCoreParseTest {
+public class IndoorCoreParsingTest {
 
     @Test
     public void MapHashParsingTest() {
@@ -121,14 +121,28 @@ public class IndoorCoreParseTest {
                 Feature psf = (Feature) psfs.getValue();
                 Collection<? extends Property> psfValues = psf.getValue();
                 Iterator<? extends Property> psfIter = psfValues.iterator();
+                
+                List<Association> csmList = new ArrayList<Association>();
+                List<Association> csbmList  = new ArrayList<Association>();
+                
                 while(psfIter.hasNext()) {
                     Property p = psfIter.next();
                     
+                    if("cellSpaceMember".equals(p.getName().getLocalPart())) {
+                        Association csm = (Association) p;
+                        csmList.add(csm);
+                    } else if("cellSpaceBoundaryMember".equals(p.getName().getLocalPart())) {
+                        Association csbm = (Association) p;
+                    } else {
+                        System.out.println("Value : " + p.getValue());
+                    }
                     
                     
                     System.out.println("Attr : " + p.getName());
                     System.out.println("Value : " + p.getValue());
                 }
+                
+                //CellSpaceType
                 
                 System.out.println();
                 

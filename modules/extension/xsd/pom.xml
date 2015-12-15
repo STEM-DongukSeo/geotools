@@ -96,6 +96,8 @@
     <module>xsd-wms</module>
     <module>xsd-csw</module>
     <module>xsd-indoorgml</module>
+    
+    <module>xsd-indoorgml2</module>
   </modules>
 
 </project>

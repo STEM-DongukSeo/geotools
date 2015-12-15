@@ -134,6 +134,9 @@ public class GMLComplexParsingUtils {
             FeatureType fType = ftCache.get(new NameImpl(property.getTargetNamespace(), property.getName()));
             if(fType != null) {
                 tBuilder.referenceType(fType);
+            } else {
+                fType = GMLComplexParsingUtils.featureType(decl, null, ftCache, crs);
+                ftCache.put(fType);
             }
             
             int min = particle.getMinOccurs();

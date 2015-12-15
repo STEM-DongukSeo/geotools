@@ -5,21 +5,21 @@ import org.geotools.gml2.FeatureTypeCache;
 import org.geotools.indoorgml.core.binding.GMLComplexParsingUtils;
 import org.geotools.xml.*;
 import org.geotools.xml.AbstractComplexBinding;
-import org.opengis.feature.Association;
+
 
 import javax.xml.namespace.QName;
 
 /**
- * Binding object for the type http://www.opengis.net/indoorgml/1.0/core:CellSpaceMemberType.
+ * Binding object for the type http://www.opengis.net/indoorgml/1.0/core:CellSpaceBoundaryMemberType.
  *
  * <p>
  *	<pre>
  *	 <code>
- *  &lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;xs:complexType name="CellSpaceMemberType" xmlns:xs="http://www.w3.org/2001/XMLSchema"&gt;
+ *  &lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;xs:complexType name="CellSpaceBoundaryMemberType" xmlns:xs="http://www.w3.org/2001/XMLSchema"&gt;
  *  		&lt;xs:complexContent&gt;
  *  			&lt;xs:extension base="gml:AbstractFeatureMemberType"&gt;
  *  				&lt;xs:sequence minOccurs="0"&gt;
- *  					&lt;xs:element ref="CellSpace"/&gt;
+ *  					&lt;xs:element ref="CellSpaceBoundary"/&gt;
  *  				&lt;/xs:sequence&gt;
  *  				&lt;xs:attributeGroup ref="gml:AssociationAttributeGroup"/&gt;
  *  			&lt;/xs:extension&gt;
@@ -32,11 +32,11 @@ import javax.xml.namespace.QName;
  *
  * @generated
  */
-public class CellSpaceMemberTypeBinding extends AbstractComplexBinding {
+public class CellSpaceBoundaryMemberTypeBinding extends AbstractComplexBinding {
 
         FeatureTypeCache ftCache;
         
-        public CellSpaceMemberTypeBinding(FeatureTypeCache ftCache) {
+        public CellSpaceBoundaryMemberTypeBinding(FeatureTypeCache ftCache) {
             this.ftCache = ftCache;
         }
         
@@ -44,7 +44,7 @@ public class CellSpaceMemberTypeBinding extends AbstractComplexBinding {
 	 * @generated
 	 */
 	public QName getTarget() {
-		return INDOORCORE.CellSpaceMemberType;
+		return INDOORCORE.CellSpaceBoundaryMemberType;
 	}
 	
 	/**
@@ -54,7 +54,7 @@ public class CellSpaceMemberTypeBinding extends AbstractComplexBinding {
 	 * @generated modifiable
 	 */	
 	public Class getType() {
-		return Association.class;
+		return null;
 	}
 	
 	/**

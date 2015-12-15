@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- =======================================================================    
+        Maven Project Configuration File                                        
+                                                                                
+        The Geotools Project                                                    
+            http://www.geotools.org/                                            
+                                                                                
+        Version: $Id$              
+     ======================================================================= -->
+  <project xmlns="http://maven.apache.org/POM/4.0.0" 
+  		   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+			 				   http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  	
+  <parent>
+    <groupId>org.geotools.xsd</groupId>
+    <artifactId>xsd</artifactId>
+    <version>15-SNAPSHOT</version>
+  </parent>
+  
+  <!-- =========================================================== -->
+  <!--     Module Description                                      -->
+  <!-- =========================================================== -->
+  <groupId>org.geotools.xsd</groupId>
+  <artifactId>gt-xsd-indoorgml2</artifactId>
+  <packaging>jar</packaging>
+  <name>IndoorGML XML Support</name>
+  
+  <description>
+    IndoorGML XML support for Geotools.
+  </description>
+  
+  <licenses>
+    <license>
+      <name>Lesser General Public License (LGPL)</name>
+      <url>http://www.gnu.org/copyleft/lesser.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  
+  <!-- =========================================================== -->
+  <!--     Developers and Contributors                             -->
+  <!-- =========================================================== -->
+  <developers>
+    <developer>
+      <name>HyungGyu Ryoo</name>
+      <id>hgryoo</id>
+      <email>hyunggyu.ryoo@pnu.edu</email>
+      <organization>Pusan National University</organization>
+      <roles>
+        <role>Java Developer</role>
+      </roles>
+    </developer>
+  </developers>
+  
+  <!-- =========================================================== -->
+  <!--     Dependency Management                                   -->
+  <!-- =========================================================== -->
+  <dependencies>
+  		<dependency>
+  		  <groupId>junit</groupId>
+		  <artifactId>junit</artifactId>
+		  <version>4.11</version>
+		  <scope>test</scope>
+  		</dependency>
+		<dependency>
+	      <groupId>org.geotools.xsd</groupId>
+	      <artifactId>gt-xsd-gml3</artifactId>
+	      <version>${project.version}</version>
+	    </dependency>
+  </dependencies>	
+
+  <!-- =========================================================== -->
+  <!--     Build Configuration                                     -->
+  <!-- =========================================================== -->
+  <build>
+  	<plugins>
+		<plugin>
+			<groupId>org.geotools.maven</groupId>
+			<artifactId>xmlcodegen</artifactId>
+			<version>15-SNAPSHOT</version>
+			<configuration>
+				<!-- =========================================================== -->
+				<!-- Common Configuration -->
+				<!-- =========================================================== -->
+				<schemaLocation>indoorgmlcore.xsd</schemaLocation>
+				<schemaSourceDirectory>${basedir}/src/main/resources/org/geotools/indoorgml/core</schemaSourceDirectory>
+
+				<targetPrefix>indoorCore</targetPrefix>
+				<destinationPackage>org.geotools.indoorgml.core</destinationPackage>
+				
+				<relativeSchemaReference>true</relativeSchemaReference>
+				<overwriteExistingFiles>true</overwriteExistingFiles>
+				<!-- =========================================================== -->
+				<!-- Generate Configuration -->
+				<!-- =========================================================== -->
+				<generateConfiguration>true</generateConfiguration>
+				<generateBindingConfiguration>true</generateBindingConfiguration>
+				
+				<generateBindingInterface>true</generateBindingInterface>
+				<generateAttributeBindings>true</generateAttributeBindings>
+				<generateElementBindings>true</generateElementBindings>
+				<generateTypeBindings>true</generateTypeBindings>
+				
+				<generateXsd>true</generateXsd> <!-- necessary -->
+				
+				<generateSchemaLocationResolver>false</generateSchemaLocationResolver>
+				<!-- =========================================================== -->
+				<!-- GenerateSchema Configuration -->
+				<!-- =========================================================== -->
+				<includeComplexTypes>true</includeComplexTypes>
+				<includeSimpleTypes>true</includeSimpleTypes>
+				<followComplexTypes>true</followComplexTypes>
+				<cyclicTypeSupport>true</cyclicTypeSupport>
+				<includeGML>true</includeGML>
+				<printRecursionPaths>false</printRecursionPaths>
+
+				<imports>
+					<import>org.geotools.xs.XSSchema</import>
+					<import>org.geotools.xlink.XLINKSchema</import>
+ 					<import>org.geotools.gml3.v3_2.GMLSchema</import>
+				</imports>
+			</configuration>
+		</plugin>
+	</plugins>
+	</build>
+</project>

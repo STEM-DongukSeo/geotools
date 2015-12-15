@@ -1,25 +1,24 @@
 package org.geotools.indoorgml.core;
 
 
-import javax.xml.namespace.QName;
-
 import org.geotools.gml2.FeatureTypeCache;
 import org.geotools.indoorgml.core.binding.GMLComplexParsingUtils;
+import org.geotools.xml.*;
 import org.geotools.xml.AbstractComplexBinding;
-import org.geotools.xml.ElementInstance;
-import org.geotools.xml.Node;
 import org.opengis.feature.Association;
 import org.opengis.feature.Feature;
 
+import javax.xml.namespace.QName;
+
 /**
- * Binding object for the type http://www.opengis.net/indoorgml/1.0/core:PrimalSpaceFeaturesPropertyType.
+ * Binding object for the type http://www.opengis.net/indoorgml/1.0/core:StatePropertyType.
  *
  * <p>
  *	<pre>
  *	 <code>
- *  &lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;xs:complexType name="PrimalSpaceFeaturesPropertyType" xmlns:xs="http://www.w3.org/2001/XMLSchema"&gt;
+ *  &lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;xs:complexType name="StatePropertyType" xmlns:xs="http://www.w3.org/2001/XMLSchema"&gt;
  *  		&lt;xs:sequence minOccurs="0"&gt;
- *  			&lt;xs:element ref="PrimalSpaceFeatures"/&gt;
+ *  			&lt;xs:element ref="State"/&gt;
  *  		&lt;/xs:sequence&gt;
  *  		&lt;xs:attributeGroup ref="gml:AssociationAttributeGroup"/&gt;
  *  	&lt;/xs:complexType&gt; 
@@ -30,19 +29,19 @@ import org.opengis.feature.Feature;
  *
  * @generated
  */
-public class PrimalSpaceFeaturesPropertyTypeBinding extends AbstractComplexBinding {
+public class StatePropertyTypeBinding extends AbstractComplexBinding {
 
         FeatureTypeCache ftCache;
-
-        public PrimalSpaceFeaturesPropertyTypeBinding(FeatureTypeCache ftCache) {
+        
+        public StatePropertyTypeBinding(FeatureTypeCache ftCache) {
             this.ftCache = ftCache;
         }
-
+        
 	/**
 	 * @generated
 	 */
 	public QName getTarget() {
-		return INDOORCORE.PrimalSpaceFeaturesPropertyType;
+		return INDOORCORE.StatePropertyType;
 	}
 	
 	/**
@@ -63,8 +62,9 @@ public class PrimalSpaceFeaturesPropertyTypeBinding extends AbstractComplexBindi
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
-	    System.out.println("### PrimalSpaceFeaturesPropertyTypeBinding ###");
-            return GMLComplexParsingUtils.parseAssociation(instance, node, value, ftCache);
+
+	    System.out.println("### StatePropertyTypeBinding ###");
+	    return GMLComplexParsingUtils.parseAssociation(instance, node, value, ftCache);
 	}
 
 }

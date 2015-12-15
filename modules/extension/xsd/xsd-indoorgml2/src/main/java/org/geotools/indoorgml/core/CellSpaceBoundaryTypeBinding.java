@@ -1,31 +1,34 @@
 package org.geotools.indoorgml.core;
 
 
+import javax.xml.namespace.QName;
+
 import org.geotools.gml2.FeatureTypeCache;
 import org.geotools.gml3.XSDIdRegistry;
 import org.geotools.gml3.bindings.AbstractFeatureTypeBinding;
 import org.geotools.gml3.bindings.GML3EncodingUtils;
-import org.geotools.gml3.bindings.GML3ParsingUtils;
 import org.geotools.indoorgml.core.binding.GMLComplexParsingUtils;
-import org.geotools.xml.*;
+import org.geotools.xml.BindingWalkerFactory;
+import org.geotools.xml.Configuration;
+import org.geotools.xml.ElementInstance;
+import org.geotools.xml.Node;
+import org.geotools.xml.SchemaIndex;
 import org.opengis.feature.Feature;
 
-import javax.xml.namespace.QName;
-
 /**
- * Binding object for the type http://www.opengis.net/indoorgml/1.0/core:PrimalSpaceFeaturesType.
+ * Binding object for the type http://www.opengis.net/indoorgml/1.0/core:CellSpaceBoundaryType.
  *
  * <p>
  *	<pre>
  *	 <code>
- *  &lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;xs:complexType name="PrimalSpaceFeaturesType" xmlns:xs="http://www.w3.org/2001/XMLSchema"&gt;
+ *  &lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;xs:complexType name="CellSpaceBoundaryType" xmlns:xs="http://www.w3.org/2001/XMLSchema"&gt;
  *  		&lt;xs:complexContent&gt;
  *  			&lt;xs:extension base="gml:AbstractFeatureType"&gt;
  *  				&lt;xs:sequence&gt;
- *  					&lt;xs:element maxOccurs="unbounded" minOccurs="0" name="cellSpaceMember" type="gml:FeaturePropertyType"/&gt;
- *  					&lt;xs:element maxOccurs="unbounded" minOccurs="0" name="cellSpaceBoundaryMember" type="gml:FeaturePropertyType"/&gt;
+ *  					&lt;xs:element maxOccurs="1" minOccurs="0" name="duality" type="TransitionPropertyType"/&gt;
+ *  					&lt;xs:group minOccurs="0" ref="CellSpaceBoundaryGeometry"/&gt;
+ *  					&lt;xs:element maxOccurs="unbounded" minOccurs="0" name="externalReference" type="ExternalReferenceType"/&gt;
  *  				&lt;/xs:sequence&gt;
- *  				&lt;xs:attributeGroup ref="gml:AggregationAttributeGroup"/&gt;
  *  			&lt;/xs:extension&gt;
  *  		&lt;/xs:complexContent&gt;
  *  	&lt;/xs:complexType&gt; 
@@ -36,9 +39,9 @@ import javax.xml.namespace.QName;
  *
  * @generated
  */
-public class PrimalSpaceFeaturesTypeBinding extends AbstractFeatureTypeBinding {
+public class CellSpaceBoundaryTypeBinding extends AbstractFeatureTypeBinding {
 
-	public PrimalSpaceFeaturesTypeBinding(FeatureTypeCache ftCache, BindingWalkerFactory bwFactory,
+	public CellSpaceBoundaryTypeBinding(FeatureTypeCache ftCache, BindingWalkerFactory bwFactory,
 			SchemaIndex schemaIndex, Configuration configuration, XSDIdRegistry idRegistry,
 			GML3EncodingUtils encodingUtils) {
 		super(ftCache, bwFactory, schemaIndex, configuration, idRegistry, encodingUtils);
@@ -49,7 +52,7 @@ public class PrimalSpaceFeaturesTypeBinding extends AbstractFeatureTypeBinding {
 	 * @generated
 	 */
 	public QName getTarget() {
-		return INDOORCORE.PrimalSpaceFeaturesType;
+		return INDOORCORE.CellSpaceBoundaryType;
 	}
 	
 	/**
@@ -70,8 +73,8 @@ public class PrimalSpaceFeaturesTypeBinding extends AbstractFeatureTypeBinding {
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
-		System.out.println("### PrimalSpaceFeatureTypeBinding ###");
-		return GMLComplexParsingUtils.parseFeature(instance, node, value, super.getFeatureTypeCache(), super.getBindingWalkerFactory());
+		System.out.println("### CellSpaceBoundaryTypeBinding ###");
+                return GMLComplexParsingUtils.parseFeature(instance, node, value, super.getFeatureTypeCache(), super.getBindingWalkerFactory());
 	}
 
 }

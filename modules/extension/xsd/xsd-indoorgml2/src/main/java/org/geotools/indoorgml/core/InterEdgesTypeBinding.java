@@ -1,29 +1,30 @@
 package org.geotools.indoorgml.core;
 
 
+import javax.xml.namespace.QName;
+
 import org.geotools.gml2.FeatureTypeCache;
 import org.geotools.gml3.XSDIdRegistry;
 import org.geotools.gml3.bindings.AbstractFeatureTypeBinding;
 import org.geotools.gml3.bindings.GML3EncodingUtils;
-import org.geotools.gml3.bindings.GML3ParsingUtils;
-import org.geotools.indoorgml.core.binding.GMLComplexParsingUtils;
-import org.geotools.xml.*;
+import org.geotools.xml.BindingWalkerFactory;
+import org.geotools.xml.Configuration;
+import org.geotools.xml.ElementInstance;
+import org.geotools.xml.Node;
+import org.geotools.xml.SchemaIndex;
 import org.opengis.feature.Feature;
 
-import javax.xml.namespace.QName;
-
 /**
- * Binding object for the type http://www.opengis.net/indoorgml/1.0/core:PrimalSpaceFeaturesType.
+ * Binding object for the type http://www.opengis.net/indoorgml/1.0/core:InterEdgesType.
  *
  * <p>
  *	<pre>
  *	 <code>
- *  &lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;xs:complexType name="PrimalSpaceFeaturesType" xmlns:xs="http://www.w3.org/2001/XMLSchema"&gt;
+ *  &lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;xs:complexType name="InterEdgesType" xmlns:xs="http://www.w3.org/2001/XMLSchema"&gt;
  *  		&lt;xs:complexContent&gt;
  *  			&lt;xs:extension base="gml:AbstractFeatureType"&gt;
  *  				&lt;xs:sequence&gt;
- *  					&lt;xs:element maxOccurs="unbounded" minOccurs="0" name="cellSpaceMember" type="gml:FeaturePropertyType"/&gt;
- *  					&lt;xs:element maxOccurs="unbounded" minOccurs="0" name="cellSpaceBoundaryMember" type="gml:FeaturePropertyType"/&gt;
+ *  					&lt;xs:element maxOccurs="unbounded" minOccurs="1" name="interLayerConnectionMember" type="InterLayerConnectionMemberType"/&gt;
  *  				&lt;/xs:sequence&gt;
  *  				&lt;xs:attributeGroup ref="gml:AggregationAttributeGroup"/&gt;
  *  			&lt;/xs:extension&gt;
@@ -36,11 +37,10 @@ import javax.xml.namespace.QName;
  *
  * @generated
  */
-public class PrimalSpaceFeaturesTypeBinding extends AbstractFeatureTypeBinding {
+public class InterEdgesTypeBinding extends AbstractFeatureTypeBinding {
 
-	public PrimalSpaceFeaturesTypeBinding(FeatureTypeCache ftCache, BindingWalkerFactory bwFactory,
-			SchemaIndex schemaIndex, Configuration configuration, XSDIdRegistry idRegistry,
-			GML3EncodingUtils encodingUtils) {
+	public InterEdgesTypeBinding(FeatureTypeCache ftCache, BindingWalkerFactory bwFactory, SchemaIndex schemaIndex,
+			Configuration configuration, XSDIdRegistry idRegistry, GML3EncodingUtils encodingUtils) {
 		super(ftCache, bwFactory, schemaIndex, configuration, idRegistry, encodingUtils);
 		// TODO Auto-generated constructor stub
 	}
@@ -49,7 +49,7 @@ public class PrimalSpaceFeaturesTypeBinding extends AbstractFeatureTypeBinding {
 	 * @generated
 	 */
 	public QName getTarget() {
-		return INDOORCORE.PrimalSpaceFeaturesType;
+		return INDOORCORE.InterEdgesType;
 	}
 	
 	/**
@@ -70,8 +70,16 @@ public class PrimalSpaceFeaturesTypeBinding extends AbstractFeatureTypeBinding {
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
-		System.out.println("### PrimalSpaceFeatureTypeBinding ###");
-		return GMLComplexParsingUtils.parseFeature(instance, node, value, super.getFeatureTypeCache(), super.getBindingWalkerFactory());
+		
+		System.out.println("InterEdgesTypeBinding");
+		
+		System.out.println(node.toString());
+		    
+		System.out.println(value);
+	        
+		
+		//TODO: implement and remove call to super
+		return super.parse(instance,node,value);
 	}
 
 }
