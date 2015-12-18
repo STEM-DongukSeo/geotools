@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
+
+import javax.xml.namespace.QName;
 
 import org.eclipse.xsd.XSDElementDeclaration;
 import org.eclipse.xsd.XSDParticle;
-import org.geotools.feature.AbstractFeatureFactoryImpl;
-import org.geotools.feature.AssociationImpl;
+import org.geotools.data.DataUtilities;
 import org.geotools.feature.ComplexFeatureBuilder;
 import org.geotools.feature.NameImpl;
 import org.geotools.feature.TypeBuilder;
@@ -31,12 +33,11 @@ import org.geotools.xml.Schemas;
 import org.geotools.xml.impl.BindingWalker;
 import org.geotools.xs.bindings.XSAnyTypeBinding;
 import org.opengis.feature.Association;
-import org.opengis.feature.Attribute;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
 import org.opengis.feature.type.AssociationDescriptor;
 import org.opengis.feature.type.AssociationType;
-import org.opengis.feature.type.AttributeType;
+import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.GeometryType;
 import org.opengis.feature.type.Name;
@@ -73,7 +74,13 @@ public class GMLComplexParsingUtils {
         if (!decl.isAbstract()) {
             //first look in cache
             fType = ftCache.get(new NameImpl(decl.getTargetNamespace(), decl.getName()));
-    
+            
+            FeatureType temp = null;
+            if(fType != null && fType.getUserData().get("TEMP") != null) {
+                temp = fType;
+                fType = null;
+            }
+            
             if (fType == null) {
                 // let's use the CRS from the node (only if it's available) on the feature type
                 CoordinateReferenceSystem crs = null;
@@ -85,12 +92,12 @@ public class GMLComplexParsingUtils {
     
                 //build from element declaration
                 fType = GMLComplexParsingUtils.featureType(decl, bwFactory, ftCache, crs);
-                ftCache.put(fType);
+                if(temp == null) ftCache.put(fType);
             }
+            temp = fType;
         } else {
             // first look in cache
-            fType = ftCache.get(new NameImpl(node.getComponent().getNamespace(), node
-                    .getComponent().getName()));
+            fType = ftCache.get(new NameImpl(node.getComponent().getNamespace(), node.getComponent().getName()));
     
             if (fType == null) {
                 //build from node
@@ -111,13 +118,19 @@ public class GMLComplexParsingUtils {
         return GMLComplexParsingUtils.feature(fType, fid, node);
     }
     
-    public static Association parseAssociation(ElementInstance instance, Node node, Object value, FeatureTypeCache ftCache) throws Exception {
+    public static Association parseAssociation(ElementInstance instance, Node node, Object value, FeatureTypeCache ftCache, BindingWalkerFactory bwFactory) throws Exception {
         XSDElementDeclaration decl = instance.getElementDeclaration();
-        AssociationDescriptor associationDescriptor = associationDescriptor(decl, ftCache);
+        
+        
+        AssociationDescriptor associationDescriptor = associationDescriptor(decl, ftCache, bwFactory);
+        
+        
+        
+        
         return association(decl, node, associationDescriptor);
     }
     
-    public static AssociationDescriptor associationDescriptor(XSDElementDeclaration decl, FeatureTypeCache ftCache) throws Exception {
+    public static AssociationDescriptor associationDescriptor(XSDElementDeclaration decl, FeatureTypeCache ftCache, BindingWalkerFactory bwFactory) throws Exception {
         TypeBuilder tBuilder = new TypeBuilder( new FeatureTypeFactoryImpl() );
         tBuilder.setName(decl.getName());
         tBuilder.setNamespaceURI(decl.getTargetNamespace());
@@ -131,20 +144,41 @@ public class GMLComplexParsingUtils {
                 property = property.getResolvedElementDeclaration();
             }
             
+            final ArrayList bindings = new ArrayList();
+            BindingWalker.Visitor visitor = new BindingWalker.Visitor() {
+                    public void visit(Binding binding) {
+                        //TODO
+                        bindings.add(binding);
+                    }
+                };
+
+            bwFactory.walk(property, visitor);
+            
+            
+            //Binding last = ((Binding) bindings.get(bindings.size() - 1));
+            //QName targetName = last.getTarget();
+            
             FeatureType fType = ftCache.get(new NameImpl(property.getTargetNamespace(), property.getName()));
-            if(fType != null) {
-                tBuilder.referenceType(fType);
-            } else {
-                fType = GMLComplexParsingUtils.featureType(decl, null, ftCache, crs);
-                ftCache.put(fType);
+            if(fType == null) {
+                System.out.println("비어잇네 샹");
+                /*FeatureTypeBuilder b = new FeatureTypeBuilder();
+                b.setName(property.getName());
+                b.setNamespaceURI(property.getTargetNamespace());
+                FeatureType temp = b.feature();
+                Map<Object, Object> userMap = temp.getUserData();
+                userMap.put("TEMP", "TRUE");
+                fType = temp;
+                ftCache.put(temp);*/
             }
+            
+            tBuilder.referenceType(fType);
             
             int min = particle.getMinOccurs();
             int max = particle.getMaxOccurs();
             //check for uninitialized values
-            //TODO
             if (min == -1) min = 0;
             if (max == -1) max = 1;
+            
             tBuilder.cardinality(min, max);
         }
         AssociationType type = tBuilder.association();
@@ -184,7 +218,6 @@ public class GMLComplexParsingUtils {
                             bindings.add(binding);
                         }
                     };
-
                 bwFactory.walk(property, visitor);
 
                 if (bindings.isEmpty()) {
@@ -204,13 +237,11 @@ public class GMLComplexParsingUtils {
                 // get the attribute properties
                 int min = particle.getMinOccurs();
                 int max = particle.getMaxOccurs();
+                
                 //check for uninitialized values
-                //TODO
                 if (min == -1) min = 0;
                 if (max == -1) max = 1;
                 propBuilder.cardinality(min, max);
-                
-                // create the type
                 
                 // if the next property is of type geometry, let's set its CRS
                 if (Geometry.class.isAssignableFrom(theClass) && crs != null) {
@@ -220,43 +251,36 @@ public class GMLComplexParsingUtils {
                 String propName = property.getName();
                 Class<?> binding = theClass;
                 
-                PropertyDescriptor descriptor = null;
-                
                 propBuilder.setBinding(binding);
                 propBuilder.setName(propName);
-                
+                PropertyDescriptor descriptor = null;
                 Name defaultGeom = tBuilder.getDefaultGeometry();
                 if( defaultGeom != null && defaultGeom.equals(propName) || Geometry.class.isAssignableFrom(binding)) {
                     
                     //TODO if default crs is not set
-                    
                     if(propBuilder.getCRS() == null) {
                         //TODO
                         //set default crs
                     }
-                    
                     GeometryType type = propBuilder.geometry();
-                    propBuilder.reset();
                     propBuilder.setName(propName);
                     propBuilder.setPropertyType(type);
                     descriptor = propBuilder.attributeDescriptor();
                 }
                 else {
                     PropertyType type = null;
+                    /*if(Association.class.isAssignableFrom(binding)) {
+                        descriptor = associationDescriptor(property, ftCache, bwFactory);
+                    }*/
+                    /*
                     if(Feature.class.isAssignableFrom(binding)) {
                         type = ftCache.get(new NameImpl(property.getTargetNamespace(), property.getName()));
                         //Create Association Type
-                    }
-                    else if(Association.class.isAssignableFrom(binding)) {
-                        descriptor = associationDescriptor(property, ftCache);
-                    }
-                    else {
-                        type = propBuilder.attribute();
-                        propBuilder.setName(propName);
-                        propBuilder.setPropertyType(type);
-                        descriptor = propBuilder.attributeDescriptor();
-                    }
-                    
+                    }*/
+                    type = propBuilder.attribute();
+                    propBuilder.setName(propName);
+                    propBuilder.setPropertyType(type);
+                    descriptor = propBuilder.attributeDescriptor();
                 }
                 
                 if(descriptor != null) tBuilder.add(descriptor);
@@ -351,7 +375,22 @@ public class GMLComplexParsingUtils {
                         value = converted;
                     }
                 }
-                b.append(p.getName(), (Property) value);
+                
+                if ( value == null) {
+                    //if the content is null and the descriptor says isNillable is false, 
+                    // then set the default value
+                    if (!p.isNillable()) {
+                        value = DataUtilities.defaultValue(p.getType().getBinding());
+                    }
+                } else {
+                    Class<?> target = p.getType().getBinding(); 
+                    Object converted = Converters.convert(value, target);
+                    if(converted != null) {
+                        value = converted;
+                    }
+                }
+                
+                //b.append(p.getName(), (Property) value);
             }
         }
         

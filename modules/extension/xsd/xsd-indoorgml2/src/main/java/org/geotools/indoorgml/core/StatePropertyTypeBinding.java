@@ -4,7 +4,6 @@ package org.geotools.indoorgml.core;
 import org.geotools.gml2.FeatureTypeCache;
 import org.geotools.indoorgml.core.binding.GMLComplexParsingUtils;
 import org.geotools.xml.*;
-import org.geotools.xml.AbstractComplexBinding;
 import org.opengis.feature.Association;
 import org.opengis.feature.Feature;
 
@@ -32,9 +31,11 @@ import javax.xml.namespace.QName;
 public class StatePropertyTypeBinding extends AbstractComplexBinding {
 
         FeatureTypeCache ftCache;
+        BindingWalkerFactory bwFactory;
         
-        public StatePropertyTypeBinding(FeatureTypeCache ftCache) {
+        public StatePropertyTypeBinding(FeatureTypeCache ftCache, BindingWalkerFactory bwFactory) {
             this.ftCache = ftCache;
+            this.bwFactory = bwFactory;
         }
         
 	/**
@@ -64,7 +65,7 @@ public class StatePropertyTypeBinding extends AbstractComplexBinding {
 		throws Exception {
 
 	    System.out.println("### StatePropertyTypeBinding ###");
-	    return GMLComplexParsingUtils.parseAssociation(instance, node, value, ftCache);
+	    return node.getChildValues(Feature.class);
 	}
 
 }

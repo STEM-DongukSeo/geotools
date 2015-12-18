@@ -36,14 +36,15 @@ import javax.xml.namespace.QName;
  *
  * @generated
  */
-public class PrimalSpaceFeaturesTypeBinding extends AbstractFeatureTypeBinding {
+public class PrimalSpaceFeaturesTypeBinding extends AbstractComplexBinding {
 
-	public PrimalSpaceFeaturesTypeBinding(FeatureTypeCache ftCache, BindingWalkerFactory bwFactory,
-			SchemaIndex schemaIndex, Configuration configuration, XSDIdRegistry idRegistry,
-			GML3EncodingUtils encodingUtils) {
-		super(ftCache, bwFactory, schemaIndex, configuration, idRegistry, encodingUtils);
-		// TODO Auto-generated constructor stub
-	}
+        FeatureTypeCache ftCache;
+        BindingWalkerFactory bwFactory;
+        
+        public PrimalSpaceFeaturesTypeBinding(FeatureTypeCache ftCache, BindingWalkerFactory bwFactory) {
+            this.ftCache = ftCache;
+            this.bwFactory = bwFactory;
+        }
 
 	/**
 	 * @generated
@@ -71,7 +72,7 @@ public class PrimalSpaceFeaturesTypeBinding extends AbstractFeatureTypeBinding {
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
 		System.out.println("### PrimalSpaceFeatureTypeBinding ###");
-		return GMLComplexParsingUtils.parseFeature(instance, node, value, super.getFeatureTypeCache(), super.getBindingWalkerFactory());
+		return GMLComplexParsingUtils.parseFeature(instance, node, value, ftCache, bwFactory);
 	}
 
 }

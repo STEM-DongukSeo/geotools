@@ -7,8 +7,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
+import org.geotools.indoorgml.core.INDOORCORE;
 import org.geotools.indoorgml.core.INDOORCOREConfiguration;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
+import org.geotools.util.Version;
 import org.geotools.xml.Parser;
 import org.junit.Test;
 import org.opengis.feature.Association;
@@ -80,8 +82,14 @@ public class IndoorCoreParsingTest {
     
     @Test
     public void INDOORCOREParsingTest() {
+        
+        INDOORCORE indoorcore = INDOORCORE.getInstance();
+        
+        
+        
         org.geotools.xml.Configuration configuration = new INDOORCOREConfiguration();
         org.geotools.xml.Parser parser = new org.geotools.xml.Parser( configuration );
+        
         
         //the xml instance document above
         try {

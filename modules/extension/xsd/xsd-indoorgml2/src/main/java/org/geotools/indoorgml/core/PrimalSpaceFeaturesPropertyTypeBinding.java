@@ -6,6 +6,7 @@ import javax.xml.namespace.QName;
 import org.geotools.gml2.FeatureTypeCache;
 import org.geotools.indoorgml.core.binding.GMLComplexParsingUtils;
 import org.geotools.xml.AbstractComplexBinding;
+import org.geotools.xml.BindingWalkerFactory;
 import org.geotools.xml.ElementInstance;
 import org.geotools.xml.Node;
 import org.opengis.feature.Association;
@@ -33,9 +34,11 @@ import org.opengis.feature.Feature;
 public class PrimalSpaceFeaturesPropertyTypeBinding extends AbstractComplexBinding {
 
         FeatureTypeCache ftCache;
-
-        public PrimalSpaceFeaturesPropertyTypeBinding(FeatureTypeCache ftCache) {
+        BindingWalkerFactory bwFactory;
+        
+        public PrimalSpaceFeaturesPropertyTypeBinding(FeatureTypeCache ftCache, BindingWalkerFactory bwFactory) {
             this.ftCache = ftCache;
+            this.bwFactory = bwFactory;
         }
 
 	/**
@@ -52,7 +55,7 @@ public class PrimalSpaceFeaturesPropertyTypeBinding extends AbstractComplexBindi
 	 * @generated modifiable
 	 */	
 	public Class getType() {
-		return Association.class;
+		return Feature.class;
 	}
 	
 	/**
@@ -64,7 +67,7 @@ public class PrimalSpaceFeaturesPropertyTypeBinding extends AbstractComplexBindi
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
 	    System.out.println("### PrimalSpaceFeaturesPropertyTypeBinding ###");
-            return GMLComplexParsingUtils.parseAssociation(instance, node, value, ftCache);
+	    return node.getChildValues(Feature.class);
 	}
 
 }

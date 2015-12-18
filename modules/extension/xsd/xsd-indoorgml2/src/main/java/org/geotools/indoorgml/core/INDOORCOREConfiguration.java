@@ -1,6 +1,8 @@
 package org.geotools.indoorgml.core;
 
+import org.geotools.gml3.bindings.GML3EncodingUtils;
 import org.geotools.gml3.v3_2.GMLConfiguration;
+import org.geotools.gml3.v3_2.bindings.GML32EncodingUtils;
 import org.geotools.xml.Configuration;
 import org.picocontainer.MutablePicoContainer;
 
@@ -79,4 +81,11 @@ public class INDOORCOREConfiguration extends Configuration {
 
     
     }
+    
+    @Override
+    protected void configureContext(MutablePicoContainer container) {
+        super.configureContext(container);
+        
+    }
+    
 } 

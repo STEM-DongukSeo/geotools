@@ -4,7 +4,6 @@ package org.geotools.indoorgml.core;
 import org.geotools.gml2.FeatureTypeCache;
 import org.geotools.indoorgml.core.binding.GMLComplexParsingUtils;
 import org.geotools.xml.*;
-import org.geotools.xml.AbstractComplexBinding;
 import org.opengis.feature.Association;
 
 import javax.xml.namespace.QName;
@@ -35,9 +34,11 @@ import javax.xml.namespace.QName;
 public class CellSpaceMemberTypeBinding extends AbstractComplexBinding {
 
         FeatureTypeCache ftCache;
+        BindingWalkerFactory bwFactory;
         
-        public CellSpaceMemberTypeBinding(FeatureTypeCache ftCache) {
+        public CellSpaceMemberTypeBinding(FeatureTypeCache ftCache, BindingWalkerFactory bwFactory) {
             this.ftCache = ftCache;
+            this.bwFactory = bwFactory;
         }
         
 	/**
@@ -65,7 +66,7 @@ public class CellSpaceMemberTypeBinding extends AbstractComplexBinding {
 	 */	
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
-	    return GMLComplexParsingUtils.parseAssociation(instance, node, value, ftCache);
+	    return GMLComplexParsingUtils.parseAssociation(instance, node, value, ftCache, bwFactory);
 	}
 
 }

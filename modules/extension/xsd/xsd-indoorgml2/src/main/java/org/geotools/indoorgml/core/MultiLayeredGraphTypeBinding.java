@@ -7,6 +7,7 @@ import org.geotools.gml2.FeatureTypeCache;
 import org.geotools.gml3.XSDIdRegistry;
 import org.geotools.gml3.bindings.AbstractFeatureTypeBinding;
 import org.geotools.gml3.bindings.GML3EncodingUtils;
+import org.geotools.indoorgml.core.binding.GMLComplexParsingUtils;
 import org.geotools.xml.BindingWalkerFactory;
 import org.geotools.xml.Configuration;
 import org.geotools.xml.ElementInstance;
@@ -72,7 +73,7 @@ public class MultiLayeredGraphTypeBinding extends AbstractFeatureTypeBinding {
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
 	    System.out.println("### MultiLayeredGraphTypeBinding ###");
-	    return super.parse(instance,node,value);
+	    return GMLComplexParsingUtils.parseFeature(instance, node, value, super.getFeatureTypeCache(), super.getBindingWalkerFactory());
 	}
 
 }

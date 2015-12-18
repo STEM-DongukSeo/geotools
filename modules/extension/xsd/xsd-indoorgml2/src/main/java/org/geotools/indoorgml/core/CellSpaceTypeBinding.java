@@ -7,7 +7,9 @@ import org.geotools.gml2.FeatureTypeCache;
 import org.geotools.gml3.XSDIdRegistry;
 import org.geotools.gml3.bindings.AbstractFeatureTypeBinding;
 import org.geotools.gml3.bindings.GML3EncodingUtils;
+import org.geotools.gml3.bindings.GML3ParsingUtils;
 import org.geotools.indoorgml.core.binding.GMLComplexParsingUtils;
+import org.geotools.xml.AbstractComplexBinding;
 import org.geotools.xml.BindingWalkerFactory;
 import org.geotools.xml.Configuration;
 import org.geotools.xml.ElementInstance;
@@ -40,13 +42,15 @@ import org.opengis.feature.Feature;
  *
  * @generated
  */
-public class CellSpaceTypeBinding extends AbstractFeatureTypeBinding {
+public class CellSpaceTypeBinding extends AbstractComplexBinding {
 
-	public CellSpaceTypeBinding(FeatureTypeCache ftCache, BindingWalkerFactory bwFactory, SchemaIndex schemaIndex,
-			Configuration configuration, XSDIdRegistry idRegistry, GML3EncodingUtils encodingUtils) {
-		super(ftCache, bwFactory, schemaIndex, configuration, idRegistry, encodingUtils);
-		// TODO Auto-generated constructor stub
-	}
+        FeatureTypeCache ftCache;
+        BindingWalkerFactory bwFactory;
+        
+        public CellSpaceTypeBinding(FeatureTypeCache ftCache, BindingWalkerFactory bwFactory) {
+            this.ftCache = ftCache;
+            this.bwFactory = bwFactory;
+        }
 
 	/**
 	 * @generated
@@ -74,7 +78,7 @@ public class CellSpaceTypeBinding extends AbstractFeatureTypeBinding {
 	public Object parse(ElementInstance instance, Node node, Object value) 
 		throws Exception {
 		System.out.println("### CellSpaceTypeBinding ###");
-		return GMLComplexParsingUtils.parseFeature(instance, node, value, super.getFeatureTypeCache(), super.getBindingWalkerFactory());
+		return GMLComplexParsingUtils.parseFeature(instance, node, value, ftCache, bwFactory);
 	}
 
 }
