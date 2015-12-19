@@ -16,6 +16,17 @@
  */
 package org.geotools.xml.impl;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.xml.namespace.QName;
+
 import org.apache.commons.collections.OrderedMap;
 import org.apache.commons.collections.map.ListOrderedMap;
 import org.eclipse.emf.common.notify.Adapter;
@@ -33,17 +44,6 @@ import org.eclipse.xsd.XSDParticle;
 import org.eclipse.xsd.XSDSchema;
 import org.eclipse.xsd.XSDSimpleTypeDefinition;
 import org.eclipse.xsd.XSDTypeDefinition;
-import org.eclipse.xsd.util.XSDSchemaBuildingTools;
-import org.eclipse.xsd.util.XSDUtil;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import javax.xml.namespace.QName;
-
 import org.geotools.util.SoftValueHashMap;
 import org.geotools.xml.SchemaIndex;
 import org.geotools.xml.Schemas;
@@ -168,7 +168,13 @@ public class SchemaIndexImpl implements SchemaIndex {
 
     protected XSDNamedComponent lookup(Map index, QName qName) {
         XSDNamedComponent component = (XSDNamedComponent) index.get(qName);
-
+        
+        System.out.println("==" + qName + "\n");
+        for(Object o: index.keySet()) {
+            if(o.toString().startsWith("{http://www.opengis.net/indoorgml/1.0/core}"))
+                System.out.println(o.toString());
+        }
+        
         if (component != null) {
             return component;
         }

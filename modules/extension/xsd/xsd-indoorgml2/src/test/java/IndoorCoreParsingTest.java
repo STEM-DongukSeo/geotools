@@ -1,5 +1,6 @@
 import static org.junit.Assert.assertNotNull;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -7,15 +8,20 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.geotools.GML;
+import org.geotools.GML.Version;
+import org.geotools.feature.NameImpl;
+import org.geotools.gtxml.GTXML;
 import org.geotools.indoorgml.core.INDOORCORE;
 import org.geotools.indoorgml.core.INDOORCOREConfiguration;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.geotools.util.Version;
 import org.geotools.xml.Parser;
 import org.junit.Test;
 import org.opengis.feature.Association;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
+import org.opengis.feature.type.FeatureType;
 
 
 public class IndoorCoreParsingTest {
@@ -83,16 +89,28 @@ public class IndoorCoreParsingTest {
     @Test
     public void INDOORCOREParsingTest() {
         
+        try {
         INDOORCORE indoorcore = INDOORCORE.getInstance();
+ 
+        ClassLoader classLoader = getClass().getClassLoader();
+        URL schemaLocation = classLoader.getResource("org/geotools/indoorgml/core/indoorgmlcore.xsd");
         
+        //URL schemaLocation = new URL("http://schemas.opengis.net/indoorgml/1.0/indoorgmlcore.xsd");
         
+        int av = schemaLocation.openStream().available();
+        
+        GML gml = new GML(Version.WFS1_1);
+        gml.setCoordinateReferenceSystem(DefaultGeographicCRS.WGS84);
+
+        FeatureType featureType = gml.decodeSimpleFeatureType(schemaLocation, new NameImpl(
+                "http://www.opengis.net/indoorgml/1.0/core", "IndoorFeatures"));
+
         
         org.geotools.xml.Configuration configuration = new INDOORCOREConfiguration();
         org.geotools.xml.Parser parser = new org.geotools.xml.Parser( configuration );
         
-        
         //the xml instance document above
-        try {
+        
                 URL url = getClass().getResource("indoor.gml");
                 InputStream in = url.openStream();
 
