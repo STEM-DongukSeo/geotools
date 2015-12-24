@@ -42,6 +42,8 @@ public class SolidImpl extends PrimitiveImpl implements Solid {
     /**
 	 * 
 	 */
+        private SolidBoundary boundary = null; // add boundary
+        
 	protected Envelope envelope;
 
 	/**
@@ -53,6 +55,7 @@ public class SolidImpl extends PrimitiveImpl implements Solid {
 	 */
 	public SolidImpl(SolidBoundary boundary) {
 		super(boundary.getCoordinateReferenceSystem(), null, null, null);
+		this.boundary = boundary;
 		this.envelope = (EnvelopeImpl) boundary.getEnvelope();
 	}
 
@@ -108,8 +111,7 @@ public class SolidImpl extends PrimitiveImpl implements Solid {
 	 * @return the solid boundary
 	 */
 	public SolidBoundary getBoundary() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.boundary;
 	}
 
 	/***************************************************************************
