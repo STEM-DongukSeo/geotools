@@ -42,7 +42,7 @@ public class SolidImpl extends PrimitiveImpl implements Solid {
     /**
 	 * 
 	 */
-        private SolidBoundary boundary = null; // add boundary
+        private SolidBoundary boundary = null; // add solid boundary
         
 	protected Envelope envelope;
 

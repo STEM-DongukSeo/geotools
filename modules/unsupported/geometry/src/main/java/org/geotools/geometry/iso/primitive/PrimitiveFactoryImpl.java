@@ -46,6 +46,7 @@ import org.opengis.geometry.coordinate.Position;
 import org.opengis.geometry.primitive.Curve;
 import org.opengis.geometry.primitive.CurveSegment;
 import org.opengis.geometry.primitive.OrientableCurve;
+import org.opengis.geometry.primitive.OrientableSurface;
 import org.opengis.geometry.primitive.Point;
 import org.opengis.geometry.primitive.PrimitiveFactory;
 import org.opengis.geometry.primitive.Ring;
@@ -392,6 +393,27 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
 		// Creates a Surface without SurfacePatches
 		return new SurfaceImpl(boundary);
 	}
+	
+	/*
+         * (non-Javadoc)
+         * 
+         * @see org.opengis.geometry.primitive.PrimitiveFactory#createShell(org.opengis.geometry.primitive.Shell)
+         */
+	public ShellImpl createShell(List<OrientableSurface> orientableSurfaces)
+                        throws MismatchedReferenceSystemException,
+                        MismatchedDimensionException {
+	        for (OrientableSurface orientableSurface : orientableSurfaces) {
+	            if (this.getDimension() != orientableSurface.getCoordinateDimension()) {
+	                new MismatchedDimensionException();
+	            }
+	            if (!CRS.equalsIgnoreMetadata(this.getCoordinateReferenceSystem(),
+	                    orientableSurface.getCoordinateReferenceSystem())) {
+	                throw new MismatchedReferenceSystemException();
+	            }
+	        }
+	                
+	        return new ShellImpl(orientableSurfaces);
+        }
 
 	/*
 	 * (non-Javadoc)
