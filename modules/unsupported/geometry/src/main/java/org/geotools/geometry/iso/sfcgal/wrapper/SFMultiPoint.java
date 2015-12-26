@@ -30,29 +30,29 @@ import org.bytedeco.javacpp.annotation.StdString;
  */
 @Platform(include = "cpp/SFMultiPoint.h")
 public class SFMultiPoint extends SFGeometryCollection {
-    static {
-        Loader.load();
-    }
+        static {
+                Loader.load();
+        }
 
-    public SFMultiPoint() {
-        allocate();
-    }
+        public SFMultiPoint() {
+                allocate();
+        }
 
-    public SFMultiPoint(Pointer p) {
-        super(p);
-    }
+        public SFMultiPoint(Pointer p) {
+                super(p);
+        }
 
-    private native void allocate();
+        private native void allocate();
 
-    @Name("operator=")
-    public native @ByRef SFMultiPoint assign(@ByRef SFMultiPoint other);
+        @Name("operator=")
+        public native @ByRef SFMultiPoint assign(@ByRef SFMultiPoint other);
 
-    public native SFMultiPoint clone();
+        public native SFMultiPoint clone();
 
-    public native @StdString String geometryType();
+        public native @StdString String geometryType();
 
-    public native int geometryTypeId();
+        public native int geometryTypeId();
 
-    public native @ByRef SFPoint pointN(@Cast("size_t") int n);
+        public native @ByRef SFPoint pointN(@Cast("size_t") int n);
 
 }

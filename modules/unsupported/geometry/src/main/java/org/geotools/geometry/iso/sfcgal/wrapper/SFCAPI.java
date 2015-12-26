@@ -28,34 +28,34 @@ import org.bytedeco.javacpp.annotation.StdString;
  */
 @Platform(include = "cpp/SFCAPI.h")
 public class SFCAPI {
-    static {
-        Loader.load();
-    }
+        static {
+                Loader.load();
+        }
 
-    public static native @ByRef SFGeometry SFCGAL_io_read_wkt(@ByRef @StdString String str,
-            @Cast("size_t") int len);
+        public static native @ByRef SFGeometry SFCGAL_io_read_wkt(@ByRef @StdString String str,
+                        @Cast("size_t") int len);
 
-    public static void SFCGAL_io_write_binary_prepared(SFPreparedGeometry geom, String buffer,
-            int len) {
-        System.out.println("call1");
-        SFCGAL_io_write_binary_prepared(geom, buffer.toCharArray(), len);
-        System.out.println("call2");
-    }
+        public static void SFCGAL_io_write_binary_prepared(SFPreparedGeometry geom, String buffer,
+                        int len) {
+                System.out.println("call1");
+                SFCGAL_io_write_binary_prepared(geom, buffer.toCharArray(), len);
+                System.out.println("call2");
+        }
 
-    public static native void SFCGAL_io_write_binary_prepared(SFPreparedGeometry geom,
-            @Cast("char *") char[] buffer, @Cast("size_t") int len);
+        public static native void SFCGAL_io_write_binary_prepared(SFPreparedGeometry geom,
+                        @Cast("char *") char[] buffer, @Cast("size_t") int len);
 
-    public static native @ByRef SFPreparedGeometry SFCGAL_io_read_binary_prepared(
-            @StdString String str, @Cast("size_t") int len);
+        public static native @ByRef SFPreparedGeometry SFCGAL_io_read_binary_prepared(
+                        @StdString String str, @Cast("size_t") int len);
 
-    public static native @ByRef SFPreparedGeometry SFCGAL_io_read_ewkt(@StdString String str,
-            @Cast("size_t") int len);
+        public static native @ByRef SFPreparedGeometry SFCGAL_io_read_ewkt(@StdString String str,
+                        @Cast("size_t") int len);
 
-    public static native @ByRef SFGeometry SFCGAL_geometry_force_lhr(@ByRef SFGeometry g);
+        public static native @ByRef SFGeometry SFCGAL_geometry_force_lhr(@ByRef SFGeometry g);
 
-    public static native @ByRef SFGeometry SFCGAL_geometry_force_rhr(@ByRef SFGeometry g);
+        public static native @ByRef SFGeometry SFCGAL_geometry_force_rhr(@ByRef SFGeometry g);
 
-    public static native @ByRef SFTriangulatedSurface SFCGAL_geometry_triangulate_2dz(
-            @ByRef SFGeometry g);
+        public static native @ByRef SFTriangulatedSurface SFCGAL_geometry_triangulate_2dz(
+                        @ByRef SFGeometry g);
 
 }

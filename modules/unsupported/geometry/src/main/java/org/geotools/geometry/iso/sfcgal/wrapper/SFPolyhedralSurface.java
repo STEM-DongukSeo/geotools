@@ -32,63 +32,63 @@ import org.bytedeco.javacpp.annotation.StdString;
  */
 @Platform(include = "cpp/SFPolyhedralSurface.h")
 public class SFPolyhedralSurface extends SFSurface {
-    static {
-        Loader.load();
-    }
-
-    public SFPolyhedralSurface() {
-        allocate();
-    }
-
-    public SFPolyhedralSurface(ArrayList<SFPolygon> polygons) {
-        PointerVector vector = new PointerVector(polygons.size());
-
-        for (int i = 0; i < polygons.size(); i++) {
-            vector.get(i).put(polygons.get(i));
+        static {
+                Loader.load();
         }
 
-        allocate(vector);
-    }
+        public SFPolyhedralSurface() {
+                allocate();
+        }
 
-    public SFPolyhedralSurface(Pointer p) {
-        super(p);
-    }
+        public SFPolyhedralSurface(ArrayList<SFPolygon> polygons) {
+                PointerVector vector = new PointerVector(polygons.size());
 
-    private native void allocate();
+                for (int i = 0; i < polygons.size(); i++) {
+                        vector.get(i).put(polygons.get(i));
+                }
 
-    private native void allocate(@ByRef PointerVector p);
+                allocate(vector);
+        }
 
-    @Name("operator=")
-    public native @ByRef SFPolyhedralSurface assign(@ByRef SFPolyhedralSurface tr);
+        public SFPolyhedralSurface(Pointer p) {
+                super(p);
+        }
 
-    public native SFPolyhedralSurface clone();
+        private native void allocate();
 
-    public native @StdString String geometryType();
+        private native void allocate(@ByRef PointerVector p);
 
-    public native int geometryTypeId();
+        @Name("operator=")
+        public native @ByRef SFPolyhedralSurface assign(@ByRef SFPolyhedralSurface tr);
 
-    public native int dimension();
+        public native SFPolyhedralSurface clone();
 
-    public native int coordinateDimension();
+        public native @StdString String geometryType();
 
-    public native @Cast("bool") boolean isEmpty();
+        public native int geometryTypeId();
 
-    public native @Cast("bool") boolean is3D();
+        public native int dimension();
 
-    public native @Cast("bool") boolean isMeasured();
+        public native int coordinateDimension();
 
-    public native @ByRef SFTriangulatedSurface toTriangulatedSurface();
+        public native @Cast("bool") boolean isEmpty();
 
-    public native @Cast("size_t") int numPolygons();
+        public native @Cast("bool") boolean is3D();
 
-    public native @ByRef SFPolygon polygonN(@Cast("size_t") int n);
+        public native @Cast("bool") boolean isMeasured();
 
-    public native void addPolygon(SFPolygon polygon);
+        public native @ByRef SFTriangulatedSurface toTriangulatedSurface();
 
-    public native void addPolygons(@ByRef SFPolyhedralSurface other);
+        public native @Cast("size_t") int numPolygons();
 
-    public native @Cast("size_t") int numGeometries();
+        public native @ByRef SFPolygon polygonN(@Cast("size_t") int n);
 
-    public native @ByRef SFPolygon geometryN(@Cast("size_t") int n);
+        public native void addPolygon(SFPolygon polygon);
+
+        public native void addPolygons(@ByRef SFPolyhedralSurface other);
+
+        public native @Cast("size_t") int numGeometries();
+
+        public native @ByRef SFPolygon geometryN(@Cast("size_t") int n);
 
 }

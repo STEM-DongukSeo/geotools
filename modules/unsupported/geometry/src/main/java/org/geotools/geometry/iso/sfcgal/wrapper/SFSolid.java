@@ -32,67 +32,67 @@ import org.bytedeco.javacpp.annotation.StdString;
  */
 @Platform(include = "cpp/SFSolid.h")
 public class SFSolid extends SFGeometry {
-    static {
-        Loader.load();
-    }
-
-    public SFSolid() {
-        allocate();
-    }
-
-    public SFSolid(ArrayList<SFPolyhedralSurface> shells) {
-        PointerVector vector = new PointerVector(shells.size());
-
-        for (int i = 0; i < shells.size(); i++) {
-            vector.get(i).put(shells.get(i));
+        static {
+                Loader.load();
         }
 
-        allocate(vector);
-    }
+        public SFSolid() {
+                allocate();
+        }
 
-    public SFSolid(Pointer p) {
-        super(p);
-    }
+        public SFSolid(ArrayList<SFPolyhedralSurface> shells) {
+                PointerVector vector = new PointerVector(shells.size());
 
-    public SFSolid(SFPolyhedralSurface exteriorShell) {
-        allocate(exteriorShell);
-    }
+                for (int i = 0; i < shells.size(); i++) {
+                        vector.get(i).put(shells.get(i));
+                }
 
-    private native void allocate();
+                allocate(vector);
+        }
 
-    private native void allocate(@ByRef PointerVector p);
+        public SFSolid(Pointer p) {
+                super(p);
+        }
 
-    private native void allocate(@ByRef SFPolyhedralSurface exteriorShell);
+        public SFSolid(SFPolyhedralSurface exteriorShell) {
+                allocate(exteriorShell);
+        }
 
-    @Name("operator=")
-    public native @ByRef SFSolid assign(@ByRef SFSolid tr);
+        private native void allocate();
 
-    public native SFSolid clone();
+        private native void allocate(@ByRef PointerVector p);
 
-    public native @StdString String geometryType();
+        private native void allocate(@ByRef SFPolyhedralSurface exteriorShell);
 
-    public native int geometryTypeId();
+        @Name("operator=")
+        public native @ByRef SFSolid assign(@ByRef SFSolid tr);
 
-    public native int dimension();
+        public native SFSolid clone();
 
-    public native int coordinateDimension();
+        public native @StdString String geometryType();
 
-    public native @Cast("bool") boolean isEmpty();
+        public native int geometryTypeId();
 
-    public native @Cast("bool") boolean is3D();
+        public native int dimension();
 
-    public native @Cast("bool") boolean isMeasured();
+        public native int coordinateDimension();
 
-    public native @ByRef SFPolyhedralSurface exteriorShell();
+        public native @Cast("bool") boolean isEmpty();
 
-    public native @Cast("size_t") int numInteriorShells();
+        public native @Cast("bool") boolean is3D();
 
-    public native @ByRef SFPolyhedralSurface interiorShellN(@Cast("size_t") int n);
+        public native @Cast("bool") boolean isMeasured();
 
-    public native void addInteriorShell(@ByRef SFPolyhedralSurface shell);
+        public native @ByRef SFPolyhedralSurface exteriorShell();
 
-    public native @Cast("size_t") int numShells();
+        public native @Cast("size_t") int numInteriorShells();
 
-    public native @ByRef SFPolyhedralSurface shellN(@Cast("size_t") int n);
+        public native @ByRef SFPolyhedralSurface interiorShellN(@Cast("size_t") int n);
+
+        public native void addInteriorShell(@ByRef SFPolyhedralSurface shell);
+
+        public native @Cast("size_t") int numShells();
+
+        public native @ByRef SFPolyhedralSurface shellN(@Cast("size_t") int n);
 
 }

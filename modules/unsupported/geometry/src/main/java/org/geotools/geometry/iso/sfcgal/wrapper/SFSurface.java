@@ -26,20 +26,20 @@ import org.bytedeco.javacpp.annotation.Platform;
  */
 @Platform(include = "cpp/SFSurface.h")
 public class SFSurface extends SFGeometry {
-    static {
-        Loader.load();
-    }
+        static {
+                Loader.load();
+        }
 
-    public SFSurface() {
-        allocate();
-    }
+        public SFSurface() {
+                allocate();
+        }
 
-    public SFSurface(Pointer p) {
-        super(p);
-    }
+        public SFSurface(Pointer p) {
+                super(p);
+        }
 
-    private native void allocate();
+        private native void allocate();
 
-    public native int dimension();
+        public native int dimension();
 
 }

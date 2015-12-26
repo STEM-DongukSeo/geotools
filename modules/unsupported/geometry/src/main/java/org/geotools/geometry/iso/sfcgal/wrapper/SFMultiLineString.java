@@ -30,29 +30,29 @@ import org.bytedeco.javacpp.annotation.StdString;
  */
 @Platform(include = "cpp/SFMultiLineString.h")
 public class SFMultiLineString extends SFGeometryCollection {
-    static {
-        Loader.load();
-    }
+        static {
+                Loader.load();
+        }
 
-    public SFMultiLineString() {
-        allocate();
-    }
+        public SFMultiLineString() {
+                allocate();
+        }
 
-    public SFMultiLineString(Pointer p) {
-        super(p);
-    }
+        public SFMultiLineString(Pointer p) {
+                super(p);
+        }
 
-    private native void allocate();
+        private native void allocate();
 
-    @Name("operator=")
-    public native @ByRef SFMultiLineString assign(@ByRef SFMultiLineString other);
+        @Name("operator=")
+        public native @ByRef SFMultiLineString assign(@ByRef SFMultiLineString other);
 
-    public native SFMultiLineString clone();
+        public native SFMultiLineString clone();
 
-    public native @StdString String geometryType();
+        public native @StdString String geometryType();
 
-    public native int geometryTypeId();
+        public native int geometryTypeId();
 
-    public native @ByRef SFLineString lineStringN(@Cast("size_t") int n);
+        public native @ByRef SFLineString lineStringN(@Cast("size_t") int n);
 
 }

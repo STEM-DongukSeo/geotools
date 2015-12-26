@@ -26,11 +26,11 @@ import org.bytedeco.javacpp.annotation.Platform;
  */
 @Platform(include = "cpp/SFTriangulate.h")
 public class SFTriangulate {
-    static {
-        Loader.load();
-    }
+        static {
+                Loader.load();
+        }
 
-    public static native void triangulatePolygon3D(@ByRef SFGeometry g,
-            @ByRef SFTriangulatedSurface triangulateSurface);
+        public static native void triangulatePolygon3D(@ByRef SFGeometry g,
+                        @ByRef SFTriangulatedSurface triangulateSurface);
 
 }

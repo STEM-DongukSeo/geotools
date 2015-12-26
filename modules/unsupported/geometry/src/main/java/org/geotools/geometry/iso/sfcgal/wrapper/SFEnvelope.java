@@ -29,77 +29,78 @@ import org.bytedeco.javacpp.annotation.Platform;
  */
 @Platform(include = { "cpp/SFEnvelope.h", "cpp/SFEnvelope.cpp" })
 public class SFEnvelope extends Pointer {
-    static {
-        Loader.load();
-    }
+        static {
+                Loader.load();
+        }
 
-    public SFEnvelope() {
-        allocate();
-    }
+        public SFEnvelope() {
+                allocate();
+        }
 
-    public SFEnvelope(double xmin, double xmax, double ymin, double ymax) {
-        allocate(xmin, xmax, ymin, ymax);
-    }
+        public SFEnvelope(double xmin, double xmax, double ymin, double ymax) {
+                allocate(xmin, xmax, ymin, ymax);
+        }
 
-    public SFEnvelope(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax) {
-        allocate(xmin, xmax, ymin, ymax, zmin, zmax);
-    }
+        public SFEnvelope(double xmin, double xmax, double ymin, double ymax, double zmin,
+                        double zmax) {
+                allocate(xmin, xmax, ymin, ymax, zmin, zmax);
+        }
 
-    public SFEnvelope(SFCoordinate p) {
-        allocate(p);
-    }
+        public SFEnvelope(SFCoordinate p) {
+                allocate(p);
+        }
 
-    public SFEnvelope(SFCoordinate p1, SFCoordinate p2) {
-        allocate(p1, p2);
-    }
+        public SFEnvelope(SFCoordinate p1, SFCoordinate p2) {
+                allocate(p1, p2);
+        }
 
-    public SFEnvelope(Pointer p) {
-        super(p);
-    }
+        public SFEnvelope(Pointer p) {
+                super(p);
+        }
 
-    private native void allocate();
+        private native void allocate();
 
-    private native void allocate(double xmin, double xmax, double ymin, double ymax);
+        private native void allocate(double xmin, double xmax, double ymin, double ymax);
 
-    private native void allocate(double xmin, double xmax, double ymin, double ymax, double zmin,
-            double zmax);
+        private native void allocate(double xmin, double xmax, double ymin, double ymax,
+                        double zmin, double zmax);
 
-    private native void allocate(@ByRef SFCoordinate p);
+        private native void allocate(@ByRef SFCoordinate p);
 
-    private native void allocate(@ByRef SFCoordinate p1, @ByRef SFCoordinate p2);
+        private native void allocate(@ByRef SFCoordinate p1, @ByRef SFCoordinate p2);
 
-    @Name("operator=")
-    public native @ByRef SFEnvelope assign(@ByRef SFEnvelope c);
+        @Name("operator=")
+        public native @ByRef SFEnvelope assign(@ByRef SFEnvelope c);
 
-    public native @Cast("bool") boolean isEmpty();
+        public native @Cast("bool") boolean isEmpty();
 
-    public native @Cast("bool") boolean is3D();
+        public native @Cast("bool") boolean is3D();
 
-    public native void expandToInclude(@ByRef SFCoordinate coordinate);
+        public native void expandToInclude(@ByRef SFCoordinate coordinate);
 
-    public native @ByRef double xMin();
+        public native @ByRef double xMin();
 
-    public native @ByRef double yMin();
+        public native @ByRef double yMin();
 
-    public native @ByRef double zMin();
+        public native @ByRef double zMin();
 
-    public native @ByRef double xMax();
+        public native @ByRef double xMax();
 
-    public native @ByRef double yMax();
+        public native @ByRef double yMax();
 
-    public native @ByRef double zMax();
+        public native @ByRef double zMax();
 
-    public static native @Cast("bool") boolean contains(@ByRef SFEnvelope a, @ByRef SFEnvelope b);
+        public static native @Cast("bool") boolean contains(@ByRef SFEnvelope a, @ByRef SFEnvelope b);
 
-    public static native @Cast("bool") boolean overlaps(@ByRef SFEnvelope a, @ByRef SFEnvelope b);
+        public static native @Cast("bool") boolean overlaps(@ByRef SFEnvelope a, @ByRef SFEnvelope b);
 
-    public native @ByRef SFLineString toRing();
+        public native @ByRef SFLineString toRing();
 
-    public native @ByRef SFPolygon toPolygon();
+        public native @ByRef SFPolygon toPolygon();
 
-    public native @ByRef SFSolid toSolid();
+        public native @ByRef SFSolid toSolid();
 
-    @Name("operator==")
-    public native @Cast("bool") boolean equals(@ByRef SFEnvelope other);
+        @Name("operator==")
+        public native @Cast("bool") boolean equals(@ByRef SFEnvelope other);
 
 }

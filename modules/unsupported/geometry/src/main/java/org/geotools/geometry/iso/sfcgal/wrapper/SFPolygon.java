@@ -32,83 +32,83 @@ import org.bytedeco.javacpp.annotation.StdString;
  */
 @Platform(include = "cpp/SFPolygon.h")
 public class SFPolygon extends SFSurface {
-    static {
-        Loader.load();
-    }
-
-    public SFPolygon() {
-        allocate();
-    }
-
-    public SFPolygon(ArrayList<SFLineString> rings) {
-        PointerVector vector = new PointerVector(rings.size());
-
-        for (int i = 0; i < rings.size(); i++) {
-            vector.get(i).put(rings.get(i));
+        static {
+                Loader.load();
         }
 
-        allocate(vector);
-    }
+        public SFPolygon() {
+                allocate();
+        }
 
-    public SFPolygon(SFLineString exteriorRing) {
-        allocate(exteriorRing);
-    }
+        public SFPolygon(ArrayList<SFLineString> rings) {
+                PointerVector vector = new PointerVector(rings.size());
 
-    public SFPolygon(SFTriangle triangle) {
-        allocate(triangle);
-    }
+                for (int i = 0; i < rings.size(); i++) {
+                        vector.get(i).put(rings.get(i));
+                }
 
-    public SFPolygon(Pointer p) {
-        super(p);
-    }
+                allocate(vector);
+        }
 
-    private native void allocate();
+        public SFPolygon(SFLineString exteriorRing) {
+                allocate(exteriorRing);
+        }
 
-    private native void allocate(@ByRef PointerVector p);
+        public SFPolygon(SFTriangle triangle) {
+                allocate(triangle);
+        }
 
-    private native void allocate(@ByRef SFLineString exteriorRing);
+        public SFPolygon(Pointer p) {
+                super(p);
+        }
 
-    private native void allocate(@ByRef SFTriangle triangle);
+        private native void allocate();
 
-    @Name("operator=")
-    public native @ByRef SFPolygon assign(@ByRef SFPolygon polygon);
+        private native void allocate(@ByRef PointerVector p);
 
-    public native SFPolygon clone();
+        private native void allocate(@ByRef SFLineString exteriorRing);
 
-    public native @StdString String geometryType();
+        private native void allocate(@ByRef SFTriangle triangle);
 
-    public native int geometryTypeId();
+        @Name("operator=")
+        public native @ByRef SFPolygon assign(@ByRef SFPolygon polygon);
 
-    public native int dimension();
+        public native SFPolygon clone();
 
-    public native int coordinateDimension();
+        public native @StdString String geometryType();
 
-    public native @Cast("bool") boolean isEmpty();
+        public native int geometryTypeId();
 
-    public native @Cast("bool") boolean is3D();
+        public native int dimension();
 
-    public native @Cast("bool") boolean isMeasured();
+        public native int coordinateDimension();
 
-    public native @Cast("bool") boolean isCounterClockWiseOriented();
+        public native @Cast("bool") boolean isEmpty();
 
-    public native void reverse();
+        public native @Cast("bool") boolean is3D();
 
-    public native @ByRef SFLineString exteriorRing();
+        public native @Cast("bool") boolean isMeasured();
 
-    public native void setExteriorRing(@ByRef SFLineString exteriorRing);
+        public native @Cast("bool") boolean isCounterClockWiseOriented();
 
-    public native @Cast("bool") boolean hasInteriorRings();
+        public native void reverse();
 
-    public native @Cast("size_t") int numInteriorRings();
+        public native @ByRef SFLineString exteriorRing();
 
-    public native @ByRef SFLineString interiorRingN(@Cast("size_t") int n);
+        public native void setExteriorRing(@ByRef SFLineString exteriorRing);
 
-    public native @Cast("size_t") int numRings();
+        public native @Cast("bool") boolean hasInteriorRings();
 
-    public native @ByRef SFLineString ringN(@Cast("size_t") int n);
+        public native @Cast("size_t") int numInteriorRings();
 
-    public native void addInteriorRing(@ByRef SFLineString ls);
+        public native @ByRef SFLineString interiorRingN(@Cast("size_t") int n);
 
-    public native void addRing(@ByRef SFLineString ls);
+        public native @Cast("size_t") int numRings();
+
+        public native @ByRef SFLineString ringN(@Cast("size_t") int n);
+
+        public native void addInteriorRing(@ByRef SFLineString ls);
+
+        public native void addRing(@ByRef SFLineString ls);
 
 }

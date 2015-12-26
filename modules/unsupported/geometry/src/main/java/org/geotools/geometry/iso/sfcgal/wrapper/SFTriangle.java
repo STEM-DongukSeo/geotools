@@ -30,49 +30,49 @@ import org.bytedeco.javacpp.annotation.StdString;
  */
 @Platform(include = { "cpp/SFTriangle.h", "cpp/SFTriangle.cpp" })
 public class SFTriangle extends SFSurface {
-    static {
-        Loader.load();
-    }
+        static {
+                Loader.load();
+        }
 
-    public SFTriangle() {
-        allocate();
-    }
+        public SFTriangle() {
+                allocate();
+        }
 
-    public SFTriangle(SFPoint p, SFPoint q, SFPoint r) {
-        allocate(p, q, r);
-    }
+        public SFTriangle(SFPoint p, SFPoint q, SFPoint r) {
+                allocate(p, q, r);
+        }
 
-    public SFTriangle(Pointer p) {
-        super(p);
-    }
+        public SFTriangle(Pointer p) {
+                super(p);
+        }
 
-    private native void allocate();
+        private native void allocate();
 
-    private native void allocate(@ByRef SFPoint p, @ByRef SFPoint q, @ByRef SFPoint r);
+        private native void allocate(@ByRef SFPoint p, @ByRef SFPoint q, @ByRef SFPoint r);
 
-    @Name("operator=")
-    public native @ByRef SFTriangle assign(@ByRef SFTriangle tr);
+        @Name("operator=")
+        public native @ByRef SFTriangle assign(@ByRef SFTriangle tr);
 
-    public native SFTriangle clone();
+        public native SFTriangle clone();
 
-    public native @StdString String geometryType();
+        public native @StdString String geometryType();
 
-    public native int geometryTypeId();
+        public native int geometryTypeId();
 
-    public native int dimension();
+        public native int dimension();
 
-    public native int coordinateDimension();
+        public native int coordinateDimension();
 
-    public native @Cast("bool") boolean isEmpty();
+        public native @Cast("bool") boolean isEmpty();
 
-    public native @Cast("bool") boolean is3D();
+        public native @Cast("bool") boolean is3D();
 
-    public native @Cast("bool") boolean isMeasured();
+        public native @Cast("bool") boolean isMeasured();
 
-    public native void reverse();
+        public native void reverse();
 
-    public native @ByRef SFPolygon toPolygon();
+        public native @ByRef SFPolygon toPolygon();
 
-    public native @ByRef SFPoint vertex(int i);
+        public native @ByRef SFPoint vertex(int i);
 
 }

@@ -23,63 +23,64 @@ import org.bytedeco.javacpp.annotation.Cast;
 import org.bytedeco.javacpp.annotation.Name;
 import org.bytedeco.javacpp.annotation.Platform;
 import org.bytedeco.javacpp.annotation.StdString;
+
 /**
  * @author Donguk Seo
  *
  */
 @Platform(include = "cpp/SFGeometry.h")
 public class SFGeometry extends Pointer {
-    static {
-        Loader.load();
-    }
+        static {
+                Loader.load();
+        }
 
-    public SFGeometry() {
-        allocate();
-    }
+        public SFGeometry() {
+                allocate();
+        }
 
-    public SFGeometry(Pointer p) {
-        super(p);
-    }
+        public SFGeometry(Pointer p) {
+                super(p);
+        }
 
-    private native void allocate();
+        private native void allocate();
 
-    public native SFGeometry clone();
+        public native SFGeometry clone();
 
-    public native @StdString String geometryType();
+        public native @StdString String geometryType();
 
-    public native int geometryTypeId();
+        public native int geometryTypeId();
 
-    public native int dimension();
+        public native int dimension();
 
-    public native int coordinateDimension();
+        public native int coordinateDimension();
 
-    public native @Cast("bool") boolean isEmpty();
+        public native @Cast("bool") boolean isEmpty();
 
-    public native @Cast("bool") boolean is3D();
+        public native @Cast("bool") boolean is3D();
 
-    public native @Cast("bool") boolean isMeasured();
+        public native @Cast("bool") boolean isMeasured();
 
-    public String asText() {
-        return asText(1);
-    }
+        public String asText() {
+                return asText(1);
+        }
 
-    public native @StdString String asText(int numDcimals);
+        public native @StdString String asText(int numDcimals);
 
-    public native @ByRef SFEnvelope envelope();
+        public native @ByRef SFEnvelope envelope();
 
-    public native @ByRef SFGeometry boundary();
+        public native @ByRef SFGeometry boundary();
 
-    public native double distance(@ByRef SFGeometry other);
+        public native double distance(@ByRef SFGeometry other);
 
-    public native double distance3D(@ByRef SFGeometry other);
+        public native double distance3D(@ByRef SFGeometry other);
 
-    public native void round(long scale);
+        public native void round(long scale);
 
-    public native int numGeometries();
+        public native int numGeometries();
 
-    public native @ByRef SFGeometry geometryN(int n);
+        public native @ByRef SFGeometry geometryN(int n);
 
-    @Name("operator==")
-    public native @Cast("bool") boolean equals(@ByRef SFGeometry other);
+        @Name("operator==")
+        public native @Cast("bool") boolean equals(@ByRef SFGeometry other);
 
 }

@@ -29,56 +29,56 @@ import org.bytedeco.javacpp.annotation.Platform;
  */
 @Platform(include = "cpp/SFCoordinate.h")
 public class SFCoordinate extends Pointer {
-    static {
-        Loader.load();
-    }
+        static {
+                Loader.load();
+        }
 
-    public SFCoordinate() {
-        allocate();
-    }
+        public SFCoordinate() {
+                allocate();
+        }
 
-    public SFCoordinate(double x, double y) {
-        allocate(x, y);
-    }
+        public SFCoordinate(double x, double y) {
+                allocate(x, y);
+        }
 
-    public SFCoordinate(double x, double y, double z) {
-        allocate(x, y, z);
-    }
+        public SFCoordinate(double x, double y, double z) {
+                allocate(x, y, z);
+        }
 
-    public SFCoordinate(Pointer p) {
-        super(p);
-    }
+        public SFCoordinate(Pointer p) {
+                super(p);
+        }
 
-    private native void allocate();
+        private native void allocate();
 
-    private native void allocate(double x, double y, double z);
+        private native void allocate(double x, double y, double z);
 
-    private native void allocate(double x, double y);
+        private native void allocate(double x, double y);
 
-    @Name("operator=")
-    public native @ByRef SFCoordinate assign(@ByRef SFCoordinate c);
+        @Name("operator=")
+        public native @ByRef SFCoordinate assign(@ByRef SFCoordinate c);
 
-    public native int coordinateDimension();
+        public native int coordinateDimension();
 
-    public native @Cast("bool") boolean isEmpty();
+        public native @Cast("bool") boolean isEmpty();
 
-    public native @Cast("bool") boolean is3D();
+        public native @Cast("bool") boolean is3D();
 
-    public native double x();
+        public native double x();
 
-    public native double y();
+        public native double y();
 
-    public native double z();
+        public native double z();
 
-    public native @ByRef SFCoordinate round(@ByRef long scaleFactor);
+        public native @ByRef SFCoordinate round(@ByRef long scaleFactor);
 
-    @Name("operator<")
-    public native @Cast("bool") boolean isSmallerThan(@ByRef SFCoordinate c);
+        @Name("operator<")
+        public native @Cast("bool") boolean isSmallerThan(@ByRef SFCoordinate c);
 
-    @Name("operator==")
-    public native @Cast("bool") boolean equals(@ByRef SFCoordinate c);
+        @Name("operator==")
+        public native @Cast("bool") boolean equals(@ByRef SFCoordinate c);
 
-    @Name("operator!=")
-    public native @Cast("bool") boolean notEquals(@ByRef SFCoordinate c);
+        @Name("operator!=")
+        public native @Cast("bool") boolean notEquals(@ByRef SFCoordinate c);
 
 }

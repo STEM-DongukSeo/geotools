@@ -30,43 +30,43 @@ import org.bytedeco.javacpp.annotation.StdString;
  */
 @Platform(include = "cpp/SFGeometryCollection.h")
 public class SFGeometryCollection extends SFGeometry {
-    static {
-        Loader.load();
-    }
+        static {
+                Loader.load();
+        }
 
-    public SFGeometryCollection() {
-        allocate();
-    }
+        public SFGeometryCollection() {
+                allocate();
+        }
 
-    public SFGeometryCollection(Pointer p) {
-        super(p);
-    }
+        public SFGeometryCollection(Pointer p) {
+                super(p);
+        }
 
-    private native void allocate();
+        private native void allocate();
 
-    @Name("operator=")
-    public native @ByRef SFGeometryCollection assign(@ByRef SFGeometryCollection other);
+        @Name("operator=")
+        public native @ByRef SFGeometryCollection assign(@ByRef SFGeometryCollection other);
 
-    public native SFGeometryCollection clone();
+        public native SFGeometryCollection clone();
 
-    public native @StdString String geometryType();
+        public native @StdString String geometryType();
 
-    public native int geometryTypeId();
+        public native int geometryTypeId();
 
-    public native int dimension();
+        public native int dimension();
 
-    public native int coordinateDimension();
+        public native int coordinateDimension();
 
-    public native @Cast("bool") boolean isEmpty();
+        public native @Cast("bool") boolean isEmpty();
 
-    public native @Cast("bool") boolean is3D();
+        public native @Cast("bool") boolean is3D();
 
-    public native @Cast("bool") boolean isMeasured();
+        public native @Cast("bool") boolean isMeasured();
 
-    public native @Cast("size_t") int numGeometries();
+        public native @Cast("size_t") int numGeometries();
 
-    public native @ByRef SFGeometry geometryN(@Cast("size_t") int n);
+        public native @ByRef SFGeometry geometryN(@Cast("size_t") int n);
 
-    public native void addGeometry(@ByRef SFGeometry geometry);
+        public native void addGeometry(@ByRef SFGeometry geometry);
 
 }

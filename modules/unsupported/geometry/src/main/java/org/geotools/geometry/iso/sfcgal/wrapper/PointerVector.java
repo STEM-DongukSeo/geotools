@@ -33,39 +33,39 @@ import org.bytedeco.javacpp.annotation.Platform;
 @Namespace("std")
 @Name("vector<void*>")
 public class PointerVector extends Pointer {
-    static {
-        Loader.load();
-    }
+        static {
+                Loader.load();
+        }
 
-    public PointerVector() {
-        allocate();
-    }
+        public PointerVector() {
+                allocate();
+        }
 
-    public PointerVector(long n) {
-        allocate(n);
-    }
+        public PointerVector(long n) {
+                allocate(n);
+        }
 
-    // (vector<void*>*)p
-    public PointerVector(Pointer p) {
-        super(p);
-    }
+        // (vector<void*>*)p
+        public PointerVector(Pointer p) {
+                super(p);
+        }
 
-    // new std::vector<void*>()
-    private native void allocate();
+        // new std::vector<void*>()
+        private native void allocate();
 
-    // new std::vector<void*>(n)
-    private native void allocate(long n);
+        // new std::vector<void*>(n)
+        private native void allocate(long n);
 
-    @Name("operator=")
-    public native @ByRef PointerVector copy(@ByRef PointerVector x);
+        @Name("operator=")
+        public native @ByRef PointerVector copy(@ByRef PointerVector x);
 
-    public native long size();
+        public native long size();
 
-    public native @Cast("bool") boolean empty();
+        public native @Cast("bool") boolean empty();
 
-    @Name("operator[]")
-    public native @ByRef PointerPointer get(long n);
+        @Name("operator[]")
+        public native @ByRef PointerPointer get(long n);
 
-    public native @ByRef PointerPointer at(long n);
+        public native @ByRef PointerPointer at(long n);
 
 }

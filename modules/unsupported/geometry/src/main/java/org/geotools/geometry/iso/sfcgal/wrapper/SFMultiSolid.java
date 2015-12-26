@@ -30,29 +30,29 @@ import org.bytedeco.javacpp.annotation.StdString;
  */
 @Platform(include = "cpp/SFMultiSolid.h")
 public class SFMultiSolid extends SFGeometryCollection {
-    static {
-        Loader.load();
-    }
+        static {
+                Loader.load();
+        }
 
-    public SFMultiSolid() {
-        allocate();
-    }
+        public SFMultiSolid() {
+                allocate();
+        }
 
-    public SFMultiSolid(Pointer p) {
-        super(p);
-    }
+        public SFMultiSolid(Pointer p) {
+                super(p);
+        }
 
-    private native void allocate();
+        private native void allocate();
 
-    @Name("operator=")
-    public native @ByRef SFMultiSolid assign(@ByRef SFMultiSolid other);
+        @Name("operator=")
+        public native @ByRef SFMultiSolid assign(@ByRef SFMultiSolid other);
 
-    public native SFMultiSolid clone();
+        public native SFMultiSolid clone();
 
-    public native @StdString String geometryType();
+        public native @StdString String geometryType();
 
-    public native int geometryTypeId();
+        public native int geometryTypeId();
 
-    public native @ByRef SFSolid solidN(@Cast("size_t") int n);
+        public native @ByRef SFSolid solidN(@Cast("size_t") int n);
 
 }

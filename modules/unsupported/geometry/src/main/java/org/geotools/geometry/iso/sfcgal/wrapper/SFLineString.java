@@ -32,75 +32,75 @@ import org.bytedeco.javacpp.annotation.StdString;
  */
 @Platform(include = "cpp/SFLineString.h")
 public class SFLineString extends SFGeometry {
-    static {
-        Loader.load();
-    }
-
-    public SFLineString() {
-        allocate();
-    }
-
-    public SFLineString(ArrayList<SFPoint> p) {
-        PointerVector vector = new PointerVector(p.size());
-
-        for (int i = 0; i < p.size(); i++) {
-            vector.get(i).put(p.get(i));
+        static {
+                Loader.load();
         }
 
-        allocate(vector);
-    }
+        public SFLineString() {
+                allocate();
+        }
 
-    public SFLineString(SFPoint startPoint, SFPoint endPoint) {
-        allocate(startPoint, endPoint);
-    }
+        public SFLineString(ArrayList<SFPoint> p) {
+                PointerVector vector = new PointerVector(p.size());
 
-    public SFLineString(Pointer p) {
-        super(p);
-    }
+                for (int i = 0; i < p.size(); i++) {
+                        vector.get(i).put(p.get(i));
+                }
 
-    private native void allocate();
+                allocate(vector);
+        }
 
-    private native void allocate(@ByRef PointerVector p);
+        public SFLineString(SFPoint startPoint, SFPoint endPoint) {
+                allocate(startPoint, endPoint);
+        }
 
-    private native void allocate(@ByRef SFPoint startPoint, @ByRef SFPoint endPoint);
+        public SFLineString(Pointer p) {
+                super(p);
+        }
 
-    @Name("operator=")
-    public native @ByRef SFLineString assign(@ByRef SFLineString ls);
+        private native void allocate();
 
-    public native SFLineString clone();
+        private native void allocate(@ByRef PointerVector p);
 
-    public native @StdString String geometryType();
+        private native void allocate(@ByRef SFPoint startPoint, @ByRef SFPoint endPoint);
 
-    public native int geometryTypeId();
+        @Name("operator=")
+        public native @ByRef SFLineString assign(@ByRef SFLineString ls);
 
-    public native int dimension();
+        public native SFLineString clone();
 
-    public native int coordinateDimension();
+        public native @StdString String geometryType();
 
-    public native @Cast("bool") boolean isEmpty();
+        public native int geometryTypeId();
 
-    public native @Cast("bool") boolean is3D();
+        public native int dimension();
 
-    public native @Cast("bool") boolean isMeasured();
+        public native int coordinateDimension();
 
-    public native void clear();
+        public native @Cast("bool") boolean isEmpty();
 
-    public native void reverse();
+        public native @Cast("bool") boolean is3D();
 
-    public native @Cast("size_t") int numPoints();
+        public native @Cast("bool") boolean isMeasured();
 
-    public native @Cast("size_t") int numSegments();
+        public native void clear();
 
-    public native @ByRef SFPoint pointN(@Cast("size_t") int n);
+        public native void reverse();
 
-    public native @ByRef SFPoint startPoint();
+        public native @Cast("size_t") int numPoints();
 
-    public native @ByRef SFPoint endPoint();
+        public native @Cast("size_t") int numSegments();
 
-    public native void addPoint(SFPoint p);
+        public native @ByRef SFPoint pointN(@Cast("size_t") int n);
 
-    public native @Cast("bool") boolean isClosed();
+        public native @ByRef SFPoint startPoint();
 
-    public native void reserve(@Cast("size_t") int n);
+        public native @ByRef SFPoint endPoint();
+
+        public native void addPoint(SFPoint p);
+
+        public native @Cast("bool") boolean isClosed();
+
+        public native void reserve(@Cast("size_t") int n);
 
 }
