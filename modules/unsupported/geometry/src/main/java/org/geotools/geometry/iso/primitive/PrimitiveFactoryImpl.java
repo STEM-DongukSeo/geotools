@@ -50,6 +50,7 @@ import org.opengis.geometry.primitive.OrientableSurface;
 import org.opengis.geometry.primitive.Point;
 import org.opengis.geometry.primitive.PrimitiveFactory;
 import org.opengis.geometry.primitive.Ring;
+import org.opengis.geometry.primitive.Shell;
 import org.opengis.geometry.primitive.SolidBoundary;
 import org.opengis.geometry.primitive.SurfaceBoundary;
 import org.opengis.geometry.primitive.SurfacePatch;
@@ -394,11 +395,14 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
 		return new SurfaceImpl(boundary);
 	}
 	
-	/*
-         * (non-Javadoc)
-         * 
-         * @see org.opengis.geometry.primitive.PrimitiveFactory#createShell(org.opengis.geometry.primitive.Shell)
-         */
+	
+	/**
+	 * Create a Shell
+	 * @param orientableSurfaces
+	 * @return ShellImpl
+	 * @throws MismatchedReferenceSystemException
+	 * @throws MismatchedDimensionException
+	 */
 	public ShellImpl createShell(List<OrientableSurface> orientableSurfaces)
                         throws MismatchedReferenceSystemException,
                         MismatchedDimensionException {
@@ -415,6 +419,45 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
 	        return new ShellImpl(orientableSurfaces);
         }
 
+        
+        /**
+         * Create a SolidBoundary by exterior Shell and a interior Shells.
+         * @param exterior
+         * @param interiors
+         * @return SolidBoundaryImpl
+         * @throws MismatchedReferenceSystemException
+         * @throws MismatchedDimensionException
+         */
+        public SolidBoundaryImpl createSolidBoundary(Shell exterior, List<Shell> interiors)
+                throws MismatchedReferenceSystemException, MismatchedDimensionException {
+            // TODO test
+            if (interiors == null && exterior == null)
+                throw new NullPointerException();
+            CoordinateReferenceSystem thisCRS = this.getCoordinateReferenceSystem();
+            if (exterior != null) {
+                if (this.getDimension() != exterior.getCoordinateDimension()) {
+                    throw new MismatchedDimensionException();
+                }
+                CoordinateReferenceSystem exteriorCRS = exterior.getCoordinateReferenceSystem();
+                if (!CRS.equalsIgnoreMetadata(thisCRS, exteriorCRS)) {
+                    throw new MismatchedReferenceSystemException();
+                }
+            }
+            if (interiors != null) {
+                for (Shell ring : interiors) {
+                    if (ring != null) {
+                        if (this.getDimension() != ring.getCoordinateDimension()) {
+                            throw new MismatchedDimensionException();
+                        }
+                        if (!CRS.equalsIgnoreMetadata(thisCRS, ring.getCoordinateReferenceSystem())) {
+                            throw new MismatchedReferenceSystemException();
+                        }
+                    }
+                }
+            }
+            return new SolidBoundaryImpl(getCoordinateReferenceSystem(), exterior, interiors);
+        }
+        
 	/*
 	 * (non-Javadoc)
 	 * 
