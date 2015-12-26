@@ -86,6 +86,9 @@ public class ShellImpl extends CompositeSurfaceImpl implements Shell {
 		return true;
 	}
 	
+        /**
+         * @return Returns the clone of shell.
+         */
         public ShellImpl clone() throws CloneNotSupportedException {
             Iterator<Primitive> elementIter = (Iterator<Primitive>) this.getElements().iterator();
             List<OrientableSurface> newElements = new ArrayList<OrientableSurface>();
@@ -111,6 +114,9 @@ public class ShellImpl extends CompositeSurfaceImpl implements Shell {
             this.solidBoundary = solidBoundary;
         }
 
+        /**
+         * @return returns the WKT.
+         */
         public String toString() {
             return GeometryToString.getString(this);
         }
