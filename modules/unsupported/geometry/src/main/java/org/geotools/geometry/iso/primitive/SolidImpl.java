@@ -18,6 +18,7 @@ package org.geotools.geometry.iso.primitive;
 
 import org.geotools.geometry.iso.coordinate.DirectPositionImpl;
 import org.geotools.geometry.iso.coordinate.EnvelopeImpl;
+import org.geotools.geometry.iso.io.GeometryToString;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.geometry.Envelope;
 import org.opengis.geometry.primitive.OrientablePrimitive;
@@ -177,8 +178,7 @@ public class SolidImpl extends PrimitiveImpl implements Solid {
 
 	@Override
 	public Envelope getEnvelope() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.envelope;
 	}
 
 	@Override
@@ -187,4 +187,34 @@ public class SolidImpl extends PrimitiveImpl implements Solid {
 		return null;
 	}
 
+	public String toString() {
+	        return GeometryToString.getString(this);
+	}
+	
+	@Override
+        public int hashCode() {
+                final int PRIME = 31;
+                int result = 1;
+                result = PRIME * result + ((boundary == null) ? 0 : boundary.hashCode());
+                result = PRIME * result + ((envelope == null) ? 0 : envelope.hashCode());
+                return result;
+        }
+	
+	@Override
+        public boolean equals(Object obj) {
+                if (this == obj)
+                        return true;
+                if (obj == null)
+                        return false;
+                if (getClass() != obj.getClass())
+                        return false;
+                final SolidImpl other = (SolidImpl) obj;
+                if (boundary == null) {
+                        if (other.boundary != null)
+                                return false;
+                } else if (!boundary.equals(other.boundary))
+                        return false;
+                
+                return true;
+        }
 }
