@@ -59,41 +59,50 @@ public class RelateComputer3D {
         /* intersection between Boundary of geometryA and Boundary of geometryB */
         SFGeometry intersectionBB = null;
 
+        /**
+         * @param gA
+         * @param gB
+         */
         public RelateComputer3D(GeometryImpl gA, GeometryImpl gB) {
                 geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
                 geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
                 boundaryA = getBoundary(geometryA);
                 boundaryB = getBoundary(geometryB);
 
+                // Because Intersection operation of SFCGAL has a bug now,
+                // Intersect point between two geometries must be added to LineString(or Polygon) object to get correct intersection.
                 if (geometryA.geometryTypeId() == SFCGALConvertor.SFCGAL_LINESTRING_ID) {
                         if (!SFAlgorithm.covers3D(geometryB, geometryA)) {
-                                geometryA = modifyLineString(geometryA, boundaryB);
+                                geometryA = addPointToLineString(geometryA, boundaryB);
                         }
                 } else if (geometryB.geometryTypeId() == SFCGALConvertor.SFCGAL_LINESTRING_ID) {
                         if (!SFAlgorithm.covers3D(geometryA, geometryB)) {
-                                geometryB = modifyLineString(geometryB, boundaryA);
+                                geometryB = addPointToLineString(geometryB, boundaryA);
                         }
                 } else if (geometryA.geometryTypeId() == SFCGALConvertor.SFCGAL_POLYGON_ID) {
                         if (!SFAlgorithm.covers3D(geometryB, geometryA)) {
-                                geometryA = modifyPolygon(geometryA, boundaryB);
+                                geometryA = addPointToPolygon(geometryA, boundaryB);
                         }
                 } else if (geometryB.geometryTypeId() == SFCGALConvertor.SFCGAL_POLYGON_ID) {
                         if (!SFAlgorithm.covers3D(geometryA, geometryB)) {
-                                geometryB = modifyPolygon(geometryB, boundaryA);
+                                geometryB = addPointToPolygon(geometryB, boundaryA);
                         }
                 }
         }
 
+        /**
+         * Compute the Intersection Matrix for the two given geometry objects.
+         * To compute the Intersection Matrix, use intersection operation.
+         * And IntersectionMatrix3D has only interior and boundary elements, not exterior.
+         * 
+         * @return Returns the IntersectionMatrix3D.
+         */
         public IntersectionMatrix3D computeIM3D() {
                 tIM = new IntersectionMatrix3D();
 
-                /* intersection between Closure of geometryA and Closure of geometryB */
                 intersectionCC = SFAlgorithm.intersection3D(geometryA, geometryB);
-                /* intersection between Boundary of geometryA and Closure of geometryB */
                 intersectionBC = SFAlgorithm.intersection3D(boundaryA, geometryB);
-                /* intersection between Closure of geometryA and Boundary of geometryB */
                 intersectionCB = SFAlgorithm.intersection3D(geometryA, boundaryB);
-                /* intersection between Boundary of geometryA and Boundary of geometryB */
                 intersectionBB = SFAlgorithm.intersection3D(boundaryA, boundaryB);
 
                 if (intersectionCC.geometryTypeId() == SFCGALConvertor.SFCGAL_LINESTRING_ID) {
@@ -108,12 +117,8 @@ public class RelateComputer3D {
                 if (intersectionBB.geometryTypeId() == SFCGALConvertor.SFCGAL_LINESTRING_ID) {
                         intersectionBB = simplifyLineString(intersectionBB);
                 }
-                /*
-                 * System.out.println("intersectionCC : " + intersectionCC.asText(1)); // SF_Geometry difference =
-                 * SF_Algorithm.difference3D(intersectionCC, intersectionBC); // System.out.println("difference : " + difference.asText(1));
-                 * System.out.println("intersectionBC : " + intersectionBC.asText(1)); System.out.println("intersectionCB : " +
-                 * intersectionCB.asText(1)); System.out.println("intersectionBB : " + intersectionBB.asText(1));
-                 */
+
+                // Return "FFFF", if the intersection is empty.
                 if (intersectionCC.isEmpty()) {
                         tIM.set(Location.INTERIOR, Location.INTERIOR, Dimension.FALSE);
                         tIM.set(Location.INTERIOR, Location.BOUNDARY, Dimension.FALSE);
@@ -127,40 +132,21 @@ public class RelateComputer3D {
                 computeBoundaryInterior();
                 computeBoundaryBoundary();
 
-                /*
-                 * if (!intersectionCC.isEmpty() && !intersectionBC.isEmpty()) { SFGeometry difference = SFAlgorithm.difference3D(intersectionCC,
-                 * intersectionBC); // System.out.println("equals : " + intersectionCC.equals(intersectionBC)); // System.out.println("differene : " +
-                 * difference.asText(0)); if (intersectionCC.equals(intersectionBC) || difference.isEmpty()) { // II = F, BI = T
-                 * tIM.set(Location.INTERIOR, Location.INTERIOR, Dimension.FALSE); tIM.set(Location.BOUNDARY, Location.INTERIOR,
-                 * intersectionBC.dimension()); } else { // II = T // BI = T tIM.set(Location.INTERIOR, Location.INTERIOR,
-                 * intersectionCC.dimension()); tIM.set(Location.BOUNDARY, Location.INTERIOR, intersectionBC.dimension()); }
-                 * 
-                 * difference = SFAlgorithm.difference3D(intersectionCB, intersectionBB); if (intersectionCB.equals(intersectionBB) ||
-                 * difference.isEmpty()) { // IB = F // BB = T tIM.set(Location.INTERIOR, Location.BOUNDARY, Dimension.FALSE);
-                 * tIM.set(Location.BOUNDARY, Location.BOUNDARY, intersectionBB.dimension()); } else { // IB = T // BB = T tIM.set(Location.INTERIOR,
-                 * Location.BOUNDARY, intersectionCB.dimension()); tIM.set(Location.BOUNDARY, Location.BOUNDARY, intersectionBB.dimension()); } } else
-                 * { if (!intersectionCC.isEmpty() && intersectionBC.isEmpty()) { // II = T, IB = T, BI = F, BB = F // II = T, IB = ?, BI = F, BB = ?
-                 * tIM.set(Location.INTERIOR, Location.INTERIOR, intersectionCC.dimension()); // tIM.set(Location.INTERIOR, Location.BOUNDARY,
-                 * intersectionCB.dimension()); tIM.set(Location.BOUNDARY, Location.INTERIOR, Dimension.FALSE); // tIM.set(Location.BOUNDARY,
-                 * Location.BOUNDARY, Dimension.FALSE); } else if (intersectionCC.isEmpty()) { // II = F, IB = F, BI = F, BB = F
-                 * tIM.set(Location.INTERIOR, Location.INTERIOR, Dimension.FALSE); tIM.set(Location.INTERIOR, Location.BOUNDARY, Dimension.FALSE);
-                 * tIM.set(Location.BOUNDARY, Location.INTERIOR, Dimension.FALSE); tIM.set(Location.BOUNDARY, Location.BOUNDARY, Dimension.FALSE); }
-                 * 
-                 * if (!intersectionCB.isEmpty() && intersectionBB.isEmpty()) { // IB = T // BB = F tIM.set(Location.INTERIOR, Location.BOUNDARY,
-                 * intersectionCB.dimension()); tIM.set(Location.BOUNDARY, Location.BOUNDARY, Dimension.FALSE); } else if (intersectionCB.isEmpty()) {
-                 * // II = F, IB = F, BI = F, BB = F tIM.set(Location.INTERIOR, Location.INTERIOR, Dimension.FALSE); tIM.set(Location.INTERIOR,
-                 * Location.BOUNDARY, Dimension.FALSE); tIM.set(Location.BOUNDARY, Location.INTERIOR, Dimension.FALSE); tIM.set(Location.BOUNDARY,
-                 * Location.BOUNDARY, Dimension.FALSE); } }
-                 */
-
                 return tIM;
         }
 
+        /**
+         * @param g
+         * @return Returns the boundary of g
+         * If the geometry is polygon, returns the boundary.
+         * If the geometry is solid, returns the exterior Shell.
+         * Because SFCGAL has no algorithm supports interior shell yet.
+         */
         public SFGeometry getBoundary(SFGeometry g) {
                 SFGeometry boundary = null;
 
                 if (g.geometryTypeId() == SFCGALConvertor.SFCGAL_POLYGON_ID) {
-                        boundary = ((SFPolygon) g).exteriorRing();
+                        boundary = ((SFPolygon) g).boundary();
                 } else if (g.geometryTypeId() == SFCGALConvertor.SFCGAL_SOLID_ID) {
                         boundary = ((SFSolid) g).exteriorShell();
                 } else {
@@ -170,6 +156,11 @@ public class RelateComputer3D {
                 return boundary;
         }
 
+        /**
+         * @param g
+         * @return LineString
+         * If p1, p2, p3 of LineString are collinear, p2 is removed.
+         */
         public SFGeometry simplifyLineString(SFGeometry g) {
                 SFLineString line = new SFLineString(g);
 
@@ -206,21 +197,35 @@ public class RelateComputer3D {
                 return false;
         }
 
-        public SFGeometry modifyPolygon(SFGeometry poly, SFGeometry other) {
+        /**
+         * Add intersect point between Polygon and other geometry to polygon for correct result of intersection operation.
+         * 
+         * @param poly
+         * @param other
+         * @return SFPolygon
+         */
+        public SFGeometry addPointToPolygon(SFGeometry poly, SFGeometry other) {
                 if (poly.dimension() != 2 || other.dimension() == 0) {
                         return poly;
                 }
 
                 SFPolygon polygon = (SFPolygon) SFCGALConvertor.getSFGeometry(poly);
-                // SFLineString exteriorRing = (SFLineString) SFCGALConvertor.getSFGeometry(polygon.exteriorRing());
                 SFLineString exteriorRing = (SFLineString) polygon.exteriorRing();
-                SFLineString newExteriorRing = (SFLineString) modifyLineString(exteriorRing, other);
+                SFLineString newExteriorRing = (SFLineString) addPointToLineString(exteriorRing,
+                                other);
                 newExteriorRing.addPoint(exteriorRing.endPoint());
 
                 return new SFPolygon(newExteriorRing);
         }
 
-        public SFGeometry modifyLineString(SFGeometry line, SFGeometry other) {
+        /**
+         * Add intersect point between LineString and other geometry to LineString for correct result of intersection operation.
+         * 
+         * @param line
+         * @param other
+         * @return SFLineString
+         */
+        public SFGeometry addPointToLineString(SFGeometry line, SFGeometry other) {
                 if (line.dimension() != 1 || other.dimension() == 0) {
                         return line;
                 }
@@ -322,48 +327,75 @@ public class RelateComputer3D {
                 }
         }
 
+        /**
+         * Compute (Interior, Interior) element of Intersection Matrix
+         */
         public void computeInteriorInterior() {
                 SFGeometry difference1 = SFAlgorithm.difference3D(intersectionCC, intersectionBC);
                 SFGeometry difference2 = SFAlgorithm.difference3D(intersectionCC, intersectionCB);
 
+                // The equals operation about TIN of SFCGAL, is not correct.
+                // So if the difference between of two geometries is empty, they will be equal.
+
+                // If intersection between two geometries(closures) is equal to intersection between boundaryA and geometryB,
+                // the geometryB touches boundaryA, not interior of geometryA.
+                // If intersection between two geometries(closures) is equal to intersection between geometryA and boundaryB,
+                // the geometryA touches boundaryB, not interior of geometryB.
                 if (intersectionCC.equals(intersectionBC) || difference1.isEmpty()) {
-                        tIM.set(Location.INTERIOR, Location.INTERIOR, Dimension.FALSE);
+                        tIM.set(Location.INTERIOR, Location.INTERIOR, Dimension.FALSE); // "F***"
                 } else if (intersectionCC.equals(intersectionCB) || difference2.isEmpty()) {
-                        tIM.set(Location.INTERIOR, Location.INTERIOR, Dimension.FALSE);
+                        tIM.set(Location.INTERIOR, Location.INTERIOR, Dimension.FALSE); // "F***"
                 } else {
                         tIM.set(Location.INTERIOR, Location.INTERIOR, intersectionCC.dimension());
                 }
         }
 
+        /**
+         * Compute (Interior, Boundary) element of Intersection Matrix
+         */
         public void computeInteriorBoundary() {
                 SFGeometry difference1 = SFAlgorithm.difference3D(intersectionCC, intersectionBC);
                 SFGeometry difference2 = SFAlgorithm.difference3D(intersectionCB, intersectionBB);
 
+                // If intersection between two geometries(closures) is equal to intersection between boundaryA and geometryB,
+                // the geometryB touches boundaryA, not interior of geometryA.
+                // If intersection between geometryA and boundaryB is equal to intersection between two boundaries,
+                // the boundaryB touches boundaryA, not interior of geometryA.
                 if (intersectionCC.equals(intersectionBC) || difference1.isEmpty()) {
-                        tIM.set(Location.INTERIOR, Location.BOUNDARY, Dimension.FALSE);
+                        tIM.set(Location.INTERIOR, Location.BOUNDARY, Dimension.FALSE); // "*F**"
                 } else if (intersectionCB.equals(intersectionBB) || difference2.isEmpty()) {
-                        tIM.set(Location.INTERIOR, Location.BOUNDARY, Dimension.FALSE);
+                        tIM.set(Location.INTERIOR, Location.BOUNDARY, Dimension.FALSE); // "*F**"
                 } else {
                         tIM.set(Location.INTERIOR, Location.BOUNDARY, intersectionCB.dimension());
                 }
         }
 
+        /**
+         * Compute (Boundary, Interior) element of Intersection Matrix
+         */
         public void computeBoundaryInterior() {
                 SFGeometry difference1 = SFAlgorithm.difference3D(intersectionCC, intersectionCB);
                 SFGeometry difference2 = SFAlgorithm.difference3D(intersectionBC, intersectionCB);
 
+                // If intersection between two geometries(closures) is equal to intersection between geometryA and boundaryB,
+                // the geometryB touches boundaryA, not interior of geometryA.
+                // If intersection between boundaryA and geometryB is equal to intersection between two boundaries,
+                // the boundaryA touches boundaryB, not interior of geometryB.
                 if (intersectionCC.equals(intersectionCB) || difference1.isEmpty()) {
-                        tIM.set(Location.BOUNDARY, Location.INTERIOR, Dimension.FALSE);
+                        tIM.set(Location.BOUNDARY, Location.INTERIOR, Dimension.FALSE); // "**F*"
                 } else if (intersectionBC.equals(intersectionBB) || difference2.isEmpty()) {
-                        tIM.set(Location.BOUNDARY, Location.INTERIOR, Dimension.FALSE);
+                        tIM.set(Location.BOUNDARY, Location.INTERIOR, Dimension.FALSE); // "**F*"
                 } else {
                         tIM.set(Location.BOUNDARY, Location.INTERIOR, intersectionBC.dimension());
                 }
         }
 
+        /**
+         * Compute (Boundary, Boundary) element of Intersection Matrix
+         */
         public void computeBoundaryBoundary() {
                 if (intersectionBB.isEmpty()) {
-                        tIM.set(Location.BOUNDARY, Location.BOUNDARY, Dimension.FALSE);
+                        tIM.set(Location.BOUNDARY, Location.BOUNDARY, Dimension.FALSE); // "***F"
                 } else {
                         tIM.set(Location.BOUNDARY, Location.BOUNDARY, intersectionBB.dimension());
                 }

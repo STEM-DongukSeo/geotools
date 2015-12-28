@@ -525,14 +525,14 @@ public class WKTReader {
          * 
          * @param tokenizer
          *            tokenizer over a stream of text in Well-known Text format. The
-         *            next tokens must form a &lt;LineString Text&gt;.
+         *            next tokens must form a &lt;Shell Text&gt;.
          * @return a <code>Shell</code> specified by the next token in the
          *         stream
          * @throws IOException
          *             if an I/O error occurs
          * @throws ParseException
          *             if the coordinates used to create the <code>Shell</code>
-         *             do not form a closed linestring, or if an unexpected token
+         *             do not form a closed surfaces, or if an unexpected token
          *             was encountered
          */
 	private Shell readShellText() throws IOException, ParseException {
@@ -560,7 +560,7 @@ public class WKTReader {
          * 
          * @param tokenizer
          *            tokenizer over a stream of text in Well-known Text format. The
-         *            next tokens must form a &lt;Polygon Text&gt;.
+         *            next tokens must form a &lt;Solid Text&gt;.
          * @return a <code>Polygon</code> specified by the next token in the
          *         stream
          * @throws ParseException

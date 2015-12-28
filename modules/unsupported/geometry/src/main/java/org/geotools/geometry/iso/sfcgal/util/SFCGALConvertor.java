@@ -92,6 +92,8 @@ import org.opengis.geometry.primitive.SurfacePatch;
  *
  */
 public class SFCGALConvertor {
+        
+        // GeometryType
         public static final int SFCGAL_POINT_ID = 1;
 
         public static final int SFCGAL_LINESTRING_ID = 2;
@@ -123,9 +125,13 @@ public class SFCGALConvertor {
                 hints.put(Hints.CRS, DefaultGeographicCRS.WGS84_3D);
                 hints.put(Hints.GEOMETRY_VALIDATE, false);
                 builder = new GeometryBuilder(hints);
-
         }
 
+        /**
+         * Convert a DirectPosition instance to a SFPoint
+         * @param p DirectPosition instance
+         * @return Instance of SFPoint
+         */
         public static SFPoint directPositionToSFCGALPoint(DirectPosition p) {
                 SFPoint point = null;
                 double[] coord = p.getCoordinate();
@@ -143,6 +149,11 @@ public class SFCGALConvertor {
                 return point;
         }
 
+        /**
+         * Convert a Point instance to a SFPoint
+         * @param p Point instance
+         * @return Instance of SFPoint
+         */
         public static SFPoint pointToSFCGALPoint(Point p) {
                 SFPoint point = null;
                 point = directPositionToSFCGALPoint(p.getDirectPosition());
@@ -150,6 +161,11 @@ public class SFCGALConvertor {
                 return point;
         }
 
+        /**
+         * Convert a LineString instance to a SFLineString
+         * @param ls LineString instance
+         * @return Instance of SFLineString
+         */
         public static SFLineString lineStringToSFCGALLineString(LineString ls) {
                 SFLineString lineString = null;
                 PointArray controlPoints = ls.getControlPoints();
@@ -166,11 +182,21 @@ public class SFCGALConvertor {
                 return lineString;
         }
 
+        /**
+         * Convert a Curve instance to a SFLineString
+         * @param curvge Curve instance
+         * @return Instance of SFLineString
+         */
         public static SFLineString curveToSFCGALLineString(Curve curve) {
 
                 return lineStringToSFCGALLineString(((CurveImpl) curve).asLineString());
         }
 
+        /**
+         * Convert a Ring instance to a SFLineString
+         * @param ring Ring instance
+         * @return Instance of SFLineString
+         */
         public static SFLineString ringToSFCGALLineString(Ring ring) {
                 SFLineString lineString = null;
                 List<DirectPosition> directPositions = ((RingImplUnsafe) ring).asDirectPositions();
@@ -186,6 +212,11 @@ public class SFCGALConvertor {
                 return lineString;
         }
 
+        /**
+         * Convert a Polygon instance to a SFPolygon
+         * @param poly Polygon instance
+         * @return Instance of SFPolygon
+         */
         public static SFPolygon polygonToSFCGALPolygon(Polygon poly) {
                 SFPolygon polygon = null;
                 ArrayList<SFLineString> rings = new ArrayList<SFLineString>();
@@ -205,6 +236,11 @@ public class SFCGALConvertor {
                 return polygon;
         }
 
+        /**
+         * Convert a Triangle instance to a SFTriangle
+         * @param tri Triangle instance
+         * @return Instance of SFTriangle
+         */
         public static SFTriangle triangleToSFCGALTriangle(Triangle tri) {
                 SFTriangle triangle = null;
                 List<Position> corners = tri.getCorners();
@@ -218,6 +254,11 @@ public class SFCGALConvertor {
                 return triangle;
         }
 
+        /**
+         * Convert a Surface instance to a SFPolygon
+         * @param surface Surface instance
+         * @return Instance of SFPolygon
+         */
         public static SFPolygon surfaceToSFCGALPolygon(Surface surface) {
                 SFPolygon polygon = null;
                 ArrayList<SFLineString> rings = new ArrayList<SFLineString>();
@@ -237,6 +278,11 @@ public class SFCGALConvertor {
                 return polygon;
         }
 
+        /**
+         * Convert a PolyhedralSurface instance to a SFPolyhedralSurface
+         * @param polyhedral PolyhedralSurface instance
+         * @return Instance of SFPolyhedralSurface
+         */
         public static SFPolyhedralSurface polyhedralSurfaceToSFCGALPolyhedralSurface(
                         PolyhedralSurface polyhedral) {
                 SFPolyhedralSurface polyhedralSurface = null;
@@ -259,6 +305,11 @@ public class SFCGALConvertor {
                 return polyhedralSurface;
         }
 
+        /**
+         * Convert a TriangulatedSurface instance to a SFTriangulatedSurface
+         * @param triangulated TriangulatedSurface instance
+         * @return Instance of SFTriangulatedSurface
+         */
         public static SFTriangulatedSurface triangulatedSurfaceToSFCGALPolyhedralSurface(
                         TriangulatedSurface triangulated) {
                 SFTriangulatedSurface triangulatedSurface = null;
@@ -276,6 +327,11 @@ public class SFCGALConvertor {
                 return triangulatedSurface;
         }
 
+        /**
+         * Convert a Shell instance to a SFPolyhedralSurface
+         * @param shell Shell instance
+         * @return Instance of SFPolyhedralSurface
+         */
         public static SFPolyhedralSurface shellToSFCGALPolyhedralSurface(Shell shell) {
                 SFPolyhedralSurface polyhedral = null;
                 ArrayList<SFPolygon> polygons = new ArrayList<SFPolygon>();
@@ -291,6 +347,11 @@ public class SFCGALConvertor {
                 return polyhedral;
         }
 
+        /**
+         * Convert a Solid instance to a SFSolid
+         * @param solid Solid instance
+         * @return Instance of SFPSolid
+         */
         public static SFSolid solidToSFCGALSolid(Solid solid) {
                 SFSolid sfcgalSolid = null;
                 Shell exterior = solid.getBoundary().getExterior();
@@ -310,6 +371,11 @@ public class SFCGALConvertor {
                 return sfcgalSolid;
         }
 
+        /**
+         * Convert a MultiPrimitive instance to a SFGeometryCollection
+         * @param multiPrimitive MultiPrimitive instance
+         * @return Instance of SFGeometryCollection
+         */
         public static SFGeometryCollection multiPrimitiveToSFCGALGeometryCollection(
                         MultiPrimitive multiPrimitive) {
                 SFGeometryCollection sfcgalGeometryCollection = new SFGeometryCollection();
@@ -325,6 +391,11 @@ public class SFCGALConvertor {
                 return sfcgalGeometryCollection;
         }
 
+        /**
+         * Convert a MultiPoint instance to a SFMultiPoint
+         * @param multiPoint MultiPoint instance
+         * @return Instance of SFMultiPoint
+         */
         public static SFMultiPoint multiPointToSFCGALMultiPoint(MultiPoint multiPoint) {
                 SFMultiPoint sfcgalMultiPoint = new SFMultiPoint();
                 Set<Point> elements = multiPoint.getElements();
@@ -337,6 +408,11 @@ public class SFCGALConvertor {
                 return sfcgalMultiPoint;
         }
 
+        /**
+         * Convert a MultiCurve instance to a SFMultiLineString
+         * @param multiCurve MultiCurve instance
+         * @return Instance of SFMultiCurve
+         */
         public static SFMultiLineString multiCurveToSFCGALMultiLineString(MultiCurve multiCurve) {
                 SFMultiLineString sfcgalMultiLineString = new SFMultiLineString();
                 Set<OrientableCurve> elements = multiCurve.getElements();
@@ -350,6 +426,11 @@ public class SFCGALConvertor {
                 return sfcgalMultiLineString;
         }
 
+        /**
+         * Convert a MultiSurface instance to a SFMultiPolygon
+         * @param multiSurface MultiSurface instance
+         * @return Instance of SFMultiPolygon
+         */
         public static SFMultiPolygon multiSurfaceToSFCGALMultiPolygon(MultiSurface multiSurface) {
                 SFMultiPolygon sfcgalMultiPolygon = new SFMultiPolygon();
                 Set<OrientableSurface> elements = multiSurface.getElements();
@@ -363,6 +444,11 @@ public class SFCGALConvertor {
                 return sfcgalMultiPolygon;
         }
 
+        /**
+         * Convert a MultiSolidImpl instance to a SFMultiSolid
+         * @param multiSolid MultiSolidImpl instance
+         * @return Instance of SFMultiSolid
+         */
         public static SFMultiSolid multiSolidToSFCGALMultiSolid(MultiSolidImpl multiSolid) {
                 SFMultiSolid sfcgalMultiSolid = new SFMultiSolid();
                 Set<Primitive> elements = multiSolid.getElements();
@@ -375,6 +461,12 @@ public class SFCGALConvertor {
                 return sfcgalMultiSolid;
         }
 
+
+        /**
+         * Convert a SFPoint instance to a DirectPosition
+         * @param p SFPoint instance
+         * @return Instance of DirectPosition
+         */
         public static DirectPosition directPositionFromSFCGALPoint(SFPoint p) {
                 /*
                  * Hints hints = GeoTools.getDefaultHints(); hints.put(Hints.CRS, DefaultGeographicCRS.WGS84_3D); hints.put(Hints.GEOMETRY_VALIDATE,
@@ -394,6 +486,11 @@ public class SFCGALConvertor {
                 return position;
         }
 
+        /**
+         * Convert a SFPoint instance to a Point
+         * @param p SFPoint instance
+         * @return Instance of Point
+         */
         public static Point pointFromSFCGALPoint(SFPoint p) {
                 /*
                  * Hints hints = GeoTools.getDefaultHints(); hints.put(Hints.CRS, DefaultGeographicCRS.WGS84_3D); hints.put(Hints.GEOMETRY_VALIDATE,
@@ -404,6 +501,11 @@ public class SFCGALConvertor {
                 return point;
         }
 
+        /**
+         * Convert a SFLineString instance to a LineString
+         * @param ls SFLineString instance
+         * @return Instance of LineString
+         */
         public static LineString lineStringFromSFCGALLineString(SFLineString ls) {
                 LineString lineString = null;
                 List<Position> positions = new ArrayList<Position>();
@@ -419,6 +521,11 @@ public class SFCGALConvertor {
                 return lineString;
         }
 
+        /**
+         * Convert a SFLineString instance to a Curve
+         * @param ls SFLineString instance
+         * @return Instance of Curve
+         */
         public static Curve curveFromSFCGALLineString(SFLineString ls) {
                 Curve curve = null;
                 LineString lineString = lineStringFromSFCGALLineString(ls);
@@ -430,6 +537,11 @@ public class SFCGALConvertor {
                 return curve;
         }
 
+        /**
+         * Convert a SFLineString instance to a Ring
+         * @param ls SFLineString instance
+         * @return Instance of Ring
+         */
         public static Ring ringFromSFCGALLineString(SFLineString ls) {
                 Ring ring = null;
 
@@ -445,6 +557,11 @@ public class SFCGALConvertor {
                 return ring;
         }
 
+        /**
+         * Convert a SFPolygon instance to a Polygon
+         * @param poly SFPolygon instance
+         * @return Instance of Polygon
+         */
         public static Polygon polygonFromSFCGALPolygon(SFPolygon poly) {
                 Polygon polygon = null;
 
@@ -463,6 +580,11 @@ public class SFCGALConvertor {
                 return polygon;
         }
 
+        /**
+         * Convert a SFTriangle instance to a Triangle
+         * @param tri SFTriangle instance
+         * @return Instance of Triangle
+         */
         public static Triangle triangleFromSFCGALTriangle(SFTriangle tri) {
                 Triangle triangle = null;
                 SFPolygon poly = tri.toPolygon();
@@ -481,6 +603,11 @@ public class SFCGALConvertor {
                 return triangle;
         }
 
+        /**
+         * Convert a SFPolygon instance to a Surface
+         * @param poly SFPolygon instance
+         * @return Instance of Surface
+         */
         public static Surface surfaceFromSFCGALPolygon(SFPolygon poly) {
                 Surface surface = null;
                 Polygon polygon = polygonFromSFCGALPolygon(poly);
@@ -490,12 +617,22 @@ public class SFCGALConvertor {
                 return surface;
         }
 
+        /**
+         * Convert a SFTriangle instance to a Surface
+         * @param tri SFTriangle instance
+         * @return Instance of Surface
+         */
         public static Surface surfaceFromSFCGALTriangle(SFTriangle tri) {
                 SFPolygon poly = tri.toPolygon();
 
                 return surfaceFromSFCGALPolygon(poly);
         }
 
+        /**
+         * Convert a SFPolyhedralSurface instance to a PolyhedralSurface
+         * @param polyhedral SFPolyhedralSurface instance
+         * @return Instance of PolyhedralSurface
+         */
         public static PolyhedralSurface polyhedralSurfaceFromSFCGALPolyhedralSurface(
                         SFPolyhedralSurface polyhedral) {
                 PolyhedralSurface polyhedralSurface = null;
@@ -515,6 +652,11 @@ public class SFCGALConvertor {
                 return polyhedralSurface;
         }
 
+        /**
+         * Convert a SFTriangulatedSurface instance to a TriangulatedSurface
+         * @param triangulated SFTriangulatedSurface instance
+         * @return Instance of TriangulatedSurface
+         */
         public static TriangulatedSurface triangulatedSurfaceFromSFCGALTriangulatedSurface(
                         SFTriangulatedSurface triangulated) {
                 TriangulatedSurface triangulatedSurface = null;
@@ -536,6 +678,11 @@ public class SFCGALConvertor {
                 return triangulatedSurface;
         }
 
+        /**
+         * Convert a SFPolyhedralSurface instance to a Shell
+         * @param polyhedral SFPolyhedralSurface instance
+         * @return Instance of Shell
+         */
         public static Shell shellFromSFCGALPolyhedralSurface(SFPolyhedralSurface polyhedral) {
                 Shell shell = null;
                 PrimitiveFactoryImpl primitiveFactory = (PrimitiveFactoryImpl) builder
@@ -551,16 +698,21 @@ public class SFCGALConvertor {
                 return shell;
         }
 
-        public static Solid solidFromSFCGALSolid(SFSolid sfcgalSolid) {
+        /**
+         * Convert a SFSolid instance to a Solid
+         * @param sfSolid SFSolid instance
+         * @return Instance of Solid
+         */
+        public static Solid solidFromSFCGALSolid(SFSolid sfSolid) {
                 Solid solid = null;
                 PrimitiveFactoryImpl primitiveFactory = (PrimitiveFactoryImpl) builder
                                 .getPrimitiveFactory();
 
-                Shell exterior = shellFromSFCGALPolyhedralSurface(sfcgalSolid.exteriorShell());
+                Shell exterior = shellFromSFCGALPolyhedralSurface(sfSolid.exteriorShell());
 
                 List<Shell> interiors = new ArrayList<Shell>();
-                for (int i = 0; i < sfcgalSolid.numInteriorShells(); i++) {
-                        Shell interior = shellFromSFCGALPolyhedralSurface(sfcgalSolid
+                for (int i = 0; i < sfSolid.numInteriorShells(); i++) {
+                        Shell interior = shellFromSFCGALPolyhedralSurface(sfSolid
                                         .interiorShellN(i));
 
                         interiors.add(interior);
@@ -572,6 +724,11 @@ public class SFCGALConvertor {
                 return solid;
         }
 
+        /**
+         * Convert a SFGeometryCollection instance to a MultiPrimitive
+         * @param geometryCollection SFGeometryCollection instance
+         * @return Instance of MultiPrimitive
+         */
         public static MultiPrimitive multiPrimitiveFromSFCGALGeometryCollection(
                         SFGeometryCollection geometryCollection) {
                 MultiPrimitive multiPrimitive = null;
@@ -590,13 +747,18 @@ public class SFCGALConvertor {
                 return multiPrimitive;
         }
 
-        public static MultiPoint multiPointFromSFCGALMultiPoint(SFMultiPoint sfcgalMultiPoint) {
+        /**
+         * Convert a SFMultiPoint instance to a MultiPoint
+         * @param sfMultiPoint SFMultiPoint instance
+         * @return Instance of MultiPoint
+         */
+        public static MultiPoint multiPointFromSFCGALMultiPoint(SFMultiPoint sfMultiPoint) {
                 MultiPoint multiPoint = null;
                 AggregateFactory aggregateFactory = builder.getAggregateFactory();
 
                 Set<Point> points = new HashSet<Point>();
-                for (int i = 0; i < sfcgalMultiPoint.numGeometries(); i++) {
-                        Point p = pointFromSFCGALPoint(sfcgalMultiPoint.pointN(i));
+                for (int i = 0; i < sfMultiPoint.numGeometries(); i++) {
+                        Point p = pointFromSFCGALPoint(sfMultiPoint.pointN(i));
 
                         points.add(p);
                 }
@@ -606,14 +768,19 @@ public class SFCGALConvertor {
                 return multiPoint;
         }
 
+        /**
+         * Convert a SFMultiLineString instance to a MultiCurve
+         * @param sfMultiLineString SFMultiLineString instance
+         * @return Instance of MultiCurve
+         */
         public static MultiCurve multiCurveFromSFCGALMultiLineString(
-                        SFMultiLineString sfcgalMultiLineString) {
+                        SFMultiLineString sfMultiLineString) {
                 MultiCurve multiCurve = null;
                 AggregateFactory aggregateFactory = builder.getAggregateFactory();
 
                 Set<OrientableCurve> curves = new HashSet<OrientableCurve>();
-                for (int i = 0; i < sfcgalMultiLineString.numGeometries(); i++) {
-                        Curve curve = curveFromSFCGALLineString(sfcgalMultiLineString
+                for (int i = 0; i < sfMultiLineString.numGeometries(); i++) {
+                        Curve curve = curveFromSFCGALLineString(sfMultiLineString
                                         .lineStringN(i));
 
                         curves.add(curve);
@@ -624,14 +791,19 @@ public class SFCGALConvertor {
                 return multiCurve;
         }
 
+        /**
+         * Convert a SFMultiPolygon instance to a MultiSurface
+         * @param sfMultiPolygon SFMultiPolygon instance
+         * @return Instance of MultiSurface
+         */
         public static MultiSurface multiSurfaceFromSFCGALMultiPolygon(
-                        SFMultiPolygon sfcgalMultiPolygon) {
+                        SFMultiPolygon sfMultiPolygon) {
                 MultiSurface multiSurface = null;
                 AggregateFactory aggregateFactory = builder.getAggregateFactory();
 
                 Set<OrientableSurface> surfaces = new HashSet<OrientableSurface>();
-                for (int i = 0; i < sfcgalMultiPolygon.numGeometries(); i++) {
-                        Surface surface = surfaceFromSFCGALPolygon(sfcgalMultiPolygon.polygonN(i));
+                for (int i = 0; i < sfMultiPolygon.numGeometries(); i++) {
+                        Surface surface = surfaceFromSFCGALPolygon(sfMultiPolygon.polygonN(i));
 
                         surfaces.add(surface);
                 }
@@ -641,14 +813,19 @@ public class SFCGALConvertor {
                 return multiSurface;
         }
 
-        public static MultiSolidImpl multiSolidFromSFCGALMultiSolid(SFMultiSolid sfcgalMultiSolid) {
+        /**
+         * Convert a SFMultiSolid instance to a MultiSolid
+         * @param sfMultiSolid SFMultiSolid instance
+         * @return Instance of MultiSolid
+         */
+        public static MultiSolidImpl multiSolidFromSFCGALMultiSolid(SFMultiSolid sfMultiSolid) {
                 MultiSolidImpl multiSolid = null;
                 AggregateFactoryImpl aggregateFactory = (AggregateFactoryImpl) builder
                                 .getAggregateFactory();
 
                 Set<Primitive> solids = new HashSet<Primitive>();
-                for (int i = 0; i < sfcgalMultiSolid.numGeometries(); i++) {
-                        Solid solid = solidFromSFCGALSolid(sfcgalMultiSolid.solidN(i));
+                for (int i = 0; i < sfMultiSolid.numGeometries(); i++) {
+                        Solid solid = solidFromSFCGALSolid(sfMultiSolid.solidN(i));
 
                         solids.add(solid);
                 }
@@ -704,6 +881,11 @@ public class SFCGALConvertor {
                 return geometry;
         }
 
+        /**
+         * Convert a SFGeometry instance to a Geometry
+         * @param geom SFGeometry instance
+         * @return Instance of Geometry
+         */
         public static Geometry geometryFromSFCGALGeometry(SFGeometry geom) {
                 Geometry geometry = null;
                 geom = getSFGeometry(geom);
@@ -737,6 +919,11 @@ public class SFCGALConvertor {
                 return geometry;
         }
 
+        /**
+         * Convert a Geometry instance to a SFGeometry
+         * @param geom Geometry instance
+         * @return Instance of SFGeometry
+         */
         public static SFGeometry geometryToSFCGALGeometry(Geometry geom) {
                 SFGeometry geometry = null;
 

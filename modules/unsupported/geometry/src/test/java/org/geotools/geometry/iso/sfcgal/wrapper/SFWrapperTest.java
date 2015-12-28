@@ -160,11 +160,6 @@ public class SFWrapperTest extends TestCase {
                         System.out.println("not counterclockwised");
                 }
 
-                /*
-                 * System.out.println("polygon coodinateDemension : " + polygon.coordinateDimension()); System.out.println("geometryType : " +
-                 * polygon.geometryType()); System.out.println("numrings : " + polygon.numRings()); System.out.println("interior numPoints : " +
-                 * polygon.interiorRingN(0).numPoints());
-                 */
         }
 
         public void _testSFTriangle() {

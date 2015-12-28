@@ -24,11 +24,14 @@ import junit.framework.TestCase;
 import org.geotools.factory.GeoTools;
 import org.geotools.factory.Hints;
 import org.geotools.geometry.GeometryBuilder;
+import org.geotools.geometry.iso.io.wkt.ParseException;
+import org.geotools.geometry.iso.io.wkt.WKTReader;
 import org.geotools.geometry.iso.primitive.CurveImpl;
 import org.geotools.geometry.iso.primitive.PrimitiveFactoryImpl;
 import org.geotools.geometry.iso.primitive.RingImplUnsafe;
 import org.geotools.geometry.iso.primitive.SurfaceImpl;
 import org.geotools.geometry.iso.root.GeometryImpl;
+import org.geotools.geometry.iso.sfcgal.wrapper.SFSolid;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.geometry.Geometry;
@@ -51,10 +54,12 @@ import org.opengis.geometry.primitive.SurfaceBoundary;
  *
  */
 public class Geometry3DOperationTest extends TestCase {
+        private static Hints hints = null;
+
         private static GeometryBuilder builder = null;
 
         public void testMain() {
-                Hints hints = GeoTools.getDefaultHints();
+                hints = GeoTools.getDefaultHints();
                 hints.put(Hints.CRS, DefaultGeographicCRS.WGS84_3D);
                 hints.put(Hints.GEOMETRY_VALIDATE, false);
                 builder = new GeometryBuilder(hints);
@@ -65,9 +70,9 @@ public class Geometry3DOperationTest extends TestCase {
                 // _testPointSolid();
                 // _testCurveCurve();
                 // _testCurveSurface();
-                _testCurveSolid();
+                // _testCurveSolid();
                 // _testSurfaceSurface();
-                // _testSurfaceSolid();
+                _testSurfaceSolid();
                 // _testSolidSolid();
         }
 
@@ -142,7 +147,19 @@ public class Geometry3DOperationTest extends TestCase {
         }
 
         public void _testCurveSolid() {
-                Solid solid = getSolids(builder).get(0);
+                String wkt = "Solid((((0.0 0.0 0.0, 2.0 0.0 0.0, 2.0 -2.0 0.0, 0.0 -2.0 0.0, 0.0 0.0 0.0)), ((2.0 -2.0 0.0, 2.0 0.0 0.0, 2.0 0.0 2.0, 2.0 -2.0 2.0, 2.0 -2.0 0.0)), ((0.0 0.0 2.0, 0.0 -2.0 2.0, 2.0 -2.0 2.0, 2.0 0.0 2.0, 0.0 0.0 2.0)), ((0.0 -2.0 2.0, 0.0 0.0 2.0, 0.0 0.0 0.0, 0.0 -2.0 0.0, 0.0 -2.0 2.0)), ((0.0 -2.0 0.0, 2.0 -2.0 0.0, 2.0 -2.0 2.0, 0.0 -2.0 2.0, 0.0 -2.0 0.0)), ((0.0 0.0 0.0, 0.0 0.0 2.0, 2.0 0.0 2.0, 2.0 0.0 0.0, 0.0 0.0 0.0))))";
+                // Solid solid = getSolids(builder).get(0);
+                WKTReader reader = new WKTReader(hints);
+                Solid solid = null;
+                try {
+                        solid = (Solid) reader.read(wkt);
+                } catch (ParseException e) {
+                        e.printStackTrace();
+                }
+
+                SFSolid sfsolid = (SFSolid) SFCGALConvertor.geometryToSFCGALGeometry(solid);
+
+                System.out.println("sfsolid : " + sfsolid.asText(1));
                 ArrayList<Curve> curves = getCurves(builder);
 
                 // solid = rotate(solid, 30, 0, 0, 0, 0, 0);
@@ -919,16 +936,25 @@ public class Geometry3DOperationTest extends TestCase {
                 positions61.add(positions61.get(0));
 
                 ArrayList<Surface> surfaces = new ArrayList<Surface>();
-                /*
-                 * surfaces.add(makeSurface(builder, positions1)); surfaces.add(makeSurface(builder, positions2)); surfaces.add(makeSurface(builder,
-                 * positions3)); surfaces.add(makeSurface(builder, positions4)); surfaces.add(makeSurface(builder, positions5));
-                 * surfaces.add(makeSurface(builder, positions6)); surfaces.add(makeSurface(builder, positions7)); surfaces.add(makeSurface(builder,
-                 * positions8)); surfaces.add(makeSurface(builder, positions9)); surfaces.add(makeSurface(builder, positions10));
-                 * surfaces.add(makeSurface(builder, positions11)); surfaces.add(makeSurface(builder, positions12)); surfaces.add(makeSurface(builder,
-                 * positions13)); surfaces.add(makeSurface(builder, positions14)); surfaces.add(makeSurface(builder, positions15));
-                 * surfaces.add(makeSurface(builder, positions16)); surfaces.add(makeSurface(builder, positions17)); surfaces.add(makeSurface(builder,
-                 * positions18));
-                 */
+                
+                surfaces.add(makeSurface(builder, positions1));
+                surfaces.add(makeSurface(builder, positions2));
+                surfaces.add(makeSurface(builder, positions3));
+                surfaces.add(makeSurface(builder, positions4));
+                surfaces.add(makeSurface(builder, positions5));
+                surfaces.add(makeSurface(builder, positions6));
+                surfaces.add(makeSurface(builder, positions7));
+                surfaces.add(makeSurface(builder, positions8));
+                surfaces.add(makeSurface(builder, positions9));
+                surfaces.add(makeSurface(builder, positions10));
+                surfaces.add(makeSurface(builder, positions11));
+                surfaces.add(makeSurface(builder, positions12));
+                surfaces.add(makeSurface(builder, positions13));
+                surfaces.add(makeSurface(builder, positions14));
+                surfaces.add(makeSurface(builder, positions15));
+                surfaces.add(makeSurface(builder, positions16));
+                surfaces.add(makeSurface(builder, positions17));
+                surfaces.add(makeSurface(builder, positions18));                 
                 surfaces.add(makeSurface(builder, positions19));
                 surfaces.add(makeSurface(builder, positions20));
                 surfaces.add(makeSurface(builder, positions21));
