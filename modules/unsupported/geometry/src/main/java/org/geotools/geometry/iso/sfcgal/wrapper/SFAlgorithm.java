@@ -172,10 +172,27 @@ public class SFAlgorithm {
 
         public static native @ByRef SFGeometry tesselate(@ByRef SFGeometry g);
 
+        /**
+         * Compute union on 2D geometries
+         * @param gA SFGeometry Instance
+         * @param gB SFGeometry Instance
+         * @return Union on 2D geometries
+         */
         public static native @ByRef SFGeometry union_(@ByRef SFGeometry gA, @ByRef SFGeometry gB);
 
+        /**
+         * Compute union on 3D geometries
+         * @param gA SFGeometry Instance
+         * @param gB SFGeometry Instance
+         * @return Union on 3D geometries
+         */
         public static native @ByRef SFGeometry union3D(@ByRef SFGeometry gA, @ByRef SFGeometry gB);
 
+        /**
+         * Compute volume of Solid
+         * @param gA SFSolid Instance
+         * @return Volume of Solid
+         */
         public static native double volume(@ByRef SFGeometry g);
 
 }

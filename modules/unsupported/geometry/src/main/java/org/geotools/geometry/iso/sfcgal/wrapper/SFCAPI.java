@@ -37,9 +37,7 @@ public class SFCAPI {
 
         public static void SFCGAL_io_write_binary_prepared(SFPreparedGeometry geom, String buffer,
                         int len) {
-                System.out.println("call1");
                 SFCGAL_io_write_binary_prepared(geom, buffer.toCharArray(), len);
-                System.out.println("call2");
         }
 
         public static native void SFCGAL_io_write_binary_prepared(SFPreparedGeometry geom,

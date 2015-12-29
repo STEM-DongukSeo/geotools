@@ -7,6 +7,7 @@
 class SFSolid : public SFGeometry {
 public:	
 	SFSolid() : SFGeometry(new SFCGAL::Solid()) { }
+	
 	SFSolid(const std::vector< void * > & shells) {
 		std::vector<SFCGAL::PolyhedralSurface>* cpp_base_shell = new std::vector<SFCGAL::PolyhedralSurface>();
 
@@ -16,10 +17,13 @@ public:
 
 		data = new SFCGAL::Solid(*cpp_base_shell);
 	}
+	
 	SFSolid(const SFPolyhedralSurface& exteriorShell) : SFGeometry(new SFCGAL::Solid(*(SFCGAL::PolyhedralSurface *)(exteriorShell.get_data()))) { }
 	//Polygon(PolyhedralSurface* exteriorShell) : Surface(new SFCGAL::Solid(*(SFCGAL::PolyhedralSurface *)(exteriorShell->get_data()))) { }
 	//SFSolid(const SFSolid& other) : SFSurface(new SFCGAL::Solid(*other.data)) { }
+	
 	SFSolid(const SFCGAL::Solid& other) : SFGeometry(new SFCGAL::Solid(other)) { }
+	
 	SFSolid(SFCGAL::Solid* other) : SFGeometry(other) { }
 
 	SFSolid& operator=(const SFSolid& other) {

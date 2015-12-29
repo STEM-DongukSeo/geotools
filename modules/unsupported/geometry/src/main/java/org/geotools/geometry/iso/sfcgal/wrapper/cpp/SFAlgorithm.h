@@ -135,9 +135,8 @@ SFGeometry& intersection( const SFGeometry& gA, const SFGeometry& gB) {
 SFGeometry& intersection3D( const SFGeometry& gA, const SFGeometry& gB) {
 	std::auto_ptr<SFCGAL::Geometry> p = SFCGAL::algorithm::intersection3D(*(gA.get_data()), *(gB.get_data()));
 
-	// geometry type에 맞게 객체 생성
-	//SFGeometry *geometry = new SFGeometry(p.release());
-	SFGeometry *geometry = getSFGeometry(p.release());
+	SFGeometry *geometry = new SFGeometry(p.release());
+	//SFGeometry *geometry = getSFGeometry(p.release());
 
 	return *geometry;
 }
