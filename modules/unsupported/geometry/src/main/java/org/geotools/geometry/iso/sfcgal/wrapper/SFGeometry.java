@@ -60,12 +60,12 @@ public class SFGeometry extends Pointer {
         public native SFGeometry clone();
 
         /**
-         * @return Returns the type of the geometry as String
+         * @return Returns the type of the geometry as string
          */
         public native @StdString String geometryType();
 
         /**
-         * @return Returns the type of the geometry as Integer
+         * @return Returns the type of the geometry as integer
          */
         public native int geometryTypeId();
 
@@ -120,18 +120,35 @@ public class SFGeometry extends Pointer {
         /**
          * Compute the distance to another geometry
          * @param other
-         * @return 
+         * @return Returns the distance to another geometry
          */
         public native double distance(@ByRef SFGeometry other);
 
+        /**
+         * Compute the 3D distance to another geometry
+         * @param other
+         * @return Returns the 3D distance to another geometry
+         */
         public native double distance3D(@ByRef SFGeometry other);
 
         public native void round(long scale);
 
+        /**
+         * @return Returns the number of geometries in a collection of geometries
+         */
         public native int numGeometries();
 
+        /**
+         * @param n
+         * @return Returns the n-th geometry
+         */
         public native @ByRef SFGeometry geometryN(int n);
 
+        /**
+         * Equal operator
+         * @param other
+         * @return True, if the geometry is equal to another geometry
+         */
         @Name("operator==")
         public native @Cast("bool") boolean equals(@ByRef SFGeometry other);
 
