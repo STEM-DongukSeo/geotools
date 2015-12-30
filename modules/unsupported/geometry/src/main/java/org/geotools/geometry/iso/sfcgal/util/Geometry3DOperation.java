@@ -30,22 +30,60 @@ import org.opengis.geometry.TransfiniteSet;
  */
 public class Geometry3DOperation {
 
-        /**
-         * Computes the distance between two geometries using distance3D operation of SFCGAL
-         * @param gA
-         * @param gB
-         * @return distance between two geometry objects
-         */
-        public static double distance(Geometry gA, Geometry gB) {
-                SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
-                SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
+        private GeometryImpl gA, gB;
 
-                return SFAlgorithm.distance3D(geometryA, geometryB);
-        }
+        private Geometry unionGeometry = null;
+
+        private Geometry differenceGeometry = null;
+
+        private Geometry symDifferenceGeometry = null;
+
+        private Geometry intersectionGeometry = null;
+
+        private SFGeometry geometryA = null;
+
+        private SFGeometry geometryB = null;
+
+        private IntersectionMatrix3D tIM = null;
+
+        private SFGeometry intersection = null;
+
+        private SFGeometry union = null;
+
+        private SFGeometry difference = null;
+
+        private boolean calledEquals = false;
+
+        private boolean calledIntersects = false;
+
+        private boolean calledTouches = false;
+
+        private boolean calledContains = false;
+
+        private boolean calledWithin = false;
+
+        private boolean calledCrosses = false;
+
+        private boolean calledOverlaps = false;
+
+        private boolean isEquals = false;
+
+        private boolean isIntersects = false;
+
+        private boolean isTouches = false;
+
+        private boolean isContains = false;
+
+        private boolean isWithin = false;
+
+        private boolean isCrosses = false;
+
+        private boolean isOverlaps = false;
+
 
         /**
          * @param geom
-         * @return ConvexHull of geometry
+         * @return ConvexHull of the geometry
          */
         public static Geometry getConvexHull(GeometryImpl geom) {
                 SFGeometry g = SFCGALConvertor.geometryToSFCGALGeometry((Geometry) geom);
@@ -53,205 +91,215 @@ public class Geometry3DOperation {
 
                 return SFCGALConvertor.geometryFromSFCGALGeometry(convex);
         }
-
-        public static boolean relate(GeometryImpl gA, GeometryImpl gB,
-                        String intersectionPatternMatrix) {
-                return false;
-        }
-
-        /**
-         * @param gA
-         * @param gB
-         * @return TRUE, if the gA is equal to gB
-         */
-        public static boolean equals(GeometryImpl gA, GeometryImpl gB) {
-                SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
-                SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
-
-                return geometryA.equals(geometryB);
-        }
-
-        /**
-         * @param gA
-         * @param gB
-         * @return TRUE, if the gA is disjoint with gB
-         */
-        public static boolean disjoint(GeometryImpl gA, GeometryImpl gB) {
-                SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
-                SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
-
-                return !SFAlgorithm.intersects3D(geometryA, geometryB);
-        }
-
         
-        /**
-         * @param gA
-         * @param gB
-         * @return TRUE, if the gA is intersect with gB
-         */
-        public static boolean intersects(GeometryImpl gA, GeometryImpl gB) {
-                SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
-                SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
-
-                return SFAlgorithm.intersects3D(geometryA, geometryB);
+        public Geometry3DOperation(GeometryImpl gA, GeometryImpl gB) {
+                this.gA = gA;
+                this.gB = gB;
+                geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
+                geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
+                intersection = SFAlgorithm.intersection3D(geometryA, geometryB);
         }
 
-        /**
-         * @param gA
-         * @param gB
-         * @return TRUE, if the gA touches gB.
-         */
-        public static boolean touches(GeometryImpl gA, GeometryImpl gB) {
-                IntersectionMatrix3D tIM = null;
-                try {
-                        tIM = RelateOp3D.relate(gA, gB);
-                } catch (Exception e) {
-                        e.printStackTrace();
-                }
-
-                boolean rValue = false;
-                if (tIM.matches("FT**") || tIM.matches("F*T*") || tIM.matches("F**T")) {
-                        rValue = true;
-                }
-
-                return rValue;
-        }
-
-        /**
-         * @param gA
-         * @param gB
-         * @return TRUE, if the gA is spatially contain gB.
-         */
-        public static boolean contains(GeometryImpl gA, GeometryImpl gB) {
-                SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
-                SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
-
-                return !geometryA.equals(geometryB) && !touches(gA, gB)
-                                && SFAlgorithm.covers3D(geometryA, geometryB);
-        }
-
-        /**
-         * @param gA
-         * @param gB
-         * @return TRUE, if the gA is spatially within gB.
-         */
-        public static boolean within(GeometryImpl gA, GeometryImpl gB) {
-                return contains(gB, gA);
-        }
-
-        /**
-         * @param gA
-         * @param gB
-         * @return TRUE, if the gA overlaps with gB.
-         */
-        public static boolean overlaps(GeometryImpl gA, GeometryImpl gB) {
-                SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
-                SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
-                SFGeometry intersection = SFAlgorithm.intersection3D(geometryA, geometryB);
-                boolean rValue = false;
-
-                if (equals(gA, gB))
-                        return rValue;
-                if (!intersection.isEmpty() && !contains(gA, gB) && !contains(gB, gA)
-                                && !touches(gA, gB)) {
-                        if (geometryA.dimension() == 1 && geometryB.dimension() == 1) {
-                                if (!intersection.isEmpty() && intersection.dimension() == 1) {
-                                        rValue = true;
-                                }
-                        }
-                        rValue = true;
-                }
-
-                return rValue;
-        }
-
-        /**
-         * @param gA
-         * @param gB
-         * @return TRUE, if the gA crosses with gB.
-         */
-        public static boolean crosses(GeometryImpl gA, GeometryImpl gB) {
-                SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
-                SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
-                SFGeometry intersection = SFAlgorithm.intersection3D(geometryA, geometryB);
-                boolean rValue = false;
-
-                if (geometryA.dimension() == 1 && geometryB.dimension() == 1) {
-                        IntersectionMatrix3D tIM = null;
+        public IntersectionMatrix3D getIntersectionMatrix() {
+                if (tIM == null) {
                         try {
                                 tIM = RelateOp3D.relate(gA, gB);
                         } catch (Exception e) {
                                 e.printStackTrace();
                         }
-
-                        if (tIM.matches("0***")) {
-                                rValue = true;
-                        }
-
-                        return rValue;
-                } else if (!intersection.isEmpty() && !touches(gA, gB) && !contains(gA, gB)
-                                && !contains(gB, gA)) {
-                        rValue = true;
                 }
-
-                return rValue;
+                return tIM;
         }
 
         /**
-         * Computes the union between two geometries using union3D operation of SFCGAL
+         * Compute the distance between two geometries using distance3D operation of SFCGAL
+         * 
          * @param gA
          * @param gB
+         * @return distance between two geometry objects
+         */
+        public double distance() {
+                return SFAlgorithm.distance3D(geometryA, geometryB);
+        }
+
+
+        public boolean relate(String intersectionPatternMatrix) {
+                IntersectionMatrix3D tIM = getIntersectionMatrix();
+                return tIM.matches(intersectionPatternMatrix);
+        }
+
+        /**
+         * @return TRUE, if the gA is equal to gB
+         */
+        public boolean equals() {
+                if (!calledEquals) {
+                        calledEquals = true;
+                        isEquals = geometryA.equals(geometryB);
+                }
+                return isEquals;
+        }
+
+        /**
+         * @return TRUE, if the gA is disjoint with gB
+         */
+        public boolean disjoint() {
+                if (!calledIntersects) {
+                        calledIntersects = true;
+                        isIntersects = SFAlgorithm.intersects3D(geometryA, geometryB);
+                }
+                return isIntersects;
+        }
+
+        /**
+         * @return TRUE, if the gA is intersect with gB
+         */
+        public boolean intersects() {
+                return !this.intersects();
+        }
+
+        /**
+         * @return TRUE, if the gA touches gB.
+         */
+        public boolean touches() {
+                if (!calledTouches) {
+                        calledTouches = true;
+                        IntersectionMatrix3D tIM = getIntersectionMatrix();
+
+                        isTouches = false;
+                        if (tIM.matches("FT**") || tIM.matches("F*T*") || tIM.matches("F**T")) {
+                                isTouches = true;
+                        }
+                }
+                return isTouches;
+        }
+
+        /**
+         * @return TRUE, if the gA is spatially contain gB.
+         */
+        public boolean contains() {
+                if (!calledContains) {
+                        calledContains = true;
+                        isContains = !equals() && !touches()
+                                        && SFAlgorithm.covers3D(geometryA, geometryB);
+                }
+                return isContains;
+        }
+
+        /**
+         * @return TRUE, if the gA is spatially within gB.
+         */
+        public boolean within() {
+                if (!calledWithin) {
+                        calledWithin = true;
+                        isWithin = !equals() && !touches()
+                                        && SFAlgorithm.covers3D(geometryB, geometryA);
+                }
+                return isWithin;
+        }
+
+        /**
+         * @return TRUE, if the gA overlaps with gB.
+         */
+        public boolean overlaps() {
+                if (!calledOverlaps) {
+                        calledOverlaps = true;
+                        if (equals())
+                                isOverlaps = false;
+                        else if (!intersection.isEmpty() && !contains() && !within() && !touches()) {
+                                if (geometryA.dimension() == 1 && geometryB.dimension() == 1) {
+                                        if (!intersection.isEmpty()
+                                                        && intersection.dimension() == 1) {
+                                                isOverlaps = true;
+                                        }
+                                } else
+                                        isOverlaps = true;
+                        }
+                }
+                return isOverlaps;
+        }
+
+        /**
+         * @return TRUE, if the gA crosses with gB.
+         */
+        public boolean crosses() {
+                if (!calledCrosses) {
+                        calledCrosses = true;
+
+                        if (geometryA.dimension() == 1 && geometryB.dimension() == 1) {
+                                IntersectionMatrix3D tIM = getIntersectionMatrix();
+
+                                if (tIM.matches("0***")) {
+                                        isCrosses = true;
+                                }
+
+                                return isCrosses;
+                        } else if (!intersection.isEmpty() && !touches() && !contains()
+                                        && !within()) {
+                                isCrosses = true;
+                        }
+                }
+                return isCrosses;
+        }
+
+        /**
+         * Compute the union between two geometries using union3D operation of SFCGAL
          * @return union between two geometry objects
          */
-        public static TransfiniteSet union(GeometryImpl gA, GeometryImpl gB) {
-                SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
-                SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
-                SFGeometry union = SFAlgorithm.union3D(geometryA, geometryB);
+        public TransfiniteSet union() {
+                if (union == null) {
+                        union = SFAlgorithm.union3D(geometryA, geometryB);
+                }
+                if (unionGeometry == null) {
 
-                return SFCGALConvertor.geometryFromSFCGALGeometry(union);
+                        unionGeometry = SFCGALConvertor.geometryFromSFCGALGeometry(union);
+                }
+                return unionGeometry;
         }
 
         /**
-         * Computes the union between two geometries using intersection3D operation of SFCGAL
-         * @param gA
-         * @param gB
+         * Compute the union between two geometries using intersection3D operation of SFCGAL
          * @return intersection between two geometry objects
          */
-        public static TransfiniteSet intersection(GeometryImpl gA, GeometryImpl gB) {
-                SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
-                SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
-                SFGeometry intersection = SFAlgorithm.intersection3D(geometryA, geometryB);
-
-                return SFCGALConvertor.geometryFromSFCGALGeometry(intersection);
+        public TransfiniteSet intersection() {
+                if (intersectionGeometry == null) {
+                        intersectionGeometry = SFCGALConvertor
+                                        .geometryFromSFCGALGeometry(intersection);
+                }
+                return intersectionGeometry;
         }
 
         /**
-         * Computes the difference between two geometries using difference3D operation of SFCGAL
-         * @param gA
-         * @param gB
+         * Compute the difference between two geometries using difference3D operation of SFCGAL
          * @return difference between two geometry objects
          */
-        public static TransfiniteSet difference(GeometryImpl gA, GeometryImpl gB) {
-                SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
-                SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
-                SFGeometry difference = SFAlgorithm.difference3D(geometryA, geometryB);
+        public TransfiniteSet difference() {
+                if (difference == null) {
+                        difference = SFAlgorithm.difference3D(geometryA, geometryB);
+                }
+                if (differenceGeometry == null) {
 
-                return SFCGALConvertor.geometryFromSFCGALGeometry(difference);
+                        differenceGeometry = SFCGALConvertor.geometryFromSFCGALGeometry(difference);
+                }
+                return differenceGeometry;
         }
 
         /**
-         * Computes the symmetric Difference between two geometries using 3D operations of SFCGAL
-         * @param gA
-         * @param gB
+         * Compute the symmetric Difference between two geometries using 3D operations of SFCGAL
          * @return symmetric Difference between two geometry objects
          */
-        public static TransfiniteSet symmetricDifference(GeometryImpl gA, GeometryImpl gB) {
-                SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
-                SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
-                SFGeometry union = SFAlgorithm.union3D(geometryA, geometryB);
-                SFGeometry intersection = SFAlgorithm.intersection3D(geometryA, geometryB);
-                SFGeometry symDifference = SFAlgorithm.difference3D(union, intersection);
-
-                return SFCGALConvertor.geometryFromSFCGALGeometry(symDifference);
+        public TransfiniteSet symmetricDifference() {
+                if (union == null) {
+                        union = SFAlgorithm.union3D(geometryA, geometryB);
+                }
+                if (difference == null) {
+                        difference = SFAlgorithm.difference3D(geometryA, geometryB);
+                }
+                if (symDifferenceGeometry == null) {
+                        SFGeometry symDifference = SFAlgorithm.difference3D(union, intersection);
+                        symDifferenceGeometry = SFCGALConvertor
+                                        .geometryFromSFCGALGeometry(symDifference);
+                }
+                return symDifferenceGeometry;
         }
+
 }

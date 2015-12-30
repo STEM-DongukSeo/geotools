@@ -44,6 +44,7 @@ import org.geotools.geometry.iso.primitive.RingImplUnsafe;
 import org.geotools.geometry.iso.primitive.SurfaceBoundaryImpl;
 import org.geotools.geometry.iso.primitive.SurfaceImpl;
 import org.geotools.geometry.iso.sfcgal.util.Geometry3DOperation;
+import org.geotools.geometry.iso.sfcgal.util.Geometry3DOperationTest;
 import org.geotools.geometry.iso.topograph2D.Coordinate;
 import org.geotools.geometry.iso.topograph2D.IntersectionMatrix;
 import org.geotools.geometry.iso.util.Assert;
@@ -281,7 +282,8 @@ public abstract class GeometryImpl implements Geometry, Serializable  {
 	        int g1Dim = geometry.getCoordinateDimension();
 	        
 	        if(g0Dim == 3 && g1Dim == 3) {
-	            return Geometry3DOperation.distance(this, geometry);
+	                Geometry3DOperation geom3DOp = new Geometry3DOperation(this, (GeometryImpl) geometry);
+                        return geom3DOp.distance();
 	        }
 	        /* */
 	        
@@ -560,7 +562,7 @@ public abstract class GeometryImpl implements Geometry, Serializable  {
 	public Geometry getConvexHull() {
 	        /* for 3D coordinate geometry */
 	        if(getCoordinateDimension() == 3) {
-	            return Geometry3DOperation.getConvexHull(this);
+	                return Geometry3DOperation.getConvexHull(this);
 	        }
 	        /* */
 	        
@@ -596,7 +598,8 @@ public abstract class GeometryImpl implements Geometry, Serializable  {
 	        int d2 = geom2.getCoordinateDimension();
 	        
 	        if(d1 == 3 && d2 == 3) {
-	            return Geometry3DOperation.relate(geom1, geom2, intersectionPatternMatrix);
+	                Geometry3DOperation geom3DOp = new Geometry3DOperation(geom1, geom2);
+                        return geom3DOp.relate(intersectionPatternMatrix);
 	        }
 	        /* */
 	        
@@ -624,7 +627,8 @@ public abstract class GeometryImpl implements Geometry, Serializable  {
 	        int d2 = geom.getCoordinateDimension();
 	        
 	        if(d1 == 3 && d2 == 3) {
-	            return Geometry3DOperation.relate(this, geom, intersectionPatternMatrix);
+	                Geometry3DOperation geom3DOp = new Geometry3DOperation(this, geom);
+                        return geom3DOp.relate(intersectionPatternMatrix);
 	        }
 	        /* */
 	        
@@ -645,7 +649,8 @@ public abstract class GeometryImpl implements Geometry, Serializable  {
 	        int d2 = geom.getCoordinateDimension();
 	        
 	        if(d1 == 3 && d2 == 3) {
-	            return Geometry3DOperation.contains(this, geom);
+	                Geometry3DOperation geom3DOp = new Geometry3DOperation(this, geom);
+                        return geom3DOp.contains();
 	        }
 	        /* */
 	        
@@ -672,7 +677,8 @@ public abstract class GeometryImpl implements Geometry, Serializable  {
 	        int d2 = geom.getCoordinateDimension();
 	        
 	        if(d1 == 3 && d2 == 3) {
-	            return Geometry3DOperation.contains(geom, this);
+	                Geometry3DOperation geom3DOp = new Geometry3DOperation(this, geom);
+                        return geom3DOp.within();
 	        }
 	        /* */
 	        
@@ -759,7 +765,8 @@ public abstract class GeometryImpl implements Geometry, Serializable  {
 	        int d2 = geom.getCoordinateDimension();
 	        
 	        if(d1 == 3 && d2 == 3) {
-	            return Geometry3DOperation.disjoint(this, geom);
+	                Geometry3DOperation geom3DOp = new Geometry3DOperation(this, geom);
+                        return geom3DOp.disjoint();
 	        }
 	        /* */
 
@@ -827,7 +834,8 @@ public abstract class GeometryImpl implements Geometry, Serializable  {
 	        int d2 = geom.getCoordinateDimension();
 	        
 	        if(d1 == 3 && d2 == 3) {
-	            return Geometry3DOperation.equals(this, geom);
+	                Geometry3DOperation geom3DOp = new Geometry3DOperation(this, geom);
+	                return geom3DOp.equals();
 	        }
 	        /* */
 		
@@ -895,7 +903,8 @@ public abstract class GeometryImpl implements Geometry, Serializable  {
 	        int d2 = geom.getCoordinateDimension();
 	        
 	        if(d1 == 3 && d2 == 3) {
-	            return Geometry3DOperation.touches(this, geom);
+	                Geometry3DOperation geom3DOp = new Geometry3DOperation(this, geom);
+                        return geom3DOp.touches();
 	        }
 	        /* */
 		
@@ -975,7 +984,8 @@ public abstract class GeometryImpl implements Geometry, Serializable  {
 	        int coordD2 = geom.getCoordinateDimension();
 	        
 	        if(coordD1 == 3 && coordD2 == 3) {
-	            return Geometry3DOperation.overlaps(this, geom);
+	                Geometry3DOperation geom3DOp = new Geometry3DOperation(this, geom);
+                        return geom3DOp.overlaps();
 	        }
 	        /* */
 		
@@ -1054,7 +1064,8 @@ public abstract class GeometryImpl implements Geometry, Serializable  {
 	        int coordD2 = geom.getCoordinateDimension();
 	        
 	        if(coordD1 == 3 && coordD2 == 3) {
-	            return Geometry3DOperation.crosses(this, geom);
+	                Geometry3DOperation geom3DOp = new Geometry3DOperation(this, geom);
+                        return geom3DOp.crosses();
 	        }
 	        /* */
 		
@@ -1135,7 +1146,8 @@ public abstract class GeometryImpl implements Geometry, Serializable  {
 	        int d2 = otherGeom.getCoordinateDimension();
 	        
 	        if(d1 == 3 && d2 == 3) {
-	            return Geometry3DOperation.union(this, otherGeom);
+	                Geometry3DOperation geom3DOp = new Geometry3DOperation(this, otherGeom);
+                        return geom3DOp.union();
 	        }
 	        /* */
 		
@@ -1164,7 +1176,8 @@ public abstract class GeometryImpl implements Geometry, Serializable  {
 	        int d2 = otherGeom.getCoordinateDimension();
 	        
 	        if(d1 == 3 && d2 == 3) {
-	            return Geometry3DOperation.intersection(this, otherGeom);
+	                Geometry3DOperation geom3DOp = new Geometry3DOperation(this, otherGeom);
+                        return geom3DOp.intersection();
 	        }
 	        /* */
 		
@@ -1191,7 +1204,8 @@ public abstract class GeometryImpl implements Geometry, Serializable  {
 	        int d2 = otherGeom.getCoordinateDimension();
 	        
 	        if(d1 == 3 && d2 == 3) {
-	            return Geometry3DOperation.difference(this, otherGeom);
+	                Geometry3DOperation geom3DOp = new Geometry3DOperation(this, otherGeom);
+                        return geom3DOp.difference();
 	        }
 	        /* */
 		
@@ -1218,7 +1232,8 @@ public abstract class GeometryImpl implements Geometry, Serializable  {
 	        int d2 = otherGeom.getCoordinateDimension();
 	        
 	        if(d1 == 3 && d2 == 3) {
-	            return Geometry3DOperation.symmetricDifference(this, otherGeom);
+	                Geometry3DOperation geom3DOp = new Geometry3DOperation(this, otherGeom);
+                        return geom3DOp.symmetricDifference();
 	        }
 	        /* */
 		
