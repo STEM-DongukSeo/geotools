@@ -18,6 +18,7 @@ import org.opengis.feature.type.ComplexType;
 import org.opengis.feature.type.Name;
 import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.feature.type.Schema;
+import org.opengis.geometry.primitive.Solid;
 
 import com.vividsolutions.jts.geom.LineString;
 
@@ -16544,9 +16545,9 @@ public class GMLSchema extends SchemaImpl {
      *
      * @generated
      */
-    public static final ComplexType SOLIDPROPERTYTYPE_TYPE = build_SOLIDPROPERTYTYPE_TYPE();
+    public static final /*ComplexType*/ AttributeType SOLIDPROPERTYTYPE_TYPE = build_SOLIDPROPERTYTYPE_TYPE();
     
-    private static ComplexType build_SOLIDPROPERTYTYPE_TYPE() {
+    /*private static ComplexType build_SOLIDPROPERTYTYPE_TYPE() {
         ComplexType builtType = new AbstractLazyComplexTypeImpl(
                 new NameImpl("http://www.opengis.net/gml/3.2","SolidPropertyType"),
                 false, false, null, null) {
@@ -16616,8 +16617,19 @@ public class GMLSchema extends SchemaImpl {
             }
         };
         return builtType;
+    }*/
+    
+    private static AttributeType build_SOLIDPROPERTYTYPE_TYPE() {
+        AttributeType builtType = new AbstractLazyAttributeTypeImpl(
+                new NameImpl("http://www.opengis.net/gml/3.2","SolidPropertyType"),
+                Solid.class, false, false, null, null) {
+            @Override
+            public AttributeType buildSuper() {
+                return XSSchema.ANYTYPE_TYPE;
+            }
+        };
+        return builtType;
     }
-
     /**
      * <p>
      *  <pre>
@@ -16640,9 +16652,9 @@ public class GMLSchema extends SchemaImpl {
      *
      * @generated
      */
-    public static final ComplexType SOLIDTYPE_TYPE = build_SOLIDTYPE_TYPE();
+    public static final /* ComplexType */ AttributeType SOLIDTYPE_TYPE = build_SOLIDTYPE_TYPE();
     
-    private static ComplexType build_SOLIDTYPE_TYPE() {
+    /*private static ComplexType build_SOLIDTYPE_TYPE() {
         ComplexType builtType = new AbstractLazyComplexTypeImpl(
                 new NameImpl("http://www.opengis.net/gml/3.2","SolidType"),
                 false, false, null, null) {
@@ -16664,6 +16676,18 @@ public class GMLSchema extends SchemaImpl {
                         new NameImpl("http://www.opengis.net/gml/3.2","interior"),
                         0, 2147483647, false, null));
                 return descriptors;
+            }
+        };
+        return builtType;
+    }*/
+    
+    private static AttributeType build_SOLIDTYPE_TYPE() {
+        AttributeType builtType = new AbstractLazyAttributeTypeImpl(
+                new NameImpl("http://www.opengis.net/gml/3.2","SolidType"),
+                Solid.class, false, false, null, null) {
+            @Override
+            public AttributeType buildSuper() {
+                return ABSTRACTSOLIDTYPE_TYPE;
             }
         };
         return builtType;

@@ -328,9 +328,18 @@ public class FeatureTypeRegistry {
             maxOccurs = Integer.MAX_VALUE;
         }
 
+        //hgryoo
         if (!(type instanceof AttributeTypeProxy)
-                && (Geometry.class.isAssignableFrom(type.getBinding()) || CurvedGeometry.class
-                        .isAssignableFrom(type.getBinding()))) {
+                && (Geometry.class.isAssignableFrom(type.getBinding()) 
+                        || CurvedGeometry.class.isAssignableFrom(type.getBinding()) 
+                        || org.opengis.geometry.Geometry.class.isAssignableFrom(type.getBinding())
+                    )) {
+           
+            if(org.opengis.geometry.Geometry.class.isAssignableFrom(type.getBinding())) {
+                System.out.println();
+            }
+            
+            
             // create geometry descriptor with the simple feature type CRS
             GeometryType geomType = new GeometryTypeImpl(type.getName(), type.getBinding(), crs,
                     type.isIdentified(), type.isAbstract(), type.getRestrictions(),
@@ -627,7 +636,7 @@ public class FeatureTypeRegistry {
             
             for (Configuration config : helper.getConfigurations()) {
                 addSchemas(Schemas.findSchemas(config));
-            }            
+            } 
            
             FOUNDATION_TYPES.putAll(typeRegistry);
         }

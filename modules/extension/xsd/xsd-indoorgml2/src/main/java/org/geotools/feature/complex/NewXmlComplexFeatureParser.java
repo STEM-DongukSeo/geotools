@@ -14,7 +14,9 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  *    Lesser General Public License for more details.
  */
-package org.geotools.data.wfs.internal.parsers;
+package org.geotools.feature.complex;
+
+import static org.xmlpull.v1.XmlPullParser.END_TAG;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,16 +34,14 @@ import org.geotools.data.complex.config.Types;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.AttributeBuilder;
 import org.geotools.feature.AttributeImpl;
+import org.geotools.feature.ComplexFeatureBuilder;
 import org.geotools.feature.LenientFeatureFactoryImpl;
 import org.geotools.feature.NameImpl;
-import org.geotools.feature.ComplexFeatureBuilder;
 import org.geotools.feature.type.AttributeDescriptorImpl;
 import org.geotools.gml3.GML;
 import org.opengis.feature.Attribute;
 import org.opengis.feature.ComplexAttribute;
 import org.opengis.feature.Feature;
-import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory;
 import org.opengis.feature.Property;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.AttributeType;
@@ -51,6 +51,8 @@ import org.opengis.feature.type.GeometryType;
 import org.opengis.feature.type.Name;
 import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.feature.type.PropertyType;
+import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -59,8 +61,8 @@ import org.xmlpull.v1.XmlPullParserException;
  * 
  * @author Adam Brown (Curtin University of Technology)
  */
-public class XmlComplexFeatureParser extends
-		XmlFeatureParser<FeatureType, Feature> {
+public class NewXmlComplexFeatureParser extends
+    NewXmlFeatureParser<FeatureType, Feature> {
 	/**
 	 * The feature builder used to construct the features.
 	 */
@@ -92,7 +94,7 @@ public class XmlComplexFeatureParser extends
      *            The name of the feature descriptor.
      * @throws IOException
      */
-    public XmlComplexFeatureParser(InputStream getFeatureResponseStream,
+    public NewXmlComplexFeatureParser(InputStream getFeatureResponseStream,
                     FeatureType targetType, QName featureDescriptorName)
                     throws IOException {
             super(getFeatureResponseStream, targetType, featureDescriptorName);
@@ -113,7 +115,7 @@ public class XmlComplexFeatureParser extends
 	 *            Filter to apply to the features.
 	 * @throws IOException
 	 */
-	public XmlComplexFeatureParser(InputStream getFeatureResponseStream,
+	public NewXmlComplexFeatureParser(InputStream getFeatureResponseStream,
 			FeatureType targetType, QName featureDescriptorName, Filter filter)
 			throws IOException {
 		super(getFeatureResponseStream, targetType, featureDescriptorName);
@@ -176,7 +178,7 @@ public class XmlComplexFeatureParser extends
 		// Check whether anything is waiting for this attribute and, if so,
 		// populate them.
 		if (placeholderComplexAttributes.containsKey(id)) {
-			for (Attribute placeholderComplexAttribute : this.placeholderComplexAttributes
+		        for (Attribute placeholderComplexAttribute : this.placeholderComplexAttributes
 					.get(id)) {
 				placeholderComplexAttribute.setValue(value.getValue());
 			}
@@ -210,7 +212,7 @@ public class XmlComplexFeatureParser extends
 			} else {
 				// If not, then we create a placeholderComplexAttribute instead:
 				Attribute placeholderComplexAttribute = new AttributeImpl(
-						Collections.<Property> emptyList(), expectedType, null);
+						new ArrayList<Property>(), expectedType, null);
 
 				// I must maintain a reference back to this object so that I can
 				// change it once its target is found:
@@ -275,7 +277,7 @@ public class XmlComplexFeatureParser extends
 		// the end of the document:
 		int tagType;
 		do {
-			tagType = parser.next();
+			tagType = parser.next();			
 		} while (tagType != XmlPullParser.START_TAG
 				&& tagType != XmlPullParser.END_TAG
 				&& tagType != XmlPullParser.END_DOCUMENT);
@@ -289,7 +291,11 @@ public class XmlComplexFeatureParser extends
 			// there's a descriptor by that name in the type:
 			Name currentTagName = new NameImpl(parser.getNamespace(),
 					parser.getName());
-
+			
+			if(currentTagName.getLocalPart().equalsIgnoreCase("Geometry3D")) {
+			    System.out.println();
+			}
+			
 			PropertyDescriptor descriptor = complexType
 					.getDescriptor(currentTagName);
 			if (descriptor != null) {
@@ -300,12 +306,10 @@ public class XmlComplexFeatureParser extends
 				// Id if it's set:
 				PropertyType type = descriptor.getType();
 
-				String id = parser.getAttributeValue(GML.id.getNamespaceURI(),
-						GML.id.getLocalPart());
-
+				String id =  parser.getAttributeValue(org.geotools.gml3.v3_2.GML.id.getNamespaceURI(), org.geotools.gml3.v3_2.GML.id.getLocalPart());
+				
 				// Is it defined by an xlink?
-				String href = parser.getAttributeValue(
-						"http://www.w3.org/1999/xlink", "href");
+				String href = parser.getAttributeValue("http://www.w3.org/1999/xlink", "href");
 
 				// 4. Parse the tag's contents based on whether it's a:
 				if (href != null) {
@@ -316,9 +320,20 @@ public class XmlComplexFeatureParser extends
 					// We've got the attribute but the parser is still
 					// pointing at this tag so
 					// we have to advance it till we get to the end tag.
-					while (parser.next() != XmlPullParser.END_TAG)
-						;
+					 /*while (!parser.isEmptyElementTag() && parser.next() != XmlPullParser.END_TAG)
+                                             ;
+                                         */
 
+					 if(!parser.isEmptyElementTag()) {
+					    while (parser.next() != XmlPullParser.END_TAG)
+                                                ;
+					 } else {
+					     parser.next();
+					    /*while (parser.next() != XmlPullParser.START_TAG)
+					        ;*/
+					 }
+					 
+					 
 					return new ReturnAttribute(id, currentTagName,
 							hrefAttribute);
 				}
@@ -354,18 +369,8 @@ public class XmlComplexFeatureParser extends
 
 						// Add the value to the list if it's not null or if
 						// nulls are allowed by the descriptor.
-						if (value != null || descriptor.isNillable()) {// add
-																		// the
-																		// result
-																		// of
-																		// buildSimpleContent(type,
-																		// value)
-																		// to
-																		// the
-																		// list
-																		// and
-																		// return
-																		// it.
+						if (value != null || descriptor.isNillable()) {
+						 // add the result of buildSimpleContent(type, value) to the list and return it.
 							AttributeType simpleContentType = getSimpleContentType((AttributeType) type);
 
 							FilterFactory ff = CommonFactoryFinder
@@ -384,9 +389,11 @@ public class XmlComplexFeatureParser extends
 						// We've got the attribute but the parser is still
 						// pointing at this tag so
 						// we have to advance it till we get to the end tag.
-						while (parser.next() != XmlPullParser.END_TAG)
-							;
-
+						 while (parser.next() != XmlPullParser.END_TAG)
+	                                                ;
+						 
+						 
+						 
 						return new ReturnAttribute(id, currentTagName, list);
 					}
 
@@ -427,7 +434,10 @@ public class XmlComplexFeatureParser extends
 						this.registerGmlTarget(id,
 								(ComplexAttribute) attribteValue);
 					}
-
+					
+					parser.require(END_TAG, currentTagName.getNamespaceURI(), 
+					        currentTagName.getLocalPart());
+					
 					return new ReturnAttribute(id, currentTagName,
 							attribteValue);
 				} else if (type instanceof AttributeType
@@ -436,6 +446,14 @@ public class XmlComplexFeatureParser extends
 					// parseAttributeValue method.
 					Object attributeValue = super
 							.parseAttributeValue((AttributeDescriptor) descriptor);
+                                    
+					if(type instanceof GeometryType)
+					    while( parser.next() != XmlPullParser.END_TAG)
+					        ;
+					
+					parser.require(END_TAG, currentTagName.getNamespaceURI(),
+					        currentTagName.getLocalPart());
+					
 					return new ReturnAttribute(id, currentTagName,
 							attributeValue);
 				}

@@ -14,7 +14,7 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
  *    Lesser General Public License for more details.
  */
-package org.geotools.data.wfs.internal.parsers;
+package org.geotools.feature.complex;
 
 import static org.xmlpull.v1.XmlPullParser.END_TAG;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -40,6 +40,8 @@ import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.AttributeType;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.GeometryType;
+import org.opengis.geometry.primitive.Shell;
+import org.opengis.geometry.primitive.Solid;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -59,7 +61,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * Abstract form of XmlFeatureParser. Mostly taken out from @{@link XmlSimpleFeatureParser}.
  * @author Adam Brown (Curtin University of Technology)
  */
-public abstract class XmlFeatureParser<FT extends FeatureType, F extends Feature>
+public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feature>
 		implements GetParser<F> {
 
 	protected FT targetType;
@@ -78,7 +80,7 @@ public abstract class XmlFeatureParser<FT extends FeatureType, F extends Feature
 
 	private static final Logger LOGGER = Loggers.RESPONSES;
 
-	public XmlFeatureParser(final InputStream getFeatureResponseStream,
+	public NewXmlFeatureParser(final InputStream getFeatureResponseStream,
 			final FT targetType, QName featureDescriptorName)
 			throws IOException {
 		this.inputStream = getFeatureResponseStream;
@@ -197,7 +199,7 @@ public abstract class XmlFeatureParser<FT extends FeatureType, F extends Feature
 		final QName startingGeometryTagName = new QName(parser.getNamespace(),
 				parser.getName());
 		
-		int dimension = crsDimension(2);
+		int dimension = crsDimension(3);
 		CoordinateReferenceSystem crs = crs(DefaultGeographicCRS.WGS84);
 
 		Geometry geom;
@@ -234,7 +236,14 @@ public abstract class XmlFeatureParser<FT extends FeatureType, F extends Feature
                         geom = parseMultiSurface(dimension, crs);
                 } else if (GML.MultiPolygon.equals(startingGeometryTagName)) {
                         geom = parseMultiPolygon(dimension, crs);
-                } else {
+                
+                } else if(org.geotools.gml3.v3_2.GML.Solid.equals(startingGeometryTagName)) {
+                        parseSolid(dimension, crs);
+                        geom = null;
+                }
+		
+                
+                else {
                         throw new IllegalStateException("Unrecognized geometry element "
                                         + startingGeometryTagName);
                 }
@@ -245,7 +254,48 @@ public abstract class XmlFeatureParser<FT extends FeatureType, F extends Feature
 		return geom;
 	}
 
-	/**
+	private Solid parseSolid(int dimension, 
+	                    CoordinateReferenceSystem crs) throws XmlPullParserException,
+	                    IOException, NoSuchAuthorityCodeException, FactoryException {
+	    
+	    Solid geom = null;
+	    Shell shell = null;
+	    
+            parser.require(START_TAG, org.geotools.gml3.v3_2.GML.NAMESPACE, org.geotools.gml3.v3_2.GML.Solid.getLocalPart());
+
+            parser.nextTag();
+            parser.require(START_TAG, GML.NAMESPACE, null);
+
+            QName name = new QName(parser.getNamespace(), parser.getName());
+
+            if (GML.exterior.equals(name)) {
+                    parser.nextTag();
+                    //shell = parseLinearRing(dimension, crs);
+                    parser.nextTag();
+                    parser.require(END_TAG, GML.NAMESPACE, GML.exterior.getLocalPart());
+            } else if (GML.outerBoundaryIs.equals(name)) {
+                    parser.nextTag();
+                    parser.require(START_TAG, GML.NAMESPACE,
+                                    GML.LinearRing.getLocalPart());
+                    //shell = parseLinearRing(dimension, crs);
+                    parser.nextTag();
+                    parser.require(END_TAG, GML.NAMESPACE,
+                                    GML.outerBoundaryIs.getLocalPart());
+            } else {
+                    throw new IllegalStateException(
+                                    "Unknown polygon boundary element: " + name);
+            }
+
+            parser.nextTag();
+            parser.require(END_TAG, org.geotools.gml3.v3_2.GML.NAMESPACE, org.geotools.gml3.v3_2.GML.Solid.getLocalPart());
+
+            //geom = geomFac.createMultiPolygon(polygons.toArray(new Polygon[polygons
+            //                .size()]));
+            
+            return null;
+	}
+
+    /**
 	 * Parses a MultiPoint.
 	 * <p>
 	 * Precondition: parser positioned at a {@link GML#MultiPoint MultiPoint}

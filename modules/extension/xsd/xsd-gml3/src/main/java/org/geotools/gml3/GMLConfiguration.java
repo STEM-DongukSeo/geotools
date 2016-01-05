@@ -309,6 +309,12 @@ public class GMLConfiguration extends Configuration {
         container.registerComponentImplementation(GML.MultiCurveType,
                 org.geotools.gml3.bindings.ext.MultiCurveTypeBinding.class);
         
+        // support for Solid Type(hgryoo)
+        container.registerComponentImplementation(GML.AbstractSolidType, null);
+        container.registerComponentImplementation(GML.SolidType, null);
+        container.registerComponentImplementation(GML.SolidPropertyType, null);
+        
+        
         //extended bindings for arc/surface support
         if (isExtendedArcSurfaceSupport()) {
 

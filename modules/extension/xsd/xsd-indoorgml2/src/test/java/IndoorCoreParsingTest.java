@@ -1,91 +1,42 @@
-import static org.junit.Assert.assertNotNull;
-
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import org.geotools.GML;
-import org.geotools.GML.Version;
+import javax.xml.namespace.QName;
+
+import org.geotools.data.complex.config.EmfComplexFeatureReader;
+import org.geotools.data.complex.config.FeatureTypeRegistry;
 import org.geotools.feature.NameImpl;
-import org.geotools.gtxml.GTXML;
+import org.geotools.feature.complex.ComplexFeatureGraphGenerator;
+import org.geotools.feature.complex.NewXmlComplexFeatureParser;
+import org.geotools.feature.type.ComplexFeatureTypeFactoryImpl;
+import org.geotools.gml3.complex.GmlFeatureTypeRegistryConfiguration;
+import org.geotools.graph.build.feature.FeatureGraphGenerator;
+import org.geotools.graph.build.line.LineStringGraphGenerator;
+import org.geotools.graph.path.DijkstraShortestPathFinder;
+import org.geotools.graph.path.Path;
+import org.geotools.graph.structure.Edge;
+import org.geotools.graph.structure.Graph;
+import org.geotools.graph.structure.Node;
+import org.geotools.graph.traverse.standard.DijkstraIterator;
+import org.geotools.graph.traverse.standard.DijkstraIterator.EdgeWeighter;
 import org.geotools.indoorgml.core.INDOORCORE;
-import org.geotools.indoorgml.core.INDOORCOREConfiguration;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.geotools.xml.Parser;
+import org.geotools.xml.resolver.SchemaResolver;
 import org.junit.Test;
-import org.opengis.feature.Association;
+import org.opengis.feature.ComplexAttribute;
 import org.opengis.feature.Feature;
+import org.opengis.feature.GeometryAttribute;
 import org.opengis.feature.Property;
+import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.FeatureType;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 
 public class IndoorCoreParsingTest {
 
-    @Test
-    public void MapHashParsingTest() {
-        
-        //org.geotools.xml.Configuration configuration = new org.geotools.indoorgml.core.INDOORCOREConfiguration();
-        
-        org.geotools.xml.Configuration configuration = new org.geotools.gml2.GMLConfiguration();
-        configuration.getProperties().add( Parser.Properties.IGNORE_SCHEMA_LOCATION );
-        configuration.getProperties().add(Parser.Properties.PARSE_UNKNOWN_ELEMENTS);
-        
-        org.geotools.xml.Parser parser = new org.geotools.xml.Parser( configuration );
-        
-        //the xml instance document above
-        try {
-                URL url = getClass().getResource("indoor.gml");
-                InputStream in = url.openStream();
-
-                System.out.println(in.available());
-                
-                //parse
-                Object fc = parser.parse( in );
-                
-                Map<String, List<Feature>> m = (Map<String, List<Feature>>) fc;
-                for( Map.Entry<String, List<Feature>> e : m.entrySet() ){
-                    System.out.println( String.format("키 : %s", e.getKey()) );
-                }
-                
-                assertNotNull(fc);
-/*                for( Map.Entry<String, List<Feature>> e : fc.entrySet() ){
-                    System.out.println( String.format("키 : %s, 값 : %s", e.getKey(), e.getValue()) );
-                }*/
-                
-                
-                /*List<Feature> members = (List<Feature>) fc.get( "featureMember" );
-                for ( Iterator<Feature> i = members.iterator(); i.hasNext(); ) {
-                        SimpleFeature f = (SimpleFeature) i.next();
-                        
-                        String id = (String) f.getIdentifier().getID();
-                        Point point = (Point) f.getDefaultGeometry();
-                        String count = (String) f.getProperty("count").getValue();
-                        String date = (String) f.getProperty("date").getValue();
-                        
-                        System.out.println(id + " , " + point + " , " + count + " , " + date);
-                }*/
-                /*fc.accepts( new AbstractFeatureVisitor(){
-                      public void visit( Feature feature ) {
-                          Iterator<Property> i = feature.getProperties().iterator();
-                                  SimpleFeature f = (SimpleFeature) i.next();
-        
-                                  Point point = (Point) f.getDefaultGeometry();
-                                  String name = (String) f.getAttribute( "name" );
-                          }
-                  }, new NullProgressListener() );*/
-        }
-        catch(Exception e) {
-                e.printStackTrace();
-        }
-        
-        
-    }
-    
     @Test
     public void INDOORCOREParsingTest() {
         
@@ -95,168 +46,128 @@ public class IndoorCoreParsingTest {
         ClassLoader classLoader = getClass().getClassLoader();
         URL schemaLocation = classLoader.getResource("org/geotools/indoorgml/core/indoorgmlcore.xsd");
         
-        //URL schemaLocation = new URL("http://schemas.opengis.net/indoorgml/1.0/indoorgmlcore.xsd");
+        // Creating Feature Type
+        SchemaResolver appSchemaResolver = new SchemaResolver();
+        EmfComplexFeatureReader reader = EmfComplexFeatureReader.newInstance();
+        reader.setResolver(appSchemaResolver);
+        FeatureTypeRegistry typeRegistry = new FeatureTypeRegistry(new ComplexFeatureTypeFactoryImpl(),
+                    new GmlFeatureTypeRegistryConfiguration(null));
+        typeRegistry.addSchemas(reader.parse(schemaLocation));
         
-        int av = schemaLocation.openStream().available();
+        AttributeDescriptor descriptor = typeRegistry
+                        .getDescriptor(new NameImpl("http://www.opengis.net/indoorgml/1.0/core",
+                                        ":", "CellSpace"), null);
+        FeatureType featureType = (FeatureType) descriptor.getType();
+
+        // Creating Feature
+        URL url = getClass().getResource("indoor_wfs_test.gml");
+        NewXmlComplexFeatureParser featureParser = new NewXmlComplexFeatureParser(
+                        url.openStream(),
+                        featureType, new QName("http://www.opengis.net/indoorgml/1.0/core",
+                                "CellSpace"));
         
-        GML gml = new GML(Version.WFS1_1);
-        gml.setCoordinateReferenceSystem(DefaultGeographicCRS.WGS84);
-
-        FeatureType featureType = gml.decodeSimpleFeatureType(schemaLocation, new NameImpl(
-                "http://www.opengis.net/indoorgml/1.0/core", "IndoorFeatures"));
-
+        // Act
+        Feature feature = featureParser.parse();
+        System.out.println(feature);
         
-        org.geotools.xml.Configuration configuration = new INDOORCOREConfiguration();
-        org.geotools.xml.Parser parser = new org.geotools.xml.Parser( configuration );
+        Collection<? extends Property> sl = feature.getValue();
+        Iterator<? extends Property> slItr = sl.iterator();
         
-        //the xml instance document above
-        
-                URL url = getClass().getResource("indoor.gml");
-                InputStream in = url.openStream();
-
-                //parse
-                Object fc = parser.parse( in );
-                
-                //InodoorFeatures
-                Feature ifs = (Feature) fc;
-                assertNotNull(ifs);
-                System.out.println( 
-                        "Name : " + ifs.getName() + "\n" +
-                        "FeatureId : " + ifs.getIdentifier() 
-                );
-                
-                Collection<? extends Property> ifsValues = ifs.getValue();
-                Iterator<? extends Property> ifsIter = ifsValues.iterator();
-
-                Association psfs = null;
-                Feature mls = null;
-                while(ifsIter.hasNext()) {
-                    Property p = ifsIter.next();
-                    System.out.println("Attr : " + p.getName());
-                    if("primalSpaceFeatures".equals(p.getName().getLocalPart())) {
-                        psfs = (Association) p;
-                    } else if("MultiLayeredGraph".equals(p.getName().getLocalPart())) {
-                        mls = (Feature) p;
-                    } else {
-                        System.out.println("Value : " + p.getValue());
-                    }
-                }
-                assertNotNull(psfs);
-                
-                //PrimalSpaceFeatureType
-                Feature psf = (Feature) psfs.getValue();
-                Collection<? extends Property> psfValues = psf.getValue();
-                Iterator<? extends Property> psfIter = psfValues.iterator();
-                
-                List<Association> csmList = new ArrayList<Association>();
-                List<Association> csbmList  = new ArrayList<Association>();
-                
-                while(psfIter.hasNext()) {
-                    Property p = psfIter.next();
-                    
-                    if("cellSpaceMember".equals(p.getName().getLocalPart())) {
-                        Association csm = (Association) p;
-                        csmList.add(csm);
-                    } else if("cellSpaceBoundaryMember".equals(p.getName().getLocalPart())) {
-                        Association csbm = (Association) p;
-                    } else {
-                        System.out.println("Value : " + p.getValue());
-                    }
-                    
-                    
-                    System.out.println("Attr : " + p.getName());
-                    System.out.println("Value : " + p.getValue());
-                }
-                
-                //CellSpaceType
-                
-                System.out.println();
-                
-                
-                //MultiLayeredGraph
-                System.out.println( 
-                        "Name : " + mls.getName() + "\n" +
-                        "FeatureId : " + mls.getIdentifier() 
-                );
-                Collection<? extends Property> mlsValues = mls.getValue();
-                Iterator<? extends Property> mlsIter = mlsValues.iterator();
-                
-                Feature spaceLayers = null;
-                while(mlsIter.hasNext()) {
-                    Property p = mlsIter.next();
-                    System.out.println("Attr : " + p.getName());
-                    System.out.println("Value : " + p.getValue());
-                    
-                    if("spaceLayers".equals(p.getName().getLocalPart())) {
-                        spaceLayers = (Feature) p.getValue();
-                    }
-                    
-                }
-                System.out.println();
-                
-                //SpaceLayersType
-                System.out.println( 
-                        "Name : " + spaceLayers.getName() + "\n" +
-                        "FeatureId : " + spaceLayers.getIdentifier() 
-                );
-                Collection<? extends Property> spaceLayersValues = spaceLayers.getValue();
-                Iterator<? extends Property> spaceLayersIter = spaceLayersValues.iterator();
-                
-                List<Feature> sl = null;
-                while(spaceLayersIter.hasNext()) {
-                    Property p = spaceLayersIter.next();
-                    System.out.println("Attr : " + p.getName());
-                    System.out.println("Value : " + p.getValue());
-                    
-                    if("spaceLayerMember".equals(p.getName().getLocalPart())) {
-                        sl = (List<Feature>) p.getValue();
-                    }
-                    
-                }
-                System.out.println();
-                
-                //SpaceLayerType List
-                for(int i = 0; i < sl.size(); i++) {
-                    Feature f = sl.get(i);
-                    System.out.println("SpaceLayer[" + i + "]");
-                    System.out.println( 
-                            "Name : " + f.getName() + "\n" +
-                            "FeatureId : " + f.getIdentifier() 
-                    );
-                    Collection<? extends Property> spaceLayerValues = f.getValue();
-                    Iterator<? extends Property> spaceLayerIter = spaceLayerValues.iterator();
-
-                    while(spaceLayerIter.hasNext()) {
-                        Property p = spaceLayerIter.next();
-                        System.out.println("Attr : " + p.getName());
-                        System.out.println("Value : " + p.getValue());
-                    }
-                    System.out.println();
-                    
-                }
-                
-                
-                //primalSpaceFeatures
-/*                System.out.println( 
-                        "Name : " + psf.getName() + "\n" +
-                        "FeatureId : " + psf.getIdentifier() 
-                );
-                Collection<? extends Property> psfValues = psf.getValue();
-                Iterator<? extends Property> psfIter = psfValues.iterator();
-                while(psfIter.hasNext()) {
-                    Property p = psfIter.next();
-                    System.out.println("Attr : " + p.getName());
-                    System.out.println("Value : " + p.getValue());
-                }
-                System.out.println();*/
-                
-                
-               
-                
-                
+        Feature nodes = null;
+        Feature edges = null;
+        while (slItr.hasNext()) {
+            Feature f = (Feature) slItr.next();
+            
+            if(f.getType().getName().getLocalPart().equalsIgnoreCase("NodesType")) {
+                nodes = f;
+            } else {
+                edges = f;
+            }
         }
-        catch(Exception e) {
-                e.printStackTrace();
+        
+        Collection<? extends Property> es = edges.getValue();
+        Iterator<? extends Property> esItr = es.iterator();
+        
+        List<Feature> ts = new ArrayList<Feature>();
+        while (esItr.hasNext()) {
+            ComplexAttribute c = (ComplexAttribute) esItr.next();
+            ComplexAttribute c2 = (ComplexAttribute) c.getValue().iterator().next();
+            
+            Feature transitionType = (Feature) c2.getValue().iterator().next();
+            Feature transition = (Feature) transitionType.getValue().iterator().next();
+            
+            ts.add(transition);
+        }
+        
+        
+        //create a linear graph generate
+        LineStringGraphGenerator lineStringGen = new LineStringGraphGenerator();
+        ComplexFeatureGraphGenerator featureGen = new ComplexFeatureGraphGenerator( lineStringGen );
+        
+        for(int i = 0 ; i < ts.size(); i++) {
+            Feature transition = ts.get(i);
+            featureGen.add(transition);
+            /*
+            Iterator<? extends Property> itr = transition.getValue().iterator(); 
+            while (itr.hasNext()) {
+                Property p = itr.next();
+                
+                if(GeometryAttribute.class.isAssignableFrom(p.getClass())) {
+                    lineStringGen.add(p.getValue());
+                }
+            }*/
+        }
+        
+        Graph graph = lineStringGen.getGraph();
+        
+        Collection<Node> destinations = graph.getNodes();
+        Node start = (Node) destinations.iterator().next();
+        
+        EdgeWeighter weighter = new DijkstraIterator.EdgeWeighter() {
+            public double getWeight(Edge e) {
+               Feature feature = (Feature) e.getObject();
+               GeometryAttribute geometry = (GeometryAttribute) feature.getDefaultGeometryProperty();
+               Geometry g = (Geometry) geometry.getValue();
+               return g.getLength();
+            }
+        };
+        
+        DijkstraShortestPathFinder pf = new DijkstraShortestPathFinder( graph, start, weighter );
+        pf.calculate();
+        
+        for ( Iterator d = destinations.iterator(); d.hasNext(); ) {
+            Node destination = (Node) d.next();
+            
+            Path path = pf.getPath( destination );
+
+            System.out.println(path);
+            //do something with the path
+        }
+        System.out.println();
+        
+        
+/*        Collection<? extends Property> ifs = feature.getValue();
+        Iterator<? extends Property> ifItr = ifs.iterator();
+        Feature mlg = null;
+        while (ifItr.hasNext()) {
+            mlg = (Feature) ifItr.next();
+        }
+        
+        Collection<? extends Property> mlgs = mlg.getValue();
+        Iterator<? extends Property> mlgItr = mlgs.iterator();
+        Feature sls = null;
+        while (mlgItr.hasNext()) {
+            sls = (Feature) mlgItr.next();
+        }*/
+        
+        
+        
+        
+        
+        
+        
+        } catch ( Exception e ) {
+            e.printStackTrace();
         }
     }
 
