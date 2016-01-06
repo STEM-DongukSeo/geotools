@@ -93,21 +93,27 @@
 	      <artifactId>gt-graph</artifactId>
 	      <version>${project.version}</version>
 	    </dependency>
+	    
+	    <dependency>
+	      <groupId>org.geotools</groupId>
+	      <artifactId>gt-geometry</artifactId>
+	      <version>${project.version}</version>
+	    </dependency>
   </dependencies>	
 
   <!-- =========================================================== -->
   <!--     Build Configuration                                     -->
   <!-- =========================================================== -->
-  <build>
+  <!-- <build>
   	<plugins>
 		<plugin>
 			<groupId>org.geotools.maven</groupId>
 			<artifactId>xmlcodegen</artifactId>
 			<version>15-SNAPSHOT</version>
 			<configuration>
-				<!-- =========================================================== -->
-				<!-- Common Configuration -->
-				<!-- =========================================================== -->
+				===========================================================
+				Common Configuration
+				===========================================================
 				<schemaLocation>indoorgmlcore.xsd</schemaLocation>
 				<schemaSourceDirectory>${basedir}/src/main/resources/org/geotools/indoorgml/core</schemaSourceDirectory>
 
@@ -116,9 +122,9 @@
 				
 				<relativeSchemaReference>true</relativeSchemaReference>
 				<overwriteExistingFiles>true</overwriteExistingFiles>
-				<!-- =========================================================== -->
-				<!-- Generate Configuration -->
-				<!-- =========================================================== -->
+				===========================================================
+				Generate Configuration
+				===========================================================
 				<generateConfiguration>true</generateConfiguration>
 				<generateBindingConfiguration>true</generateBindingConfiguration>
 				
@@ -127,12 +133,12 @@
 				<generateElementBindings>true</generateElementBindings>
 				<generateTypeBindings>true</generateTypeBindings>
 				
-				<generateXsd>true</generateXsd> <!-- necessary -->
+				<generateXsd>true</generateXsd> necessary
 				
 				<generateSchemaLocationResolver>false</generateSchemaLocationResolver>
-				<!-- =========================================================== -->
-				<!-- GenerateSchema Configuration -->
-				<!-- =========================================================== -->
+				===========================================================
+				GenerateSchema Configuration
+				===========================================================
 				<includeComplexTypes>true</includeComplexTypes>
 				<includeSimpleTypes>true</includeSimpleTypes>
 				<followComplexTypes>true</followComplexTypes>
@@ -148,5 +154,5 @@
 			</configuration>
 		</plugin>
 	</plugins>
-	</build>
+	</build> -->
 </project>

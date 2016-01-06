@@ -13,7 +13,6 @@ import org.geotools.feature.complex.ComplexFeatureGraphGenerator;
 import org.geotools.feature.complex.NewXmlComplexFeatureParser;
 import org.geotools.feature.type.ComplexFeatureTypeFactoryImpl;
 import org.geotools.gml3.complex.GmlFeatureTypeRegistryConfiguration;
-import org.geotools.graph.build.feature.FeatureGraphGenerator;
 import org.geotools.graph.build.line.LineStringGraphGenerator;
 import org.geotools.graph.path.DijkstraShortestPathFinder;
 import org.geotools.graph.path.Path;
@@ -22,7 +21,6 @@ import org.geotools.graph.structure.Graph;
 import org.geotools.graph.structure.Node;
 import org.geotools.graph.traverse.standard.DijkstraIterator;
 import org.geotools.graph.traverse.standard.DijkstraIterator.EdgeWeighter;
-import org.geotools.indoorgml.core.INDOORCORE;
 import org.geotools.xml.resolver.SchemaResolver;
 import org.junit.Test;
 import org.opengis.feature.ComplexAttribute;
@@ -41,8 +39,6 @@ public class IndoorCoreParsingTest {
     public void INDOORCOREParsingTest() {
         
         try {
-        INDOORCORE indoorcore = INDOORCORE.getInstance();
- 
         ClassLoader classLoader = getClass().getClassLoader();
         URL schemaLocation = classLoader.getResource("org/geotools/indoorgml/core/indoorgmlcore.xsd");
         
@@ -56,7 +52,7 @@ public class IndoorCoreParsingTest {
         
         AttributeDescriptor descriptor = typeRegistry
                         .getDescriptor(new NameImpl("http://www.opengis.net/indoorgml/1.0/core",
-                                        ":", "CellSpace"), null);
+                                        ":", "SpaceLayer"), null);
         FeatureType featureType = (FeatureType) descriptor.getType();
 
         // Creating Feature
@@ -64,7 +60,7 @@ public class IndoorCoreParsingTest {
         NewXmlComplexFeatureParser featureParser = new NewXmlComplexFeatureParser(
                         url.openStream(),
                         featureType, new QName("http://www.opengis.net/indoorgml/1.0/core",
-                                "CellSpace"));
+                                "SpaceLayer"));
         
         // Act
         Feature feature = featureParser.parse();

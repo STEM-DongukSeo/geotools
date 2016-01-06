@@ -29,7 +29,7 @@ import org.opengis.feature.type.AttributeType;
  */
 public class AssociationImpl extends PropertyImpl implements Association {
 
-    protected AssociationImpl(Attribute value, AssociationDescriptor descriptor) {
+    public AssociationImpl(Attribute value, AssociationDescriptor descriptor) {
         super(value, descriptor);
     }
 

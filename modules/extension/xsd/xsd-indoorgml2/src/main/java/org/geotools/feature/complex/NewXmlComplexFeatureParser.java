@@ -53,6 +53,7 @@ import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.feature.type.PropertyType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
+import org.opengis.geometry.coordinate.GeometryFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
@@ -349,8 +350,8 @@ public class NewXmlComplexFeatureParser extends
 
 					// Configure the attribute builder to help build the complex
 					// attribute.
-					AttributeBuilder attributeBuilder = new AttributeBuilder(
-							new LenientFeatureFactoryImpl());
+					NewAttributeBuilder attributeBuilder = new NewAttributeBuilder(
+							new NewLenientFeatureFactoryImpl());
 					attributeBuilder.setType((AttributeType) type);
 
 					if (type.getBinding() == Collection.class
@@ -494,4 +495,10 @@ public class NewXmlComplexFeatureParser extends
 			this.value = value;
 		}
 	}
+
+    @Override
+    public void setGeometryFactory(GeometryFactory geometryFactory) {
+        // TODO Auto-generated method stub
+        
+    }
 }

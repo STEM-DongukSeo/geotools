@@ -194,6 +194,11 @@ public interface PrimitiveFactory {
             throws MismatchedReferenceSystemException, MismatchedDimensionException;
 
     /**
+     * created by hgryoo
+     */
+    SolidBoundary createSolidBoundary(Shell exterior, List<Shell> interiors)
+            throws MismatchedReferenceSystemException, MismatchedDimensionException;
+    /**
      * Constructs a {@linkplain Ring ring} out of its component curves.
      *
      * @param curves The list of curves that comprise the newly created Ring.

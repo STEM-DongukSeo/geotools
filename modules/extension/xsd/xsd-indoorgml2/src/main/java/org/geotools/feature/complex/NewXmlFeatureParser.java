@@ -22,26 +22,46 @@ import static org.xmlpull.v1.XmlPullParser.START_TAG;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
 import javax.xml.namespace.QName;
 
 import org.geotools.data.DataSourceException;
-import org.geotools.data.wfs.internal.GetParser;
 import org.geotools.data.wfs.internal.Loggers;
-import org.geotools.gml3.GML;
+import org.geotools.data.wfs.internal.parsers.XmlSimpleFeatureParser;
+import org.geotools.factory.GeoTools;
+import org.geotools.factory.Hints;
+import org.geotools.geometry.GeometryBuilder;
+import org.geotools.gml3.v3_2.GML;
 import org.geotools.referencing.CRS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.util.Converters;
-import org.geotools.wfs.WFS;
 import org.opengis.feature.Feature;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.AttributeType;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.GeometryType;
+import org.opengis.geometry.DirectPosition;
+import org.opengis.geometry.Geometry;
+import org.opengis.geometry.PositionFactory;
+import org.opengis.geometry.aggregate.MultiCurve;
+import org.opengis.geometry.aggregate.MultiPoint;
+import org.opengis.geometry.coordinate.GeometryFactory;
+import org.opengis.geometry.coordinate.LineString;
+import org.opengis.geometry.coordinate.Polygon;
+import org.opengis.geometry.coordinate.Position;
+import org.opengis.geometry.primitive.Curve;
+import org.opengis.geometry.primitive.CurveSegment;
+import org.opengis.geometry.primitive.OrientableCurve;
+import org.opengis.geometry.primitive.Point;
+import org.opengis.geometry.primitive.PrimitiveFactory;
+import org.opengis.geometry.primitive.Ring;
 import org.opengis.geometry.primitive.Shell;
 import org.opengis.geometry.primitive.Solid;
+import org.opengis.geometry.primitive.SolidBoundary;
+import org.opengis.geometry.primitive.Surface;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -49,25 +69,21 @@ import org.xmlpull.mxp1.MXParser;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.LinearRing;
-import com.vividsolutions.jts.geom.MultiLineString;
-import com.vividsolutions.jts.geom.Point;
-import com.vividsolutions.jts.geom.Polygon;
 /**
  * Abstract form of XmlFeatureParser. Mostly taken out from @{@link XmlSimpleFeatureParser}.
  * @author Adam Brown (Curtin University of Technology)
  */
 public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feature>
-		implements GetParser<F> {
+		implements NewGetParser<F> {
 
 	protected FT targetType;
 
-	private GeometryFactory geomFac = new GeometryFactory();
-
+	/*private GeometryFactory geomFac = new GeometryFactory();*/
+	private GeometryBuilder builder;
+	private GeometryFactory geomFac;;
+	private PrimitiveFactory primitiveFac;
+	private PositionFactory posFac;
+	
 	private InputStream inputStream;
 
 	protected XmlPullParser parser;
@@ -88,6 +104,16 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 		this.featureName = featureDescriptorName.getLocalPart();
 		this.targetType = targetType;
 
+		// Create New Geometry Factory
+		Hints hints = GeoTools.getDefaultHints();
+                hints.put(Hints.CRS, DefaultGeographicCRS.WGS84_3D);
+                hints.put(Hints.GEOMETRY_VALIDATE, false);
+                builder = new GeometryBuilder(hints);
+		
+                geomFac = builder.getGeometryFactory();
+                primitiveFac = builder.getPrimitiveFactory();
+                posFac = builder.getPositionFactory(); 
+                
 		try {
                         parser = new MXParser();
                         parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
@@ -112,13 +138,6 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 			}
 		} catch (XmlPullParserException e) {
 			throw new DataSourceException(e);
-		}
-	}
-
-	@Override
-	public void setGeometryFactory(GeometryFactory geometryFactory) {
-		if (null != geometryFactory) {
-			this.geomFac = geometryFactory;
 		}
 	}
 
@@ -200,7 +219,7 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 				parser.getName());
 		
 		int dimension = crsDimension(3);
-		CoordinateReferenceSystem crs = crs(DefaultGeographicCRS.WGS84);
+		CoordinateReferenceSystem crs = crs(DefaultGeographicCRS.WGS84_3D);
 
 		Geometry geom;
 /*		if (GML.Point.equals(startingGeometryTagName)) {
@@ -222,28 +241,19 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 					+ startingGeometryTagName);
 		}*/
 		
-		if (org.geotools.gml3.v3_2.GML.Point.equals(startingGeometryTagName)) {
-                    geom = parsePoint(dimension, crs);
-                } else if (org.geotools.gml3.v3_2.GML.LineString.equals(startingGeometryTagName)) {
+		/*else if (GML.LineString.equals(startingGeometryTagName)) {
                         geom = parseLineString(dimension, crs);
-                } else if (GML.Polygon.equals(startingGeometryTagName)) {
-                        geom = parsePolygon(dimension, crs);
-                } else if (GML.MultiPoint.equals(startingGeometryTagName)) {
-                        geom = parseMultiPoint(dimension, crs);
-                } else if (GML.MultiLineString.equals(startingGeometryTagName)) {
-                        geom = parseMultiLineString(dimension, crs);
-                } else if (GML.MultiSurface.equals(startingGeometryTagName)) {
-                        geom = parseMultiSurface(dimension, crs);
-                } else if (GML.MultiPolygon.equals(startingGeometryTagName)) {
-                        geom = parseMultiPolygon(dimension, crs);
-                
-                } else if(org.geotools.gml3.v3_2.GML.Solid.equals(startingGeometryTagName)) {
-                        parseSolid(dimension, crs);
-                        geom = null;
-                }
+                } */
 		
-                
-                else {
+		if (GML.Point.equals(startingGeometryTagName)) {
+                    geom = parsePoint(dimension, crs);
+                } else if(GML.LineString.equals(startingGeometryTagName)) {
+                    geom = parseLineString(dimension, crs);
+                } else if(GML.Solid.equals(startingGeometryTagName)) {
+		    geom = parseSolid(dimension, crs);
+                } else if(GML.Polygon.equals(startingGeometryTagName)) {
+                    geom = parsePolygon(dimension, crs);
+                } else {
                         throw new IllegalStateException("Unrecognized geometry element "
                                         + startingGeometryTagName);
                 }
@@ -260,8 +270,9 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 	    
 	    Solid geom = null;
 	    Shell shell = null;
+	    List<Shell> holes = null;
 	    
-            parser.require(START_TAG, org.geotools.gml3.v3_2.GML.NAMESPACE, org.geotools.gml3.v3_2.GML.Solid.getLocalPart());
+            parser.require(START_TAG, GML.NAMESPACE, GML.Solid.getLocalPart());
 
             parser.nextTag();
             parser.require(START_TAG, GML.NAMESPACE, null);
@@ -270,250 +281,95 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 
             if (GML.exterior.equals(name)) {
                     parser.nextTag();
-                    //shell = parseLinearRing(dimension, crs);
+                    shell = parseShell(dimension, crs);
                     parser.nextTag();
                     parser.require(END_TAG, GML.NAMESPACE, GML.exterior.getLocalPart());
-            } else if (GML.outerBoundaryIs.equals(name)) {
-                    parser.nextTag();
-                    parser.require(START_TAG, GML.NAMESPACE,
-                                    GML.LinearRing.getLocalPart());
-                    //shell = parseLinearRing(dimension, crs);
-                    parser.nextTag();
-                    parser.require(END_TAG, GML.NAMESPACE,
-                                    GML.outerBoundaryIs.getLocalPart());
             } else {
                     throw new IllegalStateException(
                                     "Unknown polygon boundary element: " + name);
             }
 
             parser.nextTag();
-            parser.require(END_TAG, org.geotools.gml3.v3_2.GML.NAMESPACE, org.geotools.gml3.v3_2.GML.Solid.getLocalPart());
 
-            //geom = geomFac.createMultiPolygon(polygons.toArray(new Polygon[polygons
-            //                .size()]));
+            name = new QName(parser.getNamespace(), parser.getName());
+            if (START_TAG == parser.getEventType()) {
+                    if (GML.interior.equals(name)) {
+                            // parse interior rings
+                            holes = new ArrayList<Shell>(2);
+                            while (true) {
+                                    parser.require(START_TAG, GML.NAMESPACE,
+                                                    name.getLocalPart());
+                                    parser.nextTag();
+                                    parser.require(START_TAG, GML.NAMESPACE,
+                                                    GML.Shell.getLocalPart());
+
+                                    Shell hole = parseShell(dimension, crs);
+
+                                    parser.require(END_TAG, GML.NAMESPACE,
+                                                    GML.Shell.getLocalPart());
+
+                                    holes.add(hole);
+
+                                    parser.nextTag();
+                                    parser.require(END_TAG, GML.NAMESPACE, name.getLocalPart());
+                                    parser.nextTag();
+                                    if (END_TAG == parser.getEventType()) {
+                                            // we're done
+                                            parser.require(END_TAG, GML.NAMESPACE,
+                                                            GML.Solid.getLocalPart());
+                                            break;
+                                    }
+                            }
+                    }
+            }
             
-            return null;
+            
+            parser.require(END_TAG, GML.NAMESPACE, GML.Solid.getLocalPart());
+            
+            SolidBoundary solidBoundary = primitiveFac.createSolidBoundary(shell, holes);
+            geom = primitiveFac.createSolid(solidBoundary);
+            return geom;
+	}
+	
+	private Shell parseShell(int dimension, 
+                CoordinateReferenceSystem crs) throws XmlPullParserException,
+                IOException, NoSuchAuthorityCodeException, FactoryException {
+	    
+	    Shell geom = null;
+	    
+	    parser.require(START_TAG, GML.NAMESPACE, GML.Shell.getLocalPart());
+	    
+	    parser.nextTag();
+            parser.require(START_TAG, GML.NAMESPACE, null);
+	    
+            final QName memberTag = new QName(parser.getNamespace(), parser.getName());
+            List<Surface> polygons = new ArrayList<Surface>(2);
+            if (GML.surfaceMember.equals(memberTag)) {
+                while (true) {
+                        parser.nextTag();
+                        Surface p = parsePolygon(dimension, crs);
+                        polygons.add(p);
+                        parser.nextTag();
+                        parser.require(END_TAG, GML.NAMESPACE,
+                                GML.surfaceMember.getLocalPart());
+                        parser.nextTag();
+                        if (END_TAG == parser.getEventType()
+                                        && GML.MultiSurface.getLocalPart().equals(
+                                                        parser.getName())) {
+                                // we're done
+                                break;
+                        }
+                }
+            }
+            
+            parser.require(END_TAG, GML.NAMESPACE, GML.Shell.getLocalPart());
+            
+            //primitiveFac.createshe
+            
+            return geom;
 	}
 
     /**
-	 * Parses a MultiPoint.
-	 * <p>
-	 * Precondition: parser positioned at a {@link GML#MultiPoint MultiPoint}
-	 * start tag
-	 * </p>
-	 * <p>
-	 * Postcondition: parser positioned at the {@link GML#MultiPoint MultiPoint}
-	 * end tag of the starting tag
-	 * </p>
-	 * 
-	 * @throws IOException
-	 * @throws XmlPullParserException
-	 * @throws IOException
-	 * @throws XmlPullParserException
-	 * @throws FactoryException
-	 * @throws NoSuchAuthorityCodeException
-	 * @throws FactoryException
-	 * @throws NoSuchAuthorityCodeException
-	 */
-	private Geometry parseMultiPoint(int dimension,
-			CoordinateReferenceSystem crs) throws XmlPullParserException,
-			IOException, NoSuchAuthorityCodeException, FactoryException {
-		Geometry geom;
-		parser.nextTag();
-		final QName memberTag = new QName(parser.getNamespace(),
-				parser.getName());
-		List<Point> points = new ArrayList<Point>(4);
-		if (GML.pointMembers.equals(memberTag)) {
-			while (true) {
-				parser.nextTag();
-				if (END_TAG == parser.getEventType()
-						&& GML.pointMembers.getLocalPart().equals(
-								parser.getName())) {
-					// we're done
-					break;
-				}
-
-				Point p = parsePoint(dimension, crs);
-				points.add(p);
-			}
-			parser.nextTag();
-		} else if (GML.pointMember.equals(memberTag)) {
-			while (true) {
-				parser.nextTag();
-				parser.require(START_TAG, GML.NAMESPACE,
-						GML.Point.getLocalPart());
-
-				Point p = parsePoint(dimension, crs);
-				points.add(p);
-				parser.nextTag();
-				parser.require(END_TAG, GML.NAMESPACE,
-						GML.pointMember.getLocalPart());
-				parser.nextTag();
-				if (END_TAG == parser.getEventType()
-						&& GML.MultiPoint.getLocalPart().equals(
-								parser.getName())) {
-					// we're done
-					break;
-				}
-			}
-		}
-
-		parser.require(END_TAG, GML.NAMESPACE, GML.MultiPoint.getLocalPart());
-		geom = geomFac.createMultiPoint(points.toArray(new Point[points.size()]));
-		return geom;
-	}
-
-	/**
-	 * Parses a MultiLineString.
-	 * <p>
-	 * Precondition: parser positioned at a {@link GML#MultiLineString
-	 * MultiLineString} start tag
-	 * </p>
-	 * <p>
-	 * Postcondition: parser positioned at the {@link GML#MultiLineString
-	 * MultiLineString} end tag of the starting tag
-	 * </p>
-	 * 
-	 * @throws IOException
-	 * @throws XmlPullParserException
-	 * @throws FactoryException
-	 * @throws NoSuchAuthorityCodeException
-	 */
-	private MultiLineString parseMultiLineString(int dimension,
-			CoordinateReferenceSystem crs) throws XmlPullParserException,
-			IOException, NoSuchAuthorityCodeException, FactoryException {
-		MultiLineString geom;
-
-		parser.require(START_TAG, GML.NAMESPACE,
-				GML.MultiLineString.getLocalPart());
-
-		List<LineString> lines = new ArrayList<LineString>(2);
-
-		while (true) {
-			parser.nextTag();
-			if (END_TAG == parser.getEventType()
-					&& GML.MultiLineString.getLocalPart().equals(
-							parser.getName())) {
-				// we're done
-				break;
-			}
-			parser.require(START_TAG, GML.NAMESPACE,
-					GML.lineStringMember.getLocalPart());
-			parser.nextTag();
-			parser.require(START_TAG, GML.NAMESPACE,
-					GML.LineString.getLocalPart());
-
-			LineString line = parseLineString(dimension, crs);
-			lines.add(line);
-			parser.nextTag();
-			parser.require(END_TAG, GML.NAMESPACE,
-					GML.lineStringMember.getLocalPart());
-		}
-
-		parser.require(END_TAG, GML.NAMESPACE,
-				GML.MultiLineString.getLocalPart());
-
-		geom = geomFac.createMultiLineString(lines.toArray(new LineString[lines
-				.size()]));
-		return geom;
-	}
-
-	/**
-	 * Parses a MultiPolygon out of a MultiSurface element (because our geometry
-	 * model only supports MultiPolygon).
-	 * <p>
-	 * Precondition: parser positioned at a {@link GML#MultiSurface
-	 * MultiSurface} start tag
-	 * </p>
-	 * <p>
-	 * Postcondition: parser positioned at the {@link GML#MultiSurface
-	 * MultiSurface} end tag of the starting tag
-	 * </p>
-	 */
-	private Geometry parseMultiSurface(int dimension,
-			CoordinateReferenceSystem crs) throws XmlPullParserException,
-			IOException, NoSuchAuthorityCodeException, FactoryException {
-
-		parser.require(START_TAG, GML.NAMESPACE,
-				GML.MultiSurface.getLocalPart());
-
-		Geometry geom;
-		parser.nextTag();
-		final QName memberTag = new QName(parser.getNamespace(),
-				parser.getName());
-		List<Polygon> polygons = new ArrayList<Polygon>(2);
-		if (GML.surfaceMembers.equals(memberTag)) {
-			while (true) {
-				parser.nextTag();
-				if (END_TAG == parser.getEventType()
-						&& GML.surfaceMembers.getLocalPart().equals(
-								parser.getName())) {
-					// we're done
-					break;
-				}
-				Polygon p = parsePolygon(dimension, crs);
-				polygons.add(p);
-			}
-			parser.nextTag();
-		} else if (GML.surfaceMember.equals(memberTag)) {
-			while (true) {
-				parser.nextTag();
-				Polygon p = parsePolygon(dimension, crs);
-				polygons.add(p);
-				parser.nextTag();
-				parser.require(END_TAG, GML.NAMESPACE,
-						GML.surfaceMember.getLocalPart());
-				parser.nextTag();
-				if (END_TAG == parser.getEventType()
-						&& GML.MultiSurface.getLocalPart().equals(
-								parser.getName())) {
-					// we're done
-					break;
-				}
-			}
-		}
-		parser.require(END_TAG, GML.NAMESPACE, GML.MultiSurface.getLocalPart());
-
-		geom = geomFac.createMultiPolygon(polygons.toArray(new Polygon[polygons
-				.size()]));
-		return geom;
-	}
-
-	private Geometry parseMultiPolygon(int dimension,
-			CoordinateReferenceSystem crs) throws XmlPullParserException,
-			IOException, NoSuchAuthorityCodeException, FactoryException {
-
-		parser.require(START_TAG, GML.NAMESPACE,
-				GML.MultiPolygon.getLocalPart());
-
-		Geometry geom;
-		List<Polygon> polygons = new ArrayList<Polygon>(2);
-		parser.nextTag();
-		while (true) {
-			parser.require(START_TAG, GML.NAMESPACE,
-					GML.polygonMember.getLocalPart());
-			parser.nextTag();
-			parser.require(START_TAG, GML.NAMESPACE, GML.Polygon.getLocalPart());
-			Polygon p = parsePolygon(dimension, crs);
-			polygons.add(p);
-			parser.nextTag();
-			parser.require(END_TAG, GML.NAMESPACE,
-					GML.polygonMember.getLocalPart());
-			parser.nextTag();
-			if (END_TAG == parser.getEventType()
-					&& GML.MultiPolygon.getLocalPart().equals(parser.getName())) {
-				// we're done
-				break;
-			}
-		}
-		parser.require(END_TAG, GML.NAMESPACE, GML.MultiPolygon.getLocalPart());
-
-		geom = geomFac.createMultiPolygon(polygons.toArray(new Polygon[polygons
-				.size()]));
-		return geom;
-	}
-
-	/**
 	 * Parses a polygon.
 	 * <p>
 	 * Precondition: parser positioned at a {@link GML#Polygon Polygon} start
@@ -532,12 +388,12 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 	 * @throws NoSuchAuthorityCodeException
 	 * @throws FactoryException
 	 */
-	private Polygon parsePolygon(int dimension, CoordinateReferenceSystem crs)
+	private Surface parsePolygon(int dimension, CoordinateReferenceSystem crs)
 			throws XmlPullParserException, IOException,
 			NoSuchAuthorityCodeException, FactoryException {
-		Polygon geom;
-		LinearRing shell;
-		List<LinearRing> holes = null;
+	        Surface geom = null;
+		Ring shell;
+		List<Ring> holes = null;
 
 		parser.nextTag();
 		parser.require(START_TAG, GML.NAMESPACE, null);
@@ -549,14 +405,6 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 			shell = parseLinearRing(dimension, crs);
 			parser.nextTag();
 			parser.require(END_TAG, GML.NAMESPACE, GML.exterior.getLocalPart());
-		} else if (GML.outerBoundaryIs.equals(name)) {
-			parser.nextTag();
-			parser.require(START_TAG, GML.NAMESPACE,
-					GML.LinearRing.getLocalPart());
-			shell = parseLinearRing(dimension, crs);
-			parser.nextTag();
-			parser.require(END_TAG, GML.NAMESPACE,
-					GML.outerBoundaryIs.getLocalPart());
 		} else {
 			throw new IllegalStateException(
 					"Unknown polygon boundary element: " + name);
@@ -567,9 +415,9 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 		name = new QName(parser.getNamespace(), parser.getName());
 
 		if (START_TAG == parser.getEventType()) {
-			if (GML.interior.equals(name) || GML.innerBoundaryIs.equals(name)) {
+			if (GML.interior.equals(name)) {
 				// parse interior rings
-				holes = new ArrayList<LinearRing>(2);
+				holes = new ArrayList<Ring>(2);
 				while (true) {
 					parser.require(START_TAG, GML.NAMESPACE,
 							name.getLocalPart());
@@ -577,7 +425,7 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 					parser.require(START_TAG, GML.NAMESPACE,
 							GML.LinearRing.getLocalPart());
 
-					LinearRing hole = parseLinearRing(dimension, crs);
+					Ring hole = parseLinearRing(dimension, crs);
 
 					parser.require(END_TAG, GML.NAMESPACE,
 							GML.LinearRing.getLocalPart());
@@ -599,47 +447,57 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 
 		parser.require(END_TAG, GML.NAMESPACE, GML.Polygon.getLocalPart());
 
-		LinearRing[] holesArray = null;
+		Ring[] holesArray = null;
 		if (holes != null) {
-			holesArray = holes.toArray(new LinearRing[holes.size()]);
+			holesArray = holes.toArray(new Ring[holes.size()]);
 		}
-		geom = geomFac.createPolygon(shell, holesArray);
-		geom.setUserData(crs);
+		
+		//TODO
+		//geom = geomFac.createPolygon(boundary, spanSurface)
+		//geom.setUserData(crs);
 		return geom;
 	}
 
-	private LinearRing parseLinearRing(final int dimension,
+	private Ring parseLinearRing(final int dimension,
 			CoordinateReferenceSystem crs) throws XmlPullParserException,
 			IOException, NoSuchAuthorityCodeException, FactoryException {
 		parser.require(START_TAG, GML.NAMESPACE, GML.LinearRing.getLocalPart());
 
 		crs = crs(crs);
-		Coordinate[] lineCoords = parseLineStringInternal(dimension, crs);
-
+		LineString lineString = parseLineStringInternal(dimension, crs);
+		List<CurveSegment> curveSegments = new ArrayList<CurveSegment>();
+                curveSegments.add(lineString);
+                
+                Curve curve = primitiveFac.createCurve(curveSegments);
+                List<OrientableCurve> curves = new ArrayList<OrientableCurve>();
+                curves.add(curve);
+		
 		parser.require(END_TAG, GML.NAMESPACE, GML.LinearRing.getLocalPart());
-
-		LinearRing linearRing = geomFac.createLinearRing(lineCoords);
-		linearRing.setUserData(crs);
+		
+		Ring linearRing = primitiveFac.createRing(curves);
+		//linearRing.setUserData(crs);
 		return linearRing;
 	}
 
-	private LineString parseLineString(int dimension,
+	private Curve parseLineString(int dimension,
 			CoordinateReferenceSystem crs) throws XmlPullParserException,
 			IOException, NoSuchAuthorityCodeException, FactoryException {
 
-		parser.require(START_TAG, org.geotools.gml3.v3_2.GML.NAMESPACE, org.geotools.gml3.v3_2.GML.LineString.getLocalPart());
+		parser.require(START_TAG, GML.NAMESPACE, GML.LineString.getLocalPart());
 
 		crs = crs(crs);
-		Coordinate[] coordinates = parseLineStringInternal(dimension, crs);
+		LineString lineString = parseLineStringInternal(dimension, crs);
+		List<CurveSegment> curveSegments = new ArrayList<CurveSegment>();
+                curveSegments.add(lineString);
+                
+		parser.require(END_TAG, GML.NAMESPACE, GML.LineString.getLocalPart());
 
-		parser.require(END_TAG, org.geotools.gml3.v3_2.GML.NAMESPACE, org.geotools.gml3.v3_2.GML.LineString.getLocalPart());
-
-		LineString geom = geomFac.createLineString(coordinates);
-		geom.setUserData(crs);
+		Curve geom = primitiveFac.createCurve(curveSegments);
+		//geom.setUserData(crs);
 		return geom;
 	}
 
-	private Coordinate[] parseLineStringInternal(int dimension,
+	private LineString parseLineStringInternal(int dimension,
 			CoordinateReferenceSystem crs) throws XmlPullParserException,
 			IOException {
 
@@ -647,14 +505,14 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 				parser.getName());
 
 		parser.nextTag();
-		Coordinate[] lineCoords;
+		Position[] lineCoords;
 
 		final QName coordsName = new QName(parser.getNamespace(),
 				parser.getName());
 		String tagName = parser.getName();
-		if (org.geotools.gml3.v3_2.GML.pos.equals(coordsName)) {
-			Coordinate[] point;
-			List<Coordinate> coords = new ArrayList<Coordinate>();
+		if (GML.pos.equals(coordsName)) {
+		        Position[] point;
+			List<Position> coords = new ArrayList<Position>();
 			int eventType;
 			do {
 				point = parseCoordList(dimension);
@@ -663,9 +521,9 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 				tagName = parser.getName();
 				eventType = parser.getEventType();
 			} while (eventType == START_TAG
-					&& tagName.equalsIgnoreCase(org.geotools.gml3.v3_2.GML.pos.getLocalPart()));
+					&& tagName.equalsIgnoreCase(GML.pos.getLocalPart()));
 
-			lineCoords = coords.toArray(new Coordinate[coords.size()]);
+			lineCoords = coords.toArray(new Position[coords.size()]);
 		} else if (GML.posList.equals(coordsName)) {
 			// parser.require(START_TAG, GML.NAMESPACE,
 			// GML.posList.getLocalPart());
@@ -674,92 +532,120 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 		} else if (GML.coordinates.equals(coordsName)) {
 			lineCoords = parseCoordinates(dimension);
 			parser.nextTag();
-		} else if (GML.coord.equals(coordsName)) {
-			Coordinate point;
-			List<Coordinate> coords = new ArrayList<Coordinate>();
-			int eventType;
-			do {
-				point = parseCoord();
-				coords.add(point);
-				parser.nextTag();
-				tagName = parser.getName();
-				eventType = parser.getEventType();
-			} while (eventType == START_TAG
-					&& GML.coord.getLocalPart().equals(tagName));
-
-			lineCoords = coords.toArray(new Coordinate[coords.size()]);
 		} else {
 			throw new IllegalStateException(
 					"Expected posList or pos inside LinearRing: " + tagName);
 		}
 		parser.require(END_TAG, lineElementName.getNamespaceURI(),
 				lineElementName.getLocalPart());
-		return lineCoords;
+		
+		List<Position> coordList = Arrays.asList(lineCoords);
+                LineString lineString = builder.createLineString(coordList);
+		
+		return lineString;
 	}
 
 	private Point parsePoint(int dimension, CoordinateReferenceSystem crs)
 			throws XmlPullParserException, IOException,
 			NoSuchAuthorityCodeException, FactoryException {
 
-		parser.require(START_TAG, org.geotools.gml3.v3_2.GML.NAMESPACE, org.geotools.gml3.v3_2.GML.Point.getLocalPart());
+		parser.require(START_TAG, GML.NAMESPACE, GML.Point.getLocalPart());
 
 		crs = crs(crs);
 
 		Point geom;
 		parser.nextTag();
-		parser.require(START_TAG, org.geotools.gml3.v3_2.GML.NAMESPACE, null);
-		Coordinate point;
-		if (org.geotools.gml3.v3_2.GML.pos.getLocalPart().equals(parser.getName())) {
-			Coordinate[] coords = parseCoordList(dimension);
+		parser.require(START_TAG, GML.NAMESPACE, null);
+		DirectPosition point;
+		if (GML.pos.getLocalPart().equals(parser.getName())) {
+		    DirectPosition[] coords = parseCoordList(dimension);
 			point = coords[0];
 			parser.nextTag();
 		} else if (GML.coordinates.getLocalPart().equals(parser.getName())) {
-			Coordinate[] coords = parseCoordinates(dimension);
+		    DirectPosition[] coords = parseCoordinates(dimension);
 			point = coords[0];
-			parser.nextTag();
-		} else if (GML.coord.getLocalPart().equals(parser.getName())) {
-			point = parseCoord();
 			parser.nextTag();
 		} else {
 			throw new IllegalStateException(
 					"Unknown coordinate element for Point: " + parser.getName());
 		}
 
-		parser.require(END_TAG, org.geotools.gml3.v3_2.GML.NAMESPACE, org.geotools.gml3.v3_2.GML.Point.getLocalPart());
+		parser.require(END_TAG, GML.NAMESPACE, GML.Point.getLocalPart());
 		
 
-		geom = geomFac.createPoint(point);
-		geom.setUserData(crs);
+		geom = primitiveFac.createPoint(point);
 		return geom;
 	}
 
-	private Coordinate parseCoord() throws XmlPullParserException, IOException {
-		parser.require(START_TAG, GML.NAMESPACE, GML.coord.getLocalPart());
+	/**
+     * Parses a MultiPoint.
+     * <p>
+     * Precondition: parser positioned at a {@link GML#MultiPoint MultiPoint}
+     * start tag
+     * </p>
+     * <p>
+     * Postcondition: parser positioned at the {@link GML#MultiPoint MultiPoint}
+     * end tag of the starting tag
+     * </p>
+     * 
+     * @throws IOException
+     * @throws XmlPullParserException
+     * @throws IOException
+     * @throws XmlPullParserException
+     * @throws FactoryException
+     * @throws NoSuchAuthorityCodeException
+     * @throws FactoryException
+     * @throws NoSuchAuthorityCodeException
+     */
+    private MultiPoint parseMultiPoint(int dimension,
+    		CoordinateReferenceSystem crs) throws XmlPullParserException,
+    		IOException, NoSuchAuthorityCodeException, FactoryException {
+            MultiPoint geom = null;
+    	parser.nextTag();
+    	final QName memberTag = new QName(parser.getNamespace(),
+    			parser.getName());
+    	List<Point> points = new ArrayList<Point>(4);
+    	if (GML.pointMembers.equals(memberTag)) {
+    		while (true) {
+    			parser.nextTag();
+    			if (END_TAG == parser.getEventType()
+    					&& GML.pointMembers.getLocalPart().equals(
+    							parser.getName())) {
+    				// we're done
+    				break;
+    			}
+    
+    			Point p = parsePoint(dimension, crs);
+    			points.add(p);
+    		}
+    		parser.nextTag();
+    	} else if (GML.pointMember.equals(memberTag)) {
+    		while (true) {
+    			parser.nextTag();
+    			parser.require(START_TAG, GML.NAMESPACE,
+    					GML.Point.getLocalPart());
+    
+    			Point p = parsePoint(dimension, crs);
+    			points.add(p);
+    			parser.nextTag();
+    			parser.require(END_TAG, GML.NAMESPACE,
+    					GML.pointMember.getLocalPart());
+    			parser.nextTag();
+    			if (END_TAG == parser.getEventType()
+    					&& GML.MultiPoint.getLocalPart().equals(
+    							parser.getName())) {
+    				// we're done
+    				break;
+    			}
+    		}
+    	}
+    
+    	parser.require(END_TAG, GML.NAMESPACE, GML.MultiPoint.getLocalPart());
+    	//geom = geomFac.createMultiPoint(points.toArray(new Point[points.size()]));
+    	return geom;
+    }
 
-		Coordinate point;
-		double x, y, z = 0;
-		parser.nextTag();
-		parser.require(START_TAG, GML.NAMESPACE, "X");
-
-		x = Double.parseDouble(parser.nextText());
-
-		parser.nextTag();
-		parser.require(START_TAG, GML.NAMESPACE, "Y");
-
-		y = Double.parseDouble(parser.nextText());
-
-		parser.nextTag();
-		if (START_TAG == parser.getEventType()) {
-			parser.require(START_TAG, GML.NAMESPACE, "Z");
-			z = Double.parseDouble(parser.nextText());
-			parser.nextTag();
-		}
-		parser.require(END_TAG, GML.NAMESPACE, GML.coord.getLocalPart());
-		point = new Coordinate(x, y, z);
-		return point;
-	}
-
-	private CoordinateReferenceSystem crs(CoordinateReferenceSystem defaultValue)
+    private CoordinateReferenceSystem crs(CoordinateReferenceSystem defaultValue)
 			throws NoSuchAuthorityCodeException, FactoryException {
 		String srsName = parser.getAttributeValue(null, "srsName");
 		if (srsName == null) {
@@ -786,16 +672,16 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 		return dimension;
 	}
 
-	private Coordinate[] parseCoordList(int dimension)
+	private DirectPosition[] parseCoordList(int dimension)
 			throws XmlPullParserException, IOException {
 		// we might be on a posList tag with srsDimension defined
 		dimension = crsDimension(dimension);
 		String rawTextValue = parser.nextText();
-		Coordinate[] coords = toCoordList(rawTextValue, dimension);
+		DirectPosition[] coords = toCoordList(rawTextValue, dimension);
 		return coords;
 	}
 
-	private Coordinate[] parseCoordinates(int dimension)
+	private DirectPosition[] parseCoordinates(int dimension)
 			throws XmlPullParserException, IOException {
 		parser.require(START_TAG, GML.NAMESPACE, GML.coordinates.getLocalPart());
 		// we might be on a posList tag with srsDimension defined
@@ -806,14 +692,14 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 		String tupleSeparator = parser.getAttributeValue("", "ts");
 
 		String rawTextValue = parser.nextText();
-		Coordinate[] coords = toCoordList(rawTextValue, decimalSeparator,
+		DirectPosition[] coords = toCoordList(rawTextValue, decimalSeparator,
 				coordSeparator, tupleSeparator, dimension);
 
 		parser.require(END_TAG, GML.NAMESPACE, GML.coordinates.getLocalPart());
 		return coords;
 	}
 
-	private Coordinate[] toCoordList(String rawTextValue, final int dimension) {
+	private DirectPosition[] toCoordList(String rawTextValue, final int dimension) {
 		rawTextValue = rawTextValue.trim();
 		rawTextValue = rawTextValue.replaceAll("\n", " ");
 		rawTextValue = rawTextValue.replaceAll("\r", " ");
@@ -825,26 +711,29 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 					+ dimension);
 		}
 		final int nCoords = ordinatesLength / dimension;
-		Coordinate[] coords = new Coordinate[nCoords];
-		Coordinate coord;
+		DirectPosition[] coords = new DirectPosition[nCoords];
+		DirectPosition coord;
 		int currCoordIdx = 0;
-		double x, y, z;
 		for (int i = 0; i < ordinatesLength; i += dimension) {
-			x = Double.valueOf(split[i]);
-			y = Double.valueOf(split[i + 1]);
-			if (dimension > 2) {
-				z = Double.valueOf(split[i + 2]);
-				coord = new Coordinate(x, y, z);
-			} else {
-				coord = new Coordinate(x, y);
+		    
+		        double[] ps = new double[dimension];
+		    
+		        ps[0] = Double.valueOf(split[i]);
+		        ps[1] = Double.valueOf(split[i + 1]);
+			
+			if(dimension > 2) {
+			    ps[2] = Double.valueOf(split[i + 2]);
 			}
+			
+			coord = builder.createDirectPosition(ps);
+			
 			coords[currCoordIdx] = coord;
 			currCoordIdx++;
 		}
 		return coords;
 	}
 
-	private Coordinate[] toCoordList(String rawTextValue,
+	private DirectPosition[] toCoordList(String rawTextValue,
 			final String decimalSeparator, final String coordSeparator,
 			final String tupleSeparator, final int dimension) {
 
@@ -857,10 +746,8 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 
 		final int nCoords = tuples.length;
 
-		Coordinate[] coords = new Coordinate[nCoords];
-		Coordinate coord;
-
-		double x, y, z;
+		DirectPosition[] coords = new DirectPosition[nCoords];
+		DirectPosition coord;
 
 		for (int i = 0; i < nCoords; i++) {
 			String tuple = tuples[i];
@@ -875,15 +762,7 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 				}
 				parsedOrdinates[o] = Double.parseDouble(ordinate);
 			}
-
-			x = parsedOrdinates[0];
-			y = parsedOrdinates[1];
-			if (dimension > 2 && parsedOrdinates.length > 2) {
-				z = parsedOrdinates[2];
-				coord = new Coordinate(x, y, z);
-			} else {
-				coord = new Coordinate(x, y);
-			}
+			coord = builder.createDirectPosition(parsedOrdinates);
 			coords[i] = coord;
 		}
 		return coords;
@@ -911,7 +790,7 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 					// gml 3.2 hack (ryoo)
 					if(featureId == null) {
 					        featureId = parser.getAttributeValue(
-                                                    org.geotools.gml3.v3_2.GML.id.getNamespaceURI(), org.geotools.gml3.v3_2.GML.id.getLocalPart());
+                                                    GML.id.getNamespaceURI(), GML.id.getLocalPart());
 					}
 					
 					if (featureId == null) {
