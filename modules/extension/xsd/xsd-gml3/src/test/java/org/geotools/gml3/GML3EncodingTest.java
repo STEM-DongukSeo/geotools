@@ -96,9 +96,9 @@ public class GML3EncodingTest extends TestCase {
     }
 
     public void testWithConfiguration() throws Exception {
-        if (isOffline()) {
+       /* if (isOffline()) {
             return;
-        }
+        }*/
 
         TestConfiguration configuration = new TestConfiguration();
 
@@ -119,9 +119,9 @@ public class GML3EncodingTest extends TestCase {
     }
 
     public void testWithApplicationSchemaConfiguration() throws Exception {
-        if (isOffline()) {
+        /*if (isOffline()) {
             return;
-        }
+        }*/
 
         // The schema location needs to be a well formed URI/URL, a file path is not sufficient.
         String schemaLocation = TestConfiguration.class.getResource("test.xsd").toString();

@@ -37,7 +37,7 @@ public class GML2ParsingUtilsTest extends TestCase {
 
         AttributeImpl att = new AttributeImpl(null);
         att.setName("srsName");
-
+        
         NodeImpl attNode = new NodeImpl(att);
         attNode.setValue(new URI("EPSG:4326"));
         node.addAttribute(attNode);
@@ -48,5 +48,10 @@ public class GML2ParsingUtilsTest extends TestCase {
         attNode.setValue(new URI("http://www.opengis.net/gml/srs/epsg.xml#4326"));
         crs = GML2ParsingUtils.crs(node);
         assertNotNull(crs);
+        
+        attNode.setValue(new URI("urn:x-ogc:def:crs:EPSG:6.11.2:4326"));
+        crs = GML2ParsingUtils.crs(node);
+        assertNotNull(crs);
+
     }
 }

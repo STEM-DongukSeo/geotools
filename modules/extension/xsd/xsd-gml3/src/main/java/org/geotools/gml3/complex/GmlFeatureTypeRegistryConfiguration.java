@@ -31,6 +31,7 @@ import org.eclipse.xsd.XSDAttributeUseCategory;
 import org.eclipse.xsd.XSDComplexTypeDefinition;
 import org.eclipse.xsd.XSDSchema;
 import org.eclipse.xsd.XSDTypeDefinition;
+import org.geotools.feature.type.Types;
 import org.geotools.gml3.GML;
 import org.geotools.gml3.GMLConfiguration;
 import org.geotools.gml3.GMLSchema;
@@ -43,7 +44,6 @@ import org.geotools.xml.complex.FeatureTypeRegistryConfiguration;
 import org.geotools.xs.XS;
 import org.opengis.feature.type.Name;
 import org.opengis.feature.type.Schema;
-import org.geotools.feature.type.Types;
 
 /**
  * Feature Type Registry Configuration for  GML. Depending on the schema type
@@ -85,7 +85,7 @@ public class GmlFeatureTypeRegistryConfiguration implements FeatureTypeRegistryC
     @Override
     public Collection<Configuration> getConfigurations() {
         ArrayList<Configuration> configurations = new ArrayList<Configuration>();
-        configurations.add(new GMLConfiguration());
+        configurations.add(new org.geotools.gml3.GMLConfiguration());
         configurations.add(new org.geotools.gml3.v3_2.GMLConfiguration());
         return configurations;
     }

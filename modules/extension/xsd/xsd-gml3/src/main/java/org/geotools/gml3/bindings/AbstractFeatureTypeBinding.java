@@ -145,4 +145,13 @@ public class AbstractFeatureTypeBinding extends AbstractComplexBinding {
         return encodingUtils.AbstractFeatureTypeGetProperties(object, element, schemaIndex,
                 configuration);
     }
+    
+    public FeatureTypeCache getFeatureTypeCache() {
+        return ftCache;
+    }
+    
+    public BindingWalkerFactory getBindingWalkerFactory() {
+        return bwFactory;
+    }
+    
 }

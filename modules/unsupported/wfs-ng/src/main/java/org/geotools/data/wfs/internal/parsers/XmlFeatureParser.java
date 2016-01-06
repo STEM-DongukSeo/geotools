@@ -93,9 +93,13 @@ public abstract class XmlFeatureParser<FT extends FeatureType, F extends Feature
 			// parse root element
 			parser.setInput(inputStream, "UTF-8");
 			parser.nextTag();
-			parser.require(START_TAG, WFS.NAMESPACE,
-					WFS.FeatureCollection.getLocalPart());
+			/*parser.require(START_TAG, WFS.NAMESPACE,
+					WFS.FeatureCollection.getLocalPart());*/
 
+			
+			parser.require(START_TAG, org.geotools.wfs.v2_0.WFS.NAMESPACE,
+			        org.geotools.wfs.v2_0.WFS.FeatureCollection.getLocalPart());
+			
 			String nof = parser.getAttributeValue(null, "numberOfFeatures");
 			if (nof != null) {
 				try {
@@ -192,11 +196,12 @@ public abstract class XmlFeatureParser<FT extends FeatureType, F extends Feature
 			FactoryException, XmlPullParserException, IOException {
 		final QName startingGeometryTagName = new QName(parser.getNamespace(),
 				parser.getName());
+		
 		int dimension = crsDimension(2);
 		CoordinateReferenceSystem crs = crs(DefaultGeographicCRS.WGS84);
 
 		Geometry geom;
-		if (GML.Point.equals(startingGeometryTagName)) {
+/*		if (GML.Point.equals(startingGeometryTagName)) {
 			geom = parsePoint(dimension, crs);
 		} else if (GML.LineString.equals(startingGeometryTagName)) {
 			geom = parseLineString(dimension, crs);
@@ -213,11 +218,30 @@ public abstract class XmlFeatureParser<FT extends FeatureType, F extends Feature
 		} else {
 			throw new IllegalStateException("Unrecognized geometry element "
 					+ startingGeometryTagName);
-		}
+		}*/
+		
+		if (org.geotools.gml3.v3_2.GML.Point.equals(startingGeometryTagName)) {
+                    geom = parsePoint(dimension, crs);
+                } else if (org.geotools.gml3.v3_2.GML.LineString.equals(startingGeometryTagName)) {
+                        geom = parseLineString(dimension, crs);
+                } else if (GML.Polygon.equals(startingGeometryTagName)) {
+                        geom = parsePolygon(dimension, crs);
+                } else if (GML.MultiPoint.equals(startingGeometryTagName)) {
+                        geom = parseMultiPoint(dimension, crs);
+                } else if (GML.MultiLineString.equals(startingGeometryTagName)) {
+                        geom = parseMultiLineString(dimension, crs);
+                } else if (GML.MultiSurface.equals(startingGeometryTagName)) {
+                        geom = parseMultiSurface(dimension, crs);
+                } else if (GML.MultiPolygon.equals(startingGeometryTagName)) {
+                        geom = parseMultiPolygon(dimension, crs);
+                } else {
+                        throw new IllegalStateException("Unrecognized geometry element "
+                                        + startingGeometryTagName);
+                }
 
 		parser.require(END_TAG, startingGeometryTagName.getNamespaceURI(),
 				startingGeometryTagName.getLocalPart());
-
+		
 		return geom;
 	}
 
@@ -553,12 +577,12 @@ public abstract class XmlFeatureParser<FT extends FeatureType, F extends Feature
 			CoordinateReferenceSystem crs) throws XmlPullParserException,
 			IOException, NoSuchAuthorityCodeException, FactoryException {
 
-		parser.require(START_TAG, GML.NAMESPACE, GML.LineString.getLocalPart());
+		parser.require(START_TAG, org.geotools.gml3.v3_2.GML.NAMESPACE, org.geotools.gml3.v3_2.GML.LineString.getLocalPart());
 
 		crs = crs(crs);
 		Coordinate[] coordinates = parseLineStringInternal(dimension, crs);
 
-		parser.require(END_TAG, GML.NAMESPACE, GML.LineString.getLocalPart());
+		parser.require(END_TAG, org.geotools.gml3.v3_2.GML.NAMESPACE, org.geotools.gml3.v3_2.GML.LineString.getLocalPart());
 
 		LineString geom = geomFac.createLineString(coordinates);
 		geom.setUserData(crs);
@@ -578,7 +602,7 @@ public abstract class XmlFeatureParser<FT extends FeatureType, F extends Feature
 		final QName coordsName = new QName(parser.getNamespace(),
 				parser.getName());
 		String tagName = parser.getName();
-		if (GML.pos.equals(coordsName)) {
+		if (org.geotools.gml3.v3_2.GML.pos.equals(coordsName)) {
 			Coordinate[] point;
 			List<Coordinate> coords = new ArrayList<Coordinate>();
 			int eventType;
@@ -589,7 +613,7 @@ public abstract class XmlFeatureParser<FT extends FeatureType, F extends Feature
 				tagName = parser.getName();
 				eventType = parser.getEventType();
 			} while (eventType == START_TAG
-					&& tagName == GML.pos.getLocalPart());
+					&& tagName.equalsIgnoreCase(org.geotools.gml3.v3_2.GML.pos.getLocalPart()));
 
 			lineCoords = coords.toArray(new Coordinate[coords.size()]);
 		} else if (GML.posList.equals(coordsName)) {
@@ -627,15 +651,15 @@ public abstract class XmlFeatureParser<FT extends FeatureType, F extends Feature
 			throws XmlPullParserException, IOException,
 			NoSuchAuthorityCodeException, FactoryException {
 
-		parser.require(START_TAG, GML.NAMESPACE, GML.Point.getLocalPart());
+		parser.require(START_TAG, org.geotools.gml3.v3_2.GML.NAMESPACE, org.geotools.gml3.v3_2.GML.Point.getLocalPart());
 
 		crs = crs(crs);
 
 		Point geom;
 		parser.nextTag();
-		parser.require(START_TAG, GML.NAMESPACE, null);
+		parser.require(START_TAG, org.geotools.gml3.v3_2.GML.NAMESPACE, null);
 		Coordinate point;
-		if (GML.pos.getLocalPart().equals(parser.getName())) {
+		if (org.geotools.gml3.v3_2.GML.pos.getLocalPart().equals(parser.getName())) {
 			Coordinate[] coords = parseCoordList(dimension);
 			point = coords[0];
 			parser.nextTag();
@@ -651,7 +675,8 @@ public abstract class XmlFeatureParser<FT extends FeatureType, F extends Feature
 					"Unknown coordinate element for Point: " + parser.getName());
 		}
 
-		parser.require(END_TAG, GML.NAMESPACE, GML.Point.getLocalPart());
+		parser.require(END_TAG, org.geotools.gml3.v3_2.GML.NAMESPACE, org.geotools.gml3.v3_2.GML.Point.getLocalPart());
+		
 
 		geom = geomFac.createPoint(point);
 		geom.setUserData(crs);
@@ -832,7 +857,13 @@ public abstract class XmlFeatureParser<FT extends FeatureType, F extends Feature
 						&& featureName.equals(name)) {
 					String featureId = parser.getAttributeValue(
 							GML.id.getNamespaceURI(), GML.id.getLocalPart());
-
+					
+					// gml 3.2 hack (ryoo)
+					if(featureId == null) {
+					        featureId = parser.getAttributeValue(
+                                                    org.geotools.gml3.v3_2.GML.id.getNamespaceURI(), org.geotools.gml3.v3_2.GML.id.getLocalPart());
+					}
+					
 					if (featureId == null) {
 						featureId = parser.getAttributeValue(null, "fid");
 					}

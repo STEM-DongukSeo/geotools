@@ -198,7 +198,7 @@ public class SimpleFeatureTypeBuilder {
 		attributeBuilder = new AttributeTypeBuilder();
 		setBindings( new SimpleSchema() );
 		reset();
-	}
+	}   
 	
 	// Dependency Injection
 	//

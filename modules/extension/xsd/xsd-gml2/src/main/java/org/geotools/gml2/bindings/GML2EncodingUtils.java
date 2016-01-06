@@ -60,6 +60,7 @@ import com.vividsolutions.jts.geom.Geometry;
 public class GML2EncodingUtils {
     
     /** logging instance */
+
     static Logger LOGGER = Logging.getLogger( "org.geotools.gml");
     
     static GMLEncodingUtils e = new GMLEncodingUtils(GML.getInstance());
