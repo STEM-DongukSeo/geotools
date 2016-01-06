@@ -55,6 +55,7 @@ import org.opengis.geometry.coordinate.Position;
 import org.opengis.geometry.primitive.Curve;
 import org.opengis.geometry.primitive.CurveSegment;
 import org.opengis.geometry.primitive.OrientableCurve;
+import org.opengis.geometry.primitive.OrientableSurface;
 import org.opengis.geometry.primitive.Point;
 import org.opengis.geometry.primitive.PrimitiveFactory;
 import org.opengis.geometry.primitive.Ring;
@@ -62,6 +63,7 @@ import org.opengis.geometry.primitive.Shell;
 import org.opengis.geometry.primitive.Solid;
 import org.opengis.geometry.primitive.SolidBoundary;
 import org.opengis.geometry.primitive.Surface;
+import org.opengis.geometry.primitive.SurfaceBoundary;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -343,18 +345,18 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
             parser.require(START_TAG, GML.NAMESPACE, null);
 	    
             final QName memberTag = new QName(parser.getNamespace(), parser.getName());
-            List<Surface> polygons = new ArrayList<Surface>(2);
+            List<OrientableSurface> surfaces = new ArrayList<OrientableSurface>(2);
             if (GML.surfaceMember.equals(memberTag)) {
                 while (true) {
                         parser.nextTag();
                         Surface p = parsePolygon(dimension, crs);
-                        polygons.add(p);
+                        surfaces.add(p);
                         parser.nextTag();
                         parser.require(END_TAG, GML.NAMESPACE,
                                 GML.surfaceMember.getLocalPart());
                         parser.nextTag();
                         if (END_TAG == parser.getEventType()
-                                        && GML.MultiSurface.getLocalPart().equals(
+                                        && GML.Shell.getLocalPart().equals(
                                                         parser.getName())) {
                                 // we're done
                                 break;
@@ -363,9 +365,7 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
             }
             
             parser.require(END_TAG, GML.NAMESPACE, GML.Shell.getLocalPart());
-            
-            //primitiveFac.createshe
-            
+            geom = primitiveFac.createShell(surfaces);
             return geom;
 	}
 
@@ -446,14 +446,9 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 		}
 
 		parser.require(END_TAG, GML.NAMESPACE, GML.Polygon.getLocalPart());
-
-		Ring[] holesArray = null;
-		if (holes != null) {
-			holesArray = holes.toArray(new Ring[holes.size()]);
-		}
 		
-		//TODO
-		//geom = geomFac.createPolygon(boundary, spanSurface)
+		SurfaceBoundary boundary = primitiveFac.createSurfaceBoundary(shell, holes);
+		geom = primitiveFac.createSurface(boundary);
 		//geom.setUserData(crs);
 		return geom;
 	}

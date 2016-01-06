@@ -41,6 +41,7 @@ import org.opengis.geometry.coordinate.BSplineSurface;
 import org.opengis.geometry.coordinate.Geodesic;
 import org.opengis.geometry.coordinate.GeodesicString;
 import org.opengis.geometry.coordinate.GeometryFactory;
+import org.opengis.geometry.coordinate.Knot;
 import org.opengis.geometry.coordinate.KnotType;
 import org.opengis.geometry.coordinate.LineSegment;
 import org.opengis.geometry.coordinate.LineString;
@@ -57,11 +58,13 @@ import org.opengis.geometry.primitive.CurveInterpolation;
 import org.opengis.geometry.primitive.CurveSegment;
 import org.opengis.geometry.primitive.OrientableCurve;
 import org.opengis.geometry.primitive.OrientablePrimitive;
+import org.opengis.geometry.primitive.OrientableSurface;
 import org.opengis.geometry.primitive.Point;
 import org.opengis.geometry.primitive.Primitive;
 import org.opengis.geometry.primitive.PrimitiveBoundary;
 import org.opengis.geometry.primitive.PrimitiveFactory;
 import org.opengis.geometry.primitive.Ring;
+import org.opengis.geometry.primitive.Shell;
 import org.opengis.geometry.primitive.Solid;
 import org.opengis.geometry.primitive.SolidBoundary;
 import org.opengis.geometry.primitive.Surface;
@@ -758,6 +761,20 @@ public class MockGeometryFactory implements GeometryFactory, PrimitiveFactory {
     }
     public SurfaceBoundary createSurfaceBoundary( Ring exterior, List interiors )
             throws MismatchedReferenceSystemException, MismatchedDimensionException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    @Override
+    public SolidBoundary createSolidBoundary(Shell exterior,
+            List<Shell> interiors) throws MismatchedReferenceSystemException,
+                    MismatchedDimensionException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+    @Override
+    public Shell createShell(List<OrientableSurface> orientableSurfaces)
+            throws MismatchedReferenceSystemException,
+            MismatchedDimensionException {
         // TODO Auto-generated method stub
         return null;
     }

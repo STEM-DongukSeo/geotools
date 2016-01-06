@@ -1,3 +1,7 @@
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,7 +56,7 @@ public class IndoorCoreParsingTest {
         
         AttributeDescriptor descriptor = typeRegistry
                         .getDescriptor(new NameImpl("http://www.opengis.net/indoorgml/1.0/core",
-                                        ":", "SpaceLayer"), null);
+                                        ":", "IndoorFeatures"), null);
         FeatureType featureType = (FeatureType) descriptor.getType();
 
         // Creating Feature
@@ -60,10 +64,11 @@ public class IndoorCoreParsingTest {
         NewXmlComplexFeatureParser featureParser = new NewXmlComplexFeatureParser(
                         url.openStream(),
                         featureType, new QName("http://www.opengis.net/indoorgml/1.0/core",
-                                "SpaceLayer"));
+                                "IndoorFeatures"));
         
         // Act
         Feature feature = featureParser.parse();
+ 
         System.out.println(feature);
         
         Collection<? extends Property> sl = feature.getValue();

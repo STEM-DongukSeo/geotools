@@ -51,7 +51,9 @@ import org.opengis.geometry.primitive.Point;
 import org.opengis.geometry.primitive.PrimitiveFactory;
 import org.opengis.geometry.primitive.Ring;
 import org.opengis.geometry.primitive.Shell;
+import org.opengis.geometry.primitive.Solid;
 import org.opengis.geometry.primitive.SolidBoundary;
+import org.opengis.geometry.primitive.Surface;
 import org.opengis.geometry.primitive.SurfaceBoundary;
 import org.opengis.geometry.primitive.SurfacePatch;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -258,12 +260,13 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
 		
 	}
 
-	/*
+	 /*
 	 * (non-Javadoc)
 	 * 
 	 * @see org.opengis.geometry.primitive.PrimitiveFactory#createCurve(java.util.List)
 	 */
-	public CurveImpl createCurve(List<CurveSegment> segments) {
+	public Curve createCurve(List<CurveSegment> segments)
+	            throws MismatchedReferenceSystemException, MismatchedDimensionException{
 		// test OK
 		if (segments == null)
 			throw new NullPointerException();
@@ -279,9 +282,9 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
 	 * 
 	 * @see org.opengis.geometry.primitive.PrimitiveFactory#createRing(java.util.List)
 	 */
-	public Ring createRing(List<OrientableCurve> orientableCurves)
-			throws MismatchedReferenceSystemException,
-			MismatchedDimensionException {
+	
+	public Ring createRing(List<OrientableCurve> curves)
+	            throws MismatchedReferenceSystemException, MismatchedDimensionException {
 		/**
 		 * Creates a Ring from triple Array of DirectPositions (Array of arrays,
 		 * which each represent a future Curve. Each array contain an array of
@@ -289,7 +292,7 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
 		 */
 		// TODO semantic JR
 		// test OK
-		for (OrientableCurve orientableCurve : orientableCurves) {
+		for (OrientableCurve orientableCurve : curves) {
 			// Comment by Sanjay
 			// TODO JR: Zur Kenntnisnahme und Berücksichtigung in Sourcen: Für
 			// alle
@@ -309,10 +312,10 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
 		// if we don't want to validate the ring upon creation (for faster creation) use
 		// RingImplUnsafe instead of RingImpl
 		if ( geomValidate ) {
-			return new RingImpl(orientableCurves);
+			return new RingImpl(curves);
 		}
 		else {
-			return new RingImplUnsafe(orientableCurves);
+			return new RingImplUnsafe(curves);
 		}
 	}
 
@@ -322,9 +325,8 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
 	 * @see org.opengis.geometry.primitive.PrimitiveFactory#createSurfaceBoundary(org.opengis.geometry.primitive.Ring,
 	 *      java.util.List)
 	 */
-	public SurfaceBoundaryImpl createSurfaceBoundary(Ring exterior,
-			List<Ring> interiors) throws MismatchedReferenceSystemException,
-			MismatchedDimensionException {
+	public SurfaceBoundary createSurfaceBoundary(Ring exterior, List<Ring> interiors)
+	            throws MismatchedReferenceSystemException, MismatchedDimensionException {
 		// Test ok
 
 		if (interiors == null && exterior == null)
@@ -362,19 +364,18 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
 	 * 
 	 * @see org.opengis.geometry.primitive.PrimitiveFactory#createSurface(java.util.List)
 	 */
-	public SurfaceImpl createSurface(List<SurfacePatch> surfacePatches)
-			throws MismatchedReferenceSystemException,
-			MismatchedDimensionException {
+	public Surface createSurface(List<SurfacePatch> surfaces)
+	            throws MismatchedReferenceSystemException, MismatchedDimensionException {
 
 		// tested in /test/TestSurface.java
 		// TODO SurfaceBoundary NOT calculated !!!
 
 		// Create Surface
 		SurfaceImpl rSurface = new SurfaceImpl(getCoordinateReferenceSystem(),
-				surfacePatches);
+		        surfaces);
 		// Set reference to the generated Surface for each SurfacePatch
-		for (int i = 0; i < surfacePatches.size(); i++) {
-			SurfacePatchImpl actPatch = (SurfacePatchImpl) surfacePatches
+		for (int i = 0; i < surfaces.size(); i++) {
+			SurfacePatchImpl actPatch = (SurfacePatchImpl) surfaces
 					.get(i);
 			actPatch.setSurface(rSurface);
 		}
@@ -387,7 +388,7 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
 	 * 
 	 * @see org.opengis.geometry.primitive.PrimitiveFactory#createSurface(org.opengis.geometry.primitive.SurfaceBoundary)
 	 */
-	public SurfaceImpl createSurface(SurfaceBoundary boundary)
+	public Surface createSurface(SurfaceBoundary boundary)
 			throws MismatchedReferenceSystemException,
 			MismatchedDimensionException {
 		// Test ok
@@ -403,9 +404,8 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
 	 * @throws MismatchedReferenceSystemException
 	 * @throws MismatchedDimensionException
 	 */
-	public ShellImpl createShell(List<OrientableSurface> orientableSurfaces)
-                        throws MismatchedReferenceSystemException,
-                        MismatchedDimensionException {
+	public Shell createShell(List<OrientableSurface> orientableSurfaces)
+	            throws MismatchedReferenceSystemException, MismatchedDimensionException {
 	        for (OrientableSurface orientableSurface : orientableSurfaces) {
 	            if (this.getDimension() != orientableSurface.getCoordinateDimension()) {
 	                new MismatchedDimensionException();
@@ -428,7 +428,8 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
          * @throws MismatchedReferenceSystemException
          * @throws MismatchedDimensionException
          */
-        public SolidBoundaryImpl createSolidBoundary(Shell exterior, List<Shell> interiors)
+	
+        public SolidBoundary createSolidBoundary(Shell exterior, List<Shell> interiors)
                 throws MismatchedReferenceSystemException, MismatchedDimensionException {
             // TODO test
             if (interiors == null && exterior == null)
@@ -463,7 +464,7 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
 	 * 
 	 * @see org.opengis.geometry.primitive.PrimitiveFactory#createSolid(org.opengis.geometry.primitive.SolidBoundary)
 	 */
-	public SolidImpl createSolid(SolidBoundary boundary)
+	public Solid createSolid(SolidBoundary boundary)
 			throws MismatchedReferenceSystemException,
 			MismatchedDimensionException {
 		// TODO semantic SJ, JR
@@ -708,7 +709,7 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
 	 * @param aPositions
 	 * @return Curve
 	 */
-	public CurveImpl createCurveByPositions(List<Position> aPositions) {
+	public Curve createCurveByPositions(List<Position> aPositions) {
 		// GeometryFactoryImpl coordFactory =
 		// this.geometryFactory.getGeometryFactoryImpl();
 
@@ -732,7 +733,7 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
 	 *            first position
 	 * @return a Surface defined by the given positions
 	 */
-	public SurfaceImpl createSurfaceByDirectPositions(
+	public Surface createSurfaceByDirectPositions(
 			List<DirectPosition> positions) {
 		// Test ok
 		Ring extRing = this.createRingByDirectPositions(positions);

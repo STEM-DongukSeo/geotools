@@ -483,13 +483,6 @@ public class Geometry3DOperationTest extends TestCase {
                 return curves;
         }
 
-        public static Surface makeSurface(GeometryBuilder builder, List<DirectPosition> positions) {
-                PrimitiveFactoryImpl pmF = (PrimitiveFactoryImpl) builder.getPrimitiveFactory();
-                SurfaceImpl surf = pmF.createSurfaceByDirectPositions(positions);
-
-                return surf;
-        }
-
         public static ArrayList<Surface> getSurfaces(GeometryBuilder builder) {
                 // 1. P1
                 ArrayList<DirectPosition> positions1 = new ArrayList<DirectPosition>();
@@ -937,7 +930,7 @@ public class Geometry3DOperationTest extends TestCase {
 
                 ArrayList<Surface> surfaces = new ArrayList<Surface>();
                 
-                surfaces.add(makeSurface(builder, positions1));
+                /*surfaces.add(makeSurface(builder, positions1));
                 surfaces.add(makeSurface(builder, positions2));
                 surfaces.add(makeSurface(builder, positions3));
                 surfaces.add(makeSurface(builder, positions4));
@@ -997,7 +990,7 @@ public class Geometry3DOperationTest extends TestCase {
                 surfaces.add(makeSurface(builder, positions58));
                 surfaces.add(makeSurface(builder, positions59));
                 surfaces.add(makeSurface(builder, positions60));
-                surfaces.add(makeSurface(builder, positions61));
+                surfaces.add(makeSurface(builder, positions61));*/
 
                 return surfaces;
         }
@@ -1369,7 +1362,7 @@ public class Geometry3DOperationTest extends TestCase {
                                 ((RingImplUnsafe) exterior).asDirectPositions(), angle, pivotX,
                                 pivotY, offsetX, offsetY, offsetZ);
 
-                return makeSurface(builder, newPositions);
+                return null; //makeSurface(builder, newPositions);
         }
 
         public static Solid rotate(Solid solid, double angle, double pivotX, double pivotY,
