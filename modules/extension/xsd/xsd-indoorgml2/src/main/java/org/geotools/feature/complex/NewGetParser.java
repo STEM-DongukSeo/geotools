@@ -27,13 +27,6 @@ import org.opengis.geometry.coordinate.GeometryFactory;
  * @author Adam Brown (Curtin University of Technology)
  */
 public interface NewGetParser<F extends Feature> {
-    /**
-     * Returns the number of features if advertised by the server and the parser was able to get that information for example from the
-     * {@code wfs:FeatureCollection} "numberOfFeatures" xml attribute, or {@code -1} if unknown.
-     * 
-     * @return number of features advertised by server, or {@code -1} if unknown
-     */
-    public int getNumberOfFeatures();
 
     /**
      * @return the next feature in the stream or {@code null} if there are no more features to parse.

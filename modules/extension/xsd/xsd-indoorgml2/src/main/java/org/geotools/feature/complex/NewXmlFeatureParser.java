@@ -94,8 +94,6 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 
 	final String featureName;
 
-	private int numberOfFeatures = -1;
-
 	private static final Logger LOGGER = Loggers.RESPONSES;
 
 	public NewXmlFeatureParser(final InputStream getFeatureResponseStream,
@@ -119,25 +117,8 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 		try {
                         parser = new MXParser();
                         parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-
-			// parse root element
-			parser.setInput(inputStream, "UTF-8");
-			parser.nextTag();
-			/*parser.require(START_TAG, WFS.NAMESPACE,
-					WFS.FeatureCollection.getLocalPart());*/
-
-			
-			parser.require(START_TAG, org.geotools.wfs.v2_0.WFS.NAMESPACE,
-			        org.geotools.wfs.v2_0.WFS.FeatureCollection.getLocalPart());
-			
-			String nof = parser.getAttributeValue(null, "numberOfFeatures");
-			if (nof != null) {
-				try {
-					this.numberOfFeatures = Integer.valueOf(nof);
-				} catch (NumberFormatException nfe) {
-					LOGGER.warning("Can't parse numberOfFeatures out of " + nof);
-				}
-			}
+                     // parse root element
+                        parser.setInput(inputStream, "UTF-8");
 		} catch (XmlPullParserException e) {
 			throw new DataSourceException(e);
 		}
@@ -146,11 +127,6 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 	@Override
 	public FT getFeatureType() {
 		return targetType;
-	}
-
-	@Override
-	public int getNumberOfFeatures() {
-		return numberOfFeatures;
 	}
 
 	@Override
@@ -243,18 +219,14 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
 					+ startingGeometryTagName);
 		}*/
 		
-		/*else if (GML.LineString.equals(startingGeometryTagName)) {
-                        geom = parseLineString(dimension, crs);
-                } */
-		
 		if (GML.Point.equals(startingGeometryTagName)) {
                     geom = parsePoint(dimension, crs);
                 } else if(GML.LineString.equals(startingGeometryTagName)) {
                     geom = parseLineString(dimension, crs);
-                } else if(GML.Solid.equals(startingGeometryTagName)) {
-		    geom = parseSolid(dimension, crs);
                 } else if(GML.Polygon.equals(startingGeometryTagName)) {
                     geom = parsePolygon(dimension, crs);
+                } else if(GML.Solid.equals(startingGeometryTagName)) {
+		    geom = parseSolid(dimension, crs);
                 } else {
                         throw new IllegalStateException("Unrecognized geometry element "
                                         + startingGeometryTagName);
@@ -313,7 +285,8 @@ public abstract class NewXmlFeatureParser<FT extends FeatureType, F extends Feat
                                     holes.add(hole);
 
                                     parser.nextTag();
-                                    parser.require(END_TAG, GML.NAMESPACE, name.getLocalPart());
+                                    parser.require(END_TAG, GML.NAMESPACE, 
+                                                    name.getLocalPart());
                                     parser.nextTag();
                                     if (END_TAG == parser.getEventType()) {
                                             // we're done

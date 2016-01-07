@@ -60,7 +60,7 @@ public class IndoorCoreParsingTest {
         FeatureType featureType = (FeatureType) descriptor.getType();
 
         // Creating Feature
-        URL url = getClass().getResource("indoor_wfs_test.gml");
+        URL url = getClass().getResource("indoor.gml");
         NewXmlComplexFeatureParser featureParser = new NewXmlComplexFeatureParser(
                         url.openStream(),
                         featureType, new QName("http://www.opengis.net/indoorgml/1.0/core",

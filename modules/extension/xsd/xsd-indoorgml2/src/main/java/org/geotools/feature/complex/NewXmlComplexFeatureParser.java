@@ -293,10 +293,6 @@ public class NewXmlComplexFeatureParser extends
 			Name currentTagName = new NameImpl(parser.getNamespace(),
 					parser.getName());
 			
-			if(currentTagName.getLocalPart().equalsIgnoreCase("Geometry3D")) {
-			    System.out.println();
-			}
-			
 			PropertyDescriptor descriptor = complexType
 					.getDescriptor(currentTagName);
 			if (descriptor != null) {
@@ -463,7 +459,7 @@ public class NewXmlComplexFeatureParser extends
 				// something is wrong.
 				throw new RuntimeException(
 						String.format(
-								"WFS response structure unexpected. Could not find descriptor in type '%s' for '%s'.",
+								"ApplicationSchema structure unexpected. Could not find descriptor in type '%s' for '%s'.",
 								complexType, currentTagName));
 			}
 		} else if (tagType == XmlPullParser.END_DOCUMENT) {
