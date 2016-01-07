@@ -68,7 +68,11 @@ public class IndoorCoreParsingTest {
         
         // Act
         Feature feature = featureParser.parse();
- 
+        
+        FeatureSeparator separator = new FeatureSeparator();
+        separator.separate(feature);
+        
+        
         System.out.println(feature);
         
         Collection<? extends Property> sl = feature.getValue();
