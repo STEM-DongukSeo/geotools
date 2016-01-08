@@ -32,13 +32,10 @@ import org.geotools.data.DataSourceException;
 import org.geotools.data.complex.ComplexFeatureConstants;
 import org.geotools.data.complex.config.Types;
 import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.feature.AttributeBuilder;
 import org.geotools.feature.AttributeImpl;
 import org.geotools.feature.ComplexFeatureBuilder;
-import org.geotools.feature.LenientFeatureFactoryImpl;
 import org.geotools.feature.NameImpl;
 import org.geotools.feature.type.AttributeDescriptorImpl;
-import org.geotools.gml3.GML;
 import org.opengis.feature.Attribute;
 import org.opengis.feature.ComplexAttribute;
 import org.opengis.feature.Feature;
@@ -53,14 +50,14 @@ import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.feature.type.PropertyType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory;
-import org.opengis.geometry.coordinate.GeometryFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 /**
- * Parses complex features from a WFS response input stream.
+ * Parses complex features from input stream.
  * 
  * @author Adam Brown (Curtin University of Technology)
+ * @author HyungGyu Ryoo (Pusan National University)
  */
 public class NewXmlComplexFeatureParser extends
     NewXmlFeatureParser<FeatureType, Feature> {
@@ -303,7 +300,7 @@ public class NewXmlComplexFeatureParser extends
 				// Id if it's set:
 				PropertyType type = descriptor.getType();
 
-				String id =  parser.getAttributeValue(org.geotools.gml3.v3_2.GML.id.getNamespaceURI(), org.geotools.gml3.v3_2.GML.id.getLocalPart());
+				String id = parser.getAttributeValue(org.geotools.gml3.v3_2.GML.id.getNamespaceURI(), org.geotools.gml3.v3_2.GML.id.getLocalPart());
 				
 				// Is it defined by an xlink?
 				String href = parser.getAttributeValue("http://www.w3.org/1999/xlink", "href");
@@ -317,19 +314,12 @@ public class NewXmlComplexFeatureParser extends
 					// We've got the attribute but the parser is still
 					// pointing at this tag so
 					// we have to advance it till we get to the end tag.
-					 /*while (!parser.isEmptyElementTag() && parser.next() != XmlPullParser.END_TAG)
-                                             ;
-                                         */
-
-					 if(!parser.isEmptyElementTag()) {
-					    while (parser.next() != XmlPullParser.END_TAG)
-                                                ;
-					 } else {
-					     parser.next();
-					    /*while (parser.next() != XmlPullParser.START_TAG)
-					        ;*/
-					 }
-					 
+					if(!parser.isEmptyElementTag()) {
+					   while (parser.next() != XmlPullParser.END_TAG)
+					       ;
+					} else {
+					    parser.next();
+					}
 					 
 					return new ReturnAttribute(id, currentTagName,
 							hrefAttribute);
@@ -386,11 +376,9 @@ public class NewXmlComplexFeatureParser extends
 						// We've got the attribute but the parser is still
 						// pointing at this tag so
 						// we have to advance it till we get to the end tag.
-						 while (parser.next() != XmlPullParser.END_TAG)
-	                                                ;
-						 
-						 
-						 
+						while (parser.next() != XmlPullParser.END_TAG)
+	                                               ;
+
 						return new ReturnAttribute(id, currentTagName, list);
 					}
 
@@ -491,10 +479,4 @@ public class NewXmlComplexFeatureParser extends
 			this.value = value;
 		}
 	}
-
-    @Override
-    public void setGeometryFactory(GeometryFactory geometryFactory) {
-        // TODO Auto-generated method stub
-        
-    }
 }

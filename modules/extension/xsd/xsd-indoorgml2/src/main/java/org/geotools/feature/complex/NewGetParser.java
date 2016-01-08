@@ -18,13 +18,13 @@ package org.geotools.feature.complex;
 
 import java.io.IOException;
 
+import org.geotools.geometry.GeometryBuilder;
 import org.opengis.feature.Feature;
 import org.opengis.feature.type.FeatureType;
-import org.opengis.geometry.coordinate.GeometryFactory;
 /**
  * Interface to return appropriate feature parser.
  * 
- * @author Adam Brown (Curtin University of Technology)
+ * @author HyungGyu Ryoo (Pusan National University)
  */
 public interface NewGetParser<F extends Feature> {
 
@@ -48,9 +48,9 @@ public interface NewGetParser<F extends Feature> {
     public FeatureType getFeatureType();
 
     /**
-     * Set the geometry factory. 
-     * @param geometryFactory
-     * 		The geometry factory to use.
+     * Set the geometry builder.
+     * @param geometryBuilder
+     * 		The geometry builder to use.
      */
-    public void setGeometryFactory(GeometryFactory geometryFactory);
+    public void setGeometryBuilder(GeometryBuilder geometryBuilder);
 }

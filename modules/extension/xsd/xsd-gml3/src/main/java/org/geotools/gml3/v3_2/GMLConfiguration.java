@@ -280,13 +280,6 @@ public class GMLConfiguration extends Configuration {
             container.registerComponentImplementation(GML.SurfaceType, 
                     org.geotools.gml3.bindings.ext.SurfaceTypeBinding.class);
         }
-        
-        // support for Solid Type(hgryoo)
-        container.registerComponentImplementation(GML.AbstractSolidType, null);
-        container.registerComponentImplementation(GML.SolidType, null);
-        container.registerComponentImplementation(GML.SolidPropertyType, null);
-        
-        
     }
     
     @Override

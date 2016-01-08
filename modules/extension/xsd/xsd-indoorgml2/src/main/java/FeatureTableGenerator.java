@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.complex.NewFeatureCollection;
 import org.opengis.feature.ComplexAttribute;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
@@ -26,7 +28,7 @@ import org.opengis.filter.identity.FeatureId;
  */
 public class FeatureTableGenerator {
     
-        private Map<Name, List> featureTable = new HashMap<Name, List>();
+        private Map<Name, NewFeatureCollection> featureTable = new HashMap<Name, NewFeatureCollection>();
 
 	public FeatureTableGenerator(Feature feature) {
 	    addFeature(feature);
@@ -38,12 +40,12 @@ public class FeatureTableGenerator {
 	    
         }
 	
-	public List getFeatureCollection(Name name) {
+	public FeatureCollection getFeatureCollection(Name name) {
 	    if(featureTable.containsKey(name)) {
 	        return featureTable.get(name);
 	    }
 	    else {
-	        return Collections.emptyList();
+	        return new NewFeatureCollection();
 	    }
 	}
 	
@@ -71,7 +73,7 @@ public class FeatureTableGenerator {
 	public void addFeature(Feature f) {
 	    Name name = f.getName();
 	    if(!featureTable.containsKey(name)) {
-	        featureTable.put(name, new ArrayList<Property>());
+	        featureTable.put(name, new NewFeatureCollection());
 	    }
 	    featureTable.get(name).add(f);
 	}

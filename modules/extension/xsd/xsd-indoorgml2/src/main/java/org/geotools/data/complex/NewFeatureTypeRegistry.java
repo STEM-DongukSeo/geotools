@@ -14,7 +14,7 @@
  *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  *    Lesser General Public License for more details.
  */
-package org.geotools.data.complex.config;
+package org.geotools.data.complex;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,7 +76,7 @@ import com.vividsolutions.jts.geom.Geometry;
  * 
  * 
  */
-public class FeatureTypeRegistry {
+public class NewFeatureTypeRegistry {
 
     private static final Logger LOGGER = Logging.getLogger("org.geotools.data.complex");
 
@@ -102,15 +102,15 @@ public class FeatureTypeRegistry {
      */
     private Stack<Name> processingTypes;
 
-    public FeatureTypeRegistry(FeatureTypeFactory typeFactory, FeatureTypeRegistryConfiguration helper) {
+    public NewFeatureTypeRegistry(FeatureTypeFactory typeFactory, FeatureTypeRegistryConfiguration helper) {
         this(null, typeFactory,helper);
     }
     
-    public FeatureTypeRegistry(NamespaceSupport namespaces, FeatureTypeFactory typeFactory, FeatureTypeRegistryConfiguration helper) {
+    public NewFeatureTypeRegistry(NamespaceSupport namespaces, FeatureTypeFactory typeFactory, FeatureTypeRegistryConfiguration helper) {
         this(namespaces, typeFactory, helper, false);
     }
 
-    public FeatureTypeRegistry(NamespaceSupport namespaces, FeatureTypeFactory typeFactory, FeatureTypeRegistryConfiguration helper, boolean includeAttributes) {
+    public NewFeatureTypeRegistry(NamespaceSupport namespaces, FeatureTypeFactory typeFactory, FeatureTypeRegistryConfiguration helper, boolean includeAttributes) {
 
         schemas = new ArrayList<SchemaIndex>();
         this.typeFactory = typeFactory;
