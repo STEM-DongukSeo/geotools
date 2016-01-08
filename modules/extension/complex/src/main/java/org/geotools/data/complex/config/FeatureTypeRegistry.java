@@ -331,8 +331,7 @@ public class FeatureTypeRegistry {
         //hgryoo
         if (!(type instanceof AttributeTypeProxy)
                 && (Geometry.class.isAssignableFrom(type.getBinding()) 
-                        || CurvedGeometry.class.isAssignableFrom(type.getBinding()) 
-                        || org.opengis.geometry.Geometry.class.isAssignableFrom(type.getBinding())
+                        || CurvedGeometry.class.isAssignableFrom(type.getBinding())
                     )) {
             
             // create geometry descriptor with the simple feature type CRS
