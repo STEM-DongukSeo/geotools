@@ -90,7 +90,7 @@ public class IndoorCoreParsingTest {
             
             Filter filter = CQL.toFilter("name == 002");
             
-            Object o = filter.evaluate(tfs);
+            //Object o = filter.evaluate(tfs);
             
             ArrayList<Feature> features = new ArrayList<Feature>();
             try {
