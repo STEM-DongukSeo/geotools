@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.xml.namespace.QName;
 
+import org.geotools.data.FeatureSource;
 import org.geotools.data.complex.NewFeatureTypeRegistry;
 import org.geotools.data.complex.config.EmfComplexFeatureReader;
 import org.geotools.data.complex.config.FeatureTypeRegistry;
@@ -76,37 +77,21 @@ public class IndoorCoreParsingTest {
             Feature feature = featureParser.parse();
             
             FeatureTableGenerator ftg = new FeatureTableGenerator(feature);
-            FeatureCollection tfs = ftg.getFeatureCollection( 
+            FeatureSource fs = ftg.getFeatureSource( 
                     new NameImpl("http://www.opengis.net/indoorgml/1.0/core","Transition"));
-            
-            FeatureIterator it = tfs.features();
             
             FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( GeoTools.getDefaultHints() );
 
-            /*Set<FeatureId> fids = new HashSet<FeatureId>();
+            Set<FeatureId> fids = new HashSet<FeatureId>();
             fids.add( ff.featureId("T10") );
             fids.add( ff.featureId("T19") );
-            Filter filter = ff.id( fids );*/
+            Filter filter = ff.id( fids );
             
-            Filter filter = CQL.toFilter("name == 002");
-            
-            //Object o = filter.evaluate(tfs);
-            
-            ArrayList<Feature> features = new ArrayList<Feature>();
-            try {
-                while( it.hasNext() ){
-                    Feature f = it.next();
-                    if(filter.evaluate(f)) {
-                        features.add(f);
-                    }
-                    // process feature
-                }
-            }
-            finally {
-                it.close();
-            }
+            FeatureCollection tfs = fs.getFeatures(filter);
             
             System.out.println();
+            
+            
             
             
            //Filter filter = CQL.toFilter("name >= 5");

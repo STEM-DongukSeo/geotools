@@ -6,7 +6,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.geotools.data.FeatureSource;
 import org.geotools.feature.FeatureCollection;
+import org.geotools.feature.complex.NewComplexFeatureSource;
 import org.geotools.feature.complex.NewFeatureCollection;
 import org.opengis.feature.ComplexAttribute;
 import org.opengis.feature.Feature;
@@ -28,29 +30,22 @@ import org.opengis.filter.identity.FeatureId;
  */
 public class FeatureTableGenerator {
     
-        private Map<Name, NewFeatureCollection> featureTable = new HashMap<Name, NewFeatureCollection>();
+        private Map<Name, NewComplexFeatureSource> featureSourceTable = new HashMap<Name, NewComplexFeatureSource>();
 
 	public FeatureTableGenerator(Feature feature) {
 	    addFeature(feature);
 	    parseNextFeature(feature);
-	    
-	    for(Name n : featureTable.keySet()) {
-	        System.out.println(n);
-	    }
-	    
         }
 	
-	public FeatureCollection getFeatureCollection(Name name) {
-	    if(featureTable.containsKey(name)) {
-	        return featureTable.get(name);
+	public FeatureSource getFeatureSource(Name name) {
+	    if(featureSourceTable.containsKey(name)) {
+	        return featureSourceTable.get(name);
 	    }
-	    else {
-	        return new NewFeatureCollection();
-	    }
+	    return null;
 	}
 	
-	public Map getFeatureTable() {
-	    return featureTable;
+	public Map getFeatureSources() {
+	    return featureSourceTable;
 	}
 	
 	public void parseNextFeature(ComplexAttribute attr) {
@@ -62,19 +57,20 @@ public class FeatureTableGenerator {
 	        PropertyType type = p.getType();
 
 	        if(type instanceof ComplexType) {
-	            parseNextFeature((ComplexAttribute) p);
+	            boolean isSuccess = true;
 	            if(type instanceof FeatureType) {
-	                addFeature((Feature) p);
+	                isSuccess = addFeature((Feature) p);
 	            }
+	            if(isSuccess) parseNextFeature((ComplexAttribute) p);
 	        }
 	    }
 	}
 	
-	public void addFeature(Feature f) {
+	public boolean addFeature(Feature f) {
 	    Name name = f.getName();
-	    if(!featureTable.containsKey(name)) {
-	        featureTable.put(name, new NewFeatureCollection());
+	    if(!featureSourceTable.containsKey(name)) {
+	        featureSourceTable.put(name, new NewComplexFeatureSource(f.getType()));
 	    }
-	    featureTable.get(name).add(f);
+	    return featureSourceTable.get(name).addFeature(f);
 	}
 }

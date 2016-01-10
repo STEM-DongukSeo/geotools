@@ -28,24 +28,34 @@ import org.opengis.filter.Filter;
  */
 public class NewComplexFeatureSource<T extends FeatureType, F extends Feature> implements FeatureSource<T, F> {
 
+    FeatureType featureType = null;
+
     Map<String, Feature> features = new HashMap<String, Feature>();
 
+    public NewComplexFeatureSource() {
+    }
+    
+    public NewComplexFeatureSource(FeatureType fType) {
+        this.featureType = fType;
+    }
+    
     @Override
     public Name getName() {
-        // TODO Auto-generated method stub
-        return null;
+        if(featureType != null) {
+            return featureType.getName();
+        } else {
+            return null;
+        }
     }
 
     @Override
     public ResourceInfo getInfo() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public DataAccess<T, F> getDataStore() {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -55,30 +65,42 @@ public class NewComplexFeatureSource<T extends FeatureType, F extends Feature> i
 
     @Override
     public void addFeatureListener(FeatureListener listener) {
-        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException();
         
     }
 
     @Override
     public void removeFeatureListener(FeatureListener listener) {
-        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException();
         
     }
 
     @Override
     public FeatureCollection<T, F> getFeatures(Filter filter)
             throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        NewFeatureCollection fc = new NewFeatureCollection();
+        for(Feature f : features.values()) {
+            if(filter.evaluate(f)) {
+                fc.add(f);
+            }
+        }
+        return fc;
     }
 
     @Override
     public FeatureCollection<T, F> getFeatures(Query query) throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException();
     }
     
-    public boolean addFeatures(Feature feature) {
+    public boolean addFeature(Feature feature) throws IllegalArgumentException {
+        if( featureType == null) {
+            featureType = feature.getType();
+        }
+        
+        if( featureType != feature.getType()) {
+            throw new IllegalArgumentException("illegal featureType");
+        }
+        
         String id = feature.getIdentifier().getID();
         if(features.containsKey(id)) {
             return false;
@@ -89,14 +111,20 @@ public class NewComplexFeatureSource<T extends FeatureType, F extends Feature> i
 
     @Override
     public FeatureCollection<T, F> getFeatures() throws IOException {
-        // TODO Auto-generated method stub
-        return null;
+        NewFeatureCollection fc = new NewFeatureCollection();
+        for(Feature f : features.values()) {
+                fc.add(f);
+        }
+        return fc;
     }
 
     @Override
     public T getSchema() {
-        // TODO Auto-generated method stub
-        return null;
+        if(featureType != null) {
+            return (T) featureType;
+        } else {
+            return null;
+        }
     }
 
     @Override
