@@ -19,39 +19,38 @@ To use this extension, some open source libraries and tools([Mingw-w64](http://s
 
  * Downald the MinGW-w64 installer, and excute.
  * Choose the Version(5.2.0), Architecture(x86_64), Thread(win32).
- * Next, Next and Finish.
- * Add <MinGW>\bin to the system PATH. (e.g., C:\dev\mingw-w64\x86_64-5.2.0-win32-seh-rt_v4-rev1\mingw64\bin)
+ * Click the Next, Next and Finish.
+ * Add MinGW\bin to the system PATH. (e.g., C:\dev\mingw-w64\x86_64-5.2.0-win32-seh-rt_v4-rev1\mingw64\bin)
 
 2. Boost (1.55 version recommended)
 
  * Download the boost archive, unpack it to a target directory of your choice (e.g., C:\dev\boost_1_55_0).
  * Open a command-line terminal, such as cmd.
  * Run:
+   
    ```
    cd C:\dev\boost_1_55_0
    ./bootstrap.bat mingw
-   ```
- * Then run "b2 claen", and build the boost libraries:
-   ```
    b2 clean
    b2 -j4 -a --toolset=gcc variant=debug,release link=static threading=multi address-model=64 stage
    ```
+   
  * Make sure the subdirectory stage/lib/ has been populated with the compiled libraries
- * Add Boost_ROOT\stage\lib to the system PATH. (e.g., C:\dev\boost_1_55_0\stage\lib).
  * Add BOOST_ROOT, BOOST_INCLUDEDIR and BOOST_LIBRARYDIR variables to the environment variables.
-
+   
    Variable Name | Description
    ------------- | ------------
    BOOST_ROOT | Root directory of your Boost installation 
    BOOST_INCLUDEDIR | Directory containing the boost/version.hpp file 
    BOOST_LIBRARYDIR | Directory containing the compiled Boost libraries
+ * Add Boost_ROOT\stage\lib to the system PATH. (e.g., C:\dev\boost_1_55_0\stage\lib).
 
 3. CMake (3.4.0 version recommended)
 
- * -Agree to the license.
+ * Agree to the license.
  * Check "Add CMake to the system PATH for all users".
  * Check "create desktop icon".
- * Next, Next, Next.
+ * Click the Next, Next, Next.
  * Finish.
 
 4. CGAL (4.7 version recommended)
@@ -59,12 +58,10 @@ To use this extension, some open source libraries and tools([Mingw-w64](http://s
  * CGAL installation will need to connect to the internet for GMP and MPFR.
  * Agree to the license.
  * Just choose the default: with GMP and MPFR, and with examples and demos.
- * 64-bit (for me).
+ * Choose "64-bit".
  * In the "Setting Environment Variables" screen, choose all users and make sure that CGAL_DIR is checked.
  * Install.
- * Add CGAL_DIR\auxiliary\gmp\lib the to system PATH. (e.g., C:\dev\CGAL-4.7\auxiliary\gmp\lib)
  * Add CGAL_DIR and other variables to the environment variables.
-
    Variable Name | Description
    ------------- | ------------
    CGAL_DIR | Root directory of your CGAL installation 
@@ -74,6 +71,7 @@ To use this extension, some open source libraries and tools([Mingw-w64](http://s
    MPFR_DIR | Directory of Mpfr default installation (CGAL_DIR\auxiliary\gmp)
    MPFR_INC_DIR | Directory containing the mpfr.h file
    MPFR_LIB_DIR | Directory containing the compiled Mpfr library
+ * Add CGAL_DIR\auxiliary\gmp\lib the to system PATH. (e.g., C:\dev\CGAL-4.7\auxiliary\gmp\lib)
 
    Now you need to compile CGAL
  * Open CMake - cmake-gui (on the Desktop) -if you are using win7 make sure you open the program in administrator mode - right click on the icon and click on "run as administrator".
@@ -95,7 +93,7 @@ To use this extension, some open source libraries and tools([Mingw-w64](http://s
 
 5. SFCGAL (1.2.2 recommended)
 
- * Download the sfcgal archive, unpack it to a target directory of your choice (C:\dev\SFCGAL-1.2.2)
+ * Download the sfcgal archive, unpack it to a target directory of your choice (e.g., C:\dev\SFCGAL-1.2.2)
  * Open CMake - cmake-gui.
  * For both "Where is the source code" and "Where to build the binaries" specify the SFCGAL installation folder (C:\dev\SFCGAL-1.2.2)
  * Click Configure.
@@ -110,7 +108,7 @@ To use this extension, some open source libraries and tools([Mingw-w64](http://s
    cd C:\dev\SFCGAL-1.2.2
    mingw32-make
    ```
- * Add SFCGAL_DIR and other variables to the environment variables.
+ * Add SFCGAL_DIR variables to the environment variables.
   
    Variable Name | Description
    ------------- | -----------
