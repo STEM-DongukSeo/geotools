@@ -117,4 +117,4 @@ To use this extension, some open source libraries and tools([Mingw-w64](http://s
 
 6. Generate DLL files
  * Run the build.bat file in the getools\modules\unsupported\geometry\lib.
- * Make sure the subdirectory org\geotools\goemetry\iso\sfcgal\wrapper\windows-x86_64 has been generated with the dll files.
+ * Make sure the subdirectory org\geotools\geometry\iso\sfcgal\wrapper\windows-x86_64 has been generated with the dll files.
