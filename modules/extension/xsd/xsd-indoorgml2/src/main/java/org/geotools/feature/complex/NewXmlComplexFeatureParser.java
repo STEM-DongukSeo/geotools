@@ -213,6 +213,9 @@ public class NewXmlComplexFeatureParser extends
 				// If not, then we create a placeholderComplexAttribute instead:
 				Attribute placeholderComplexAttribute = new AttributeImpl(
 						new ArrayList<Property>(), expectedType, null);
+				
+				// In order to replace this attribute, we check dirty.
+				placeholderComplexAttribute.getUserData().put("href", href);
 
 				// I must maintain a reference back to this object so that I can
 				// change it once its target is found:
@@ -235,6 +238,33 @@ public class NewXmlComplexFeatureParser extends
 					Collections.<Property> emptyList(), expectedType, null);
 
 			return placeholderComplexAttribute;
+		}
+	}
+	
+	
+	/**
+	 * Although placeholderComplexAttribute is created in resolveHref method,
+	 * it cannot be assigned. Because the value of the attribute is cloned,
+	 * reference will be lost. After building an attribute using attributeBuilder,
+	 * the new attribute is created. We replace the old placeholderComplexAttribute
+	 * into the new attribute.
+	 * @param attribute
+	 * @param hrefId
+	 */
+	private void updateHref(Attribute attribute, String hrefId) {
+		String id = null;
+		if (hrefId.startsWith("#")) {
+			id = hrefId.substring(1);
+		}
+		if(placeholderComplexAttributes.containsKey(id)) {
+			ArrayList<Attribute> list = placeholderComplexAttributes.get(id);
+			for(int i=list.size()-1; i>=0; i--) {
+				Map<Object, Object> userData = list.get(i).getUserData();
+				if(userData.containsKey("href") && userData.get("href").equals(hrefId)) {
+					list.set(i, attribute);
+					break;
+				}
+			}
 		}
 	}
 
@@ -335,7 +365,7 @@ public class NewXmlComplexFeatureParser extends
 					 
 					 
 					return new ReturnAttribute(id, currentTagName,
-							hrefAttribute);
+							hrefAttribute, href);
 				}
 				// ComplexType or an AttributeType.
 				else if (type instanceof ComplexType) {
@@ -408,16 +438,24 @@ public class NewXmlComplexFeatureParser extends
 							// a list before sending it to the builder.
 							ArrayList<Property> properties = new ArrayList<Property>();
 							properties.add((Property) innerAttribute.value);
-							attributeBuilder.add(innerAttribute.id, properties,
+							Attribute resultAttribute = attributeBuilder.add(innerAttribute.id, properties,
 									innerAttribute.name);
+							
+							if(innerAttribute.hrefId!=null) {
+								updateHref(resultAttribute, innerAttribute.hrefId);
+							}
 						} else {
 							// 6b. If the parsed attribute is actually just
 							// an object then it must belong to a simple
 							// type in which case we can just add it to the
 							// builder as is.
 
-							attributeBuilder.add(innerAttribute.id,
+							Attribute resultAttribute = attributeBuilder.add(innerAttribute.id,
 									getValue(innerAttribute), innerAttribute.name);
+							
+							if(innerAttribute.hrefId!=null) {
+								updateHref(resultAttribute, innerAttribute.hrefId);
+							}
 						}
 					}
 
@@ -487,11 +525,18 @@ public class NewXmlComplexFeatureParser extends
 		public final Name name;
 
 		public final Object value;
+		
+		public final String hrefId;
 
 		public ReturnAttribute(String id, Name name, Object value) {
+			this(id, name, value, null);
+		}
+		
+		public ReturnAttribute(String id, Name name, Object value, String hrefId) {
 			this.id = id;
 			this.name = name;
 			this.value = value;
+			this.hrefId = hrefId;
 		}
 	}
 }
