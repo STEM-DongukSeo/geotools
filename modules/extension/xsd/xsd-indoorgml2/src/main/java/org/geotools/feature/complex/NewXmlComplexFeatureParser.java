@@ -140,8 +140,7 @@ public class NewXmlComplexFeatureParser extends
 				if (!Property.class.isAssignableFrom(nextAttribute.value.getClass())) {
 					featureBuilder.append(nextAttribute.name, new AttributeImpl(nextAttribute.value, (AttributeDescriptor) this.targetType.getDescriptor(nextAttribute.name), null));
 				} else {
-					featureBuilder.append(nextAttribute.name,
-							(Property) nextAttribute.value);
+					featureBuilder.append(nextAttribute.name, (Property) nextAttribute.value);
 				}
 			}
 		} catch (XmlPullParserException e) {
