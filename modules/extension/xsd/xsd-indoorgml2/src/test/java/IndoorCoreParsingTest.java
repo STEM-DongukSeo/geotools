@@ -38,8 +38,7 @@ import org.opengis.feature.type.FeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.identity.FeatureId;
-
-import com.vividsolutions.jts.geom.Geometry;
+import org.opengis.geometry.Geometry;
 
 
 public class IndoorCoreParsingTest {
@@ -102,8 +101,8 @@ public class IndoorCoreParsingTest {
             ComplexFeatureGraphGenerator featureGen = new ComplexFeatureGraphGenerator( lineStringGen );
             
             for(int i = 0 ; i < tfs.size(); i++) {
-                //Feature transition = (Feature) tfs.get(i);
-                //featureGen.add(transition);
+                Feature transition = (Feature) tfs.toArray()[i];
+                featureGen.add(transition);
             }
             
             Graph graph = lineStringGen.getGraph();
@@ -113,10 +112,15 @@ public class IndoorCoreParsingTest {
             
             EdgeWeighter weighter = new DijkstraIterator.EdgeWeighter() {
                 public double getWeight(Edge e) {
+                	/*
                    Feature feature = (Feature) e.getObject();
                    GeometryAttribute geometry = (GeometryAttribute) feature.getDefaultGeometryProperty();
                    Geometry g = (Geometry) geometry.getValue();
-                   return g.getLength();
+                   */
+                   Geometry startPoint = (Geometry) e.getNodeA().getObject();
+                   Geometry endPoint = (Geometry) e.getNodeB().getObject();
+                   
+                   return startPoint.distance(endPoint);
                 }
             };
             
