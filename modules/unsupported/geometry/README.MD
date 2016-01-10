@@ -62,6 +62,7 @@ To use this extension, some open source libraries and tools([Mingw-w64](http://s
  * In the "Setting Environment Variables" screen, choose all users and make sure that CGAL_DIR is checked.
  * Install.
  * Add CGAL_DIR and other variables to the environment variables.
+ 
    Variable Name | Description
    ------------- | ------------
    CGAL_DIR | Root directory of your CGAL installation 
