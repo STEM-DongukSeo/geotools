@@ -41,6 +41,7 @@ import org.opengis.feature.Property;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.Name;
 
+
 @SuppressWarnings("serial")
 public class ISA_Sample extends JFrame implements TreeSelectionListener {
     /**
@@ -52,6 +53,7 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 	private JPanel jPanel;
 	private JMenuBar menuBar;
 	private JMenu adminMenu;
+	private JMenu queryMenu;
 	private DefaultMutableTreeNode root;
     private JTree tree;
     
@@ -72,9 +74,15 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
         adminMenu = new JMenu("File");
         adminMenu.add(new JMenuItem("Open Schema File"));
         adminMenu.add(new JMenuItem("Open IndoorGML File"));
+        queryMenu = new JMenu("Query");
+        queryMenu.add(new JMenuItem("Contain(MapMatching)"));
+        queryMenu.add(new JMenuItem("Intersect"));
+        queryMenu.add(new JMenuItem("Routing"));
         menuBar.add(adminMenu);
+        menuBar.add(queryMenu);
         setJMenuBar(menuBar);
         
+        // Open Schema File
         adminMenu.getItem(0).addActionListener(new ActionListener() {
 			
 			@Override
@@ -99,6 +107,7 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 			}
 		});
         
+        // Open IndoorGML File
         adminMenu.getItem(1).addActionListener(new ActionListener() {
 			
 			@Override
@@ -139,6 +148,52 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 						e1.printStackTrace();
 					}
 	            }
+			}
+		});
+        
+        // Contain(MapMatching)
+        queryMenu.getItem(0).addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				RoutingDialog routingDialog;
+				try {
+					routingDialog = new RoutingDialog(ISA_Sample.this, server);
+					routingDialog.jDialog.setModal(true);
+					routingDialog.jDialog.setVisible(true);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+        
+        // Intersect
+        queryMenu.getItem(1).addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+
+        // Routing
+		queryMenu.getItem(2).addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				RoutingDialog routingDialog;
+				try {
+					routingDialog = new RoutingDialog(ISA_Sample.this, server);
+					routingDialog.jDialog.setModal(true);
+					routingDialog.jDialog.setVisible(true);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
         
@@ -183,9 +238,9 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 		FeatureIterator iterator = features.features();
 		while (iterator.hasNext()) {
 			Feature feature = iterator.next();
-			if (feature.getName().getLocalPart().equals("CellSpace")) {
+			if (feature.getName().getLocalPart().equals("CellSpaceType")) {
 				getCellSpace(feature);
-			} else if (feature.getName().getLocalPart().equals("State")) {
+			} else if (feature.getName().getLocalPart().equals("StateType")) {
 				getState(feature);
 			} else if (feature.getName().getLocalPart().equals("TransitionType")) {
 				getTransition(feature);
@@ -231,28 +286,24 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 
 		Collection<Property> pc = feature.getProperties();
 		Iterator<Property> pi = pc.iterator();
+		String attribute = "";
+		String geometry = "";
 		while (pi.hasNext()) {
 			Property p = pi.next();
-			Iterator<? extends Attribute> ia = (Iterator<? extends Attribute>) ((Collection<? extends Property>) p.getValue()).iterator();
-			String attribute = "";
-			String geometry = "";
-			while (ia.hasNext()) {
-				Attribute a = ia.next();
-				if (a.getName().getLocalPart().equals("duality")) {
-					Iterator<? extends Feature> f = ((Collection<? extends Feature>) a.getValue()).iterator();
-					attribute += "| duality : " + f.next().getIdentifier() + " |";
-				} else if (a.getName().getLocalPart().equals("connects")) {
-					//Iterator<? extends Feature> f = ((Collection<? extends Feature>) a.getValue()).iterator();
-					//attribute += "| connects : " + f.next().getIdentifier() + " |";
-				} else if (GeometryAttribute.class.isAssignableFrom(a.getClass())) {
-					geometry = a.getValue().toString();
-				}
+			if (p.getName().getLocalPart().equals("duality")) {
+				Iterator<? extends Feature> f = ((Collection<? extends Feature>) p.getValue()).iterator();
+				attribute += "| duality : " + f.next().getIdentifier() + " |";
+			} else if (p.getName().getLocalPart().equals("connects")) {
+				Iterator<? extends Feature> f = ((Collection<? extends Feature>) p.getValue()).iterator();
+				attribute += "| connects : " + f.next().getIdentifier() + " |";
+			} else if (GeometryAttribute.class.isAssignableFrom(p.getClass())) {
+				geometry = p.getValue().toString();
 			}
-			userRow.add(2, attribute);
-			userRow.add(3, geometry);
-			attribute = "";
-			geometry = "";
 		}
+		userRow.add(2, attribute);
+		userRow.add(3, geometry);
+		attribute = "";
+		geometry = "";
 		model.addRow(userRow);
 	}
 
@@ -264,28 +315,24 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 
 		Collection<Property> pc = feature.getProperties();
 		Iterator<Property> pi = pc.iterator();
+		String attribute = "";
+		String geometry = "";
 		while (pi.hasNext()) {
 			Property p = pi.next();
-			Iterator<? extends Attribute> ia = (Iterator<? extends Attribute>) ((Collection<? extends Property>) p.getValue()).iterator();
-			String attribute = "";
-			String geometry = "";
-			while (ia.hasNext()) {
-				Attribute a = ia.next();
-				if (a.getName().getLocalPart().equals("duality")) {
-					Iterator<? extends Feature> f = ((Collection<? extends Feature>) a.getValue()).iterator();
-					attribute += "| duality : " + f.next().getIdentifier() + " |";
-				} else if (a.getName().getLocalPart().equals("externalReference")) {
-					// attribute += "| weight : " +
-					// a.getValue().toString() + " |";
-				} else if (GeometryAttribute.class.isAssignableFrom(a.getClass())) {
-					geometry = a.getValue().toString();
-				}
+			if (p.getName().getLocalPart().equals("duality")) {
+				Iterator<? extends Feature> f = ((Collection<? extends Feature>) p.getValue()).iterator();
+				attribute += "| duality : " + f.next().getIdentifier() + " |";
+			} else if (p.getName().getLocalPart().equals("externalReference")) {
+				// attribute += "| weight : " +
+				// a.getValue().toString() + " |";
+			} else if (GeometryAttribute.class.isAssignableFrom(p.getClass())) {
+				geometry = p.getValue().toString();
 			}
-			userRow.add(2, attribute);
-			userRow.add(3, geometry);
-			attribute = "";
-			geometry = "";
 		}
+		userRow.add(2, attribute);
+		userRow.add(3, geometry);
+		attribute = "";
+		geometry = "";
 		model.addRow(userRow);
 	}
 
