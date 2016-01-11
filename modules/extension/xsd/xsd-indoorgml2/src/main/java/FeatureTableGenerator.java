@@ -50,14 +50,14 @@ public class FeatureTableGenerator {
 	        Property p = it.next();
 	        PropertyType type = p.getType();
 
-	        if(type instanceof ComplexType) {
+	        if(p instanceof ComplexAttribute) {
 	            boolean isSuccess = true;
-	            if(type instanceof FeatureType) {
-	                Name propName = p.getName();
-	                if(!featureTypeTable.containsKey(propName)) {
-	                    featureTypeTable.put(propName, (FeatureType) type);
-	                }
-	                isSuccess = addFeature((Feature) p);
+	            if(p instanceof Feature) {
+    	                Name propName = p.getName();
+    	                if(!featureTypeTable.containsKey(propName)) {
+    	                    featureTypeTable.put(propName, (FeatureType) type);
+    	                }
+    	                isSuccess = addFeature((Feature) p);
 	            }
 	            if(isSuccess) parseNextFeature((ComplexAttribute) p);
 	        }

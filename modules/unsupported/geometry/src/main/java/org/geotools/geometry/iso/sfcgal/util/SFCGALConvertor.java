@@ -266,13 +266,16 @@ public class SFCGALConvertor {
                 Ring exterior = surface.getBoundary().getExterior();
                 List<Ring> interiors = surface.getBoundary().getInteriors();
 
+                
                 rings.add(ringToSFCGALLineString(exterior));
 
-                Iterator iter = interiors.iterator();
-                while (iter.hasNext()) {
-                        rings.add(ringToSFCGALLineString((Ring) iter.next()));
+                if(interiors != null) {
+                    Iterator iter = interiors.iterator();
+                    while (iter.hasNext()) {
+                            rings.add(ringToSFCGALLineString((Ring) iter.next()));
+                    }
                 }
-
+                
                 polygon = new SFPolygon(rings);
 
                 return polygon;

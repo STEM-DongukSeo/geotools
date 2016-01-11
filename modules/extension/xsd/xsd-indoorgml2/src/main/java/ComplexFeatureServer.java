@@ -25,8 +25,10 @@ import org.geotools.feature.type.ComplexFeatureTypeFactoryImpl;
 import org.geotools.gml3.complex.GmlFeatureTypeRegistryConfiguration;
 import org.geotools.xml.SchemaIndex;
 import org.geotools.xml.resolver.SchemaResolver;
+import org.opengis.feature.Attribute;
 import org.opengis.feature.ComplexAttribute;
 import org.opengis.feature.Feature;
+import org.opengis.feature.GeometryAttribute;
 import org.opengis.feature.Property;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.ComplexType;
@@ -108,6 +110,17 @@ public class ComplexFeatureServer {
             for( Map.Entry<Name, FeatureType> elem : types.entrySet()) {
                 System.out.println( String.format("키 : %s, 값 : %s", elem.getKey(), elem.getValue()) );
             }
+            System.out.println();
+        }
+    }
+    
+    public void printRegisteredSource() {
+        if(table != null) {
+            Map<Name, FeatureSource> fs = table.getFeatureSources();
+            for( Map.Entry<Name, FeatureSource> elem : fs.entrySet()) {
+                System.out.println( String.format("키 : %s, 값 : %s", elem.getKey(), elem.getValue()) );
+            }
+            System.out.println();
         }
     }
     
@@ -143,6 +156,7 @@ public class ComplexFeatureServer {
         
         while(it.hasNext()) {
             Feature f = it.next();
+            
             Geometry g = getGeometryfromPropertyName(f, propName);
             if(spatialEvaluate(queryType, g, geometry)) {
                 fc.add(f);
@@ -154,32 +168,48 @@ public class ComplexFeatureServer {
     }
     
     public Geometry getGeometryfromPropertyName(Feature feature, String propName) {
+        
+        Geometry geom = null;
+        
         Collection<? extends Property> values = feature.getValue();
         for(Iterator<? extends Property> it = values.iterator(); it.hasNext(); ) {
-            Property p = it.next();
-            PropertyType type = p.getType();
-            if(type instanceof GeometryType) {
-                if(p.getName().getLocalPart().equalsIgnoreCase(propName)) {
-                    return (Geometry) p.getValue();
+            Property p = (Property) it.next();
+            
+            if(GeometryAttribute.class.isAssignableFrom(p.getClass())) {
+                if(p.getDescriptor().getName().getLocalPart().equalsIgnoreCase(propName)) {
+                    geom = (Geometry) p.getValue();
+                    break;
+                }
+            }
+            else if(p.getValue() != null) {
+            
+                Iterator<? extends Attribute> ia = (Iterator<? extends Attribute>) ((Collection<? extends Property>) p.getValue()).iterator();
+                while(ia.hasNext()){
+                    Attribute a = ia.next();
+                    if(GeometryAttribute.class.isAssignableFrom(a.getClass())) {
+                        if(a.getDescriptor().getName().getLocalPart().equalsIgnoreCase(propName)) {
+                            geom = (Geometry) a.getValue();
+                            break;
+                        }
+                    }
                 }
             }
         }
-        return null;
+        
+        return geom;
     }
     
     public boolean spatialEvaluate(String queryType, Geometry propGeom, Geometry geometry) {
-        
         if("Intersects".equalsIgnoreCase(queryType)) {
-           return geometry.intersects(propGeom);
+           return propGeom.intersects(geometry);
         } else if("Contains".equalsIgnoreCase(queryType)) {
-            return geometry.contains(propGeom);
+            return propGeom.contains(geometry);
         }
         
         return false;
     }
     
     public Feature mapMatching(Point point) throws IOException {
-        
         FeatureSource cellSpacefs = table.getFeatureSource(new NameImpl("http://www.opengis.net/indoorgml/1.0/core","CellSpace"));
         FeatureCollection result = spatialFilter(cellSpacefs, "Contains", "Geometry3D", point);
         

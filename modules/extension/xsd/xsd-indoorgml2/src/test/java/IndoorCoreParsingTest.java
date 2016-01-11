@@ -1,6 +1,7 @@
 import java.net.URL;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.xml.namespace.QName;
 
@@ -17,6 +18,7 @@ import org.geotools.feature.complex.NewXmlComplexFeatureParser;
 import org.geotools.feature.type.ComplexFeatureTypeFactoryImpl;
 import org.geotools.filter.text.cql2.CQL;
 import org.geotools.geometry.GeometryBuilder;
+import org.geotools.geometry.iso.sfcgal.util.Geometry3DOperationTest;
 import org.geotools.gml3.complex.GmlFeatureTypeRegistryConfiguration;
 import org.geotools.graph.build.line.LineStringGraphGenerator;
 import org.geotools.graph.path.DijkstraShortestPathFinder;
@@ -36,6 +38,7 @@ import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.geometry.Geometry;
 import org.opengis.geometry.primitive.Point;
+import org.opengis.geometry.primitive.Solid;
 
 public class IndoorCoreParsingTest {
     
@@ -52,14 +55,22 @@ public class IndoorCoreParsingTest {
             
             URL url = getClass().getResource("indoor.gml");
             server.getResource(url);
-
+            
+             server.printRegisteredSource();
+            
             GeometryBuilder builder = null;
             Hints hints = GeoTools.getDefaultHints();
             hints.put(Hints.CRS, DefaultGeographicCRS.WGS84_3D);
             hints.put(Hints.GEOMETRY_VALIDATE, false);
             builder = new GeometryBuilder(hints);
             
-            Point point = builder.createPoint(445537.530360026, 5444900.32919035 , -2.02);
+            Point point = builder.createPoint(1, 1 , 1);
+            
+            List<Solid> solids = Geometry3DOperationTest.getSolids(builder);
+            for(Solid s : solids) {
+                System.out.println("result" + s.contains(point));
+            }
+            
             Feature f = server.mapMatching(point);
             
             server.printRegisteredSchmea();

@@ -19,6 +19,8 @@ package org.geotools.geometry.iso.sfcgal.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.measure.unit.SystemOfUnits;
+
 import junit.framework.TestCase;
 
 import org.geotools.factory.GeoTools;
@@ -1309,7 +1311,7 @@ public class Geometry3DOperationTest extends TestCase {
                 for (int i = 0; i < 8; i++) {
                         solids.add(makeSolid(builder, solidPoints.get(i)));
                 }
-
+                
                 return solids;
         }
 
