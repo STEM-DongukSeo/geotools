@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.xml.namespace.QName;
@@ -34,6 +35,7 @@ import org.geotools.data.complex.config.Types;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.AttributeImpl;
 import org.geotools.feature.ComplexFeatureBuilder;
+import org.geotools.feature.FeatureImpl;
 import org.geotools.feature.NameImpl;
 import org.geotools.feature.type.AttributeDescriptorImpl;
 import org.opengis.feature.Attribute;
@@ -58,6 +60,7 @@ import org.xmlpull.v1.XmlPullParserException;
  * 
  * @author Adam Brown (Curtin University of Technology)
  * @author HyungGyu Ryoo (Pusan National University)
+ * @author Joon-Seok Kim (Pusan National University)
  */
 public class NewXmlComplexFeatureParser extends NewXmlFeatureParser<FeatureType, Feature> {
     /**
@@ -66,13 +69,15 @@ public class NewXmlComplexFeatureParser extends NewXmlFeatureParser<FeatureType,
     private final ComplexFeatureBuilder featureBuilder;
 
     /**
-     * This is a mapping which links string gml:ids to an attribute. It's used to keep track of an id'd attributes so that we can refer back to them
-     * if they're referred to further down the input stream by a href.
+     * This is a mapping which links string gml:ids to an attribute. It's used to keep track of an
+     * id'd attributes so that we can refer back to them if they're referred to further down the
+     * input stream by a href.
      */
     private Map<String, Attribute> discoveredComplexAttributes = new HashMap<String, Attribute>();
 
     /**
-     * The placeholder complex attributes object maintains a record of incomplete attributes that relate to a particular hrefed id.
+     * The placeholder complex attributes object maintains a record of incomplete attributes that
+     * relate to a particular hrefed id.
      */
     private Map<String, ArrayList<Attribute>> placeholderComplexAttributes = new HashMap<String, ArrayList<Attribute>>();
 
@@ -144,10 +149,12 @@ public class NewXmlComplexFeatureParser extends NewXmlFeatureParser<FeatureType,
     }
 
     /**
-     * Register the target of any hrefs' with the target id specified, to the attribute provided. This has two effects: it puts the id and value in
-     * the discoveredComplexAttributes object so that if we come across a href pointing to this id in the future, we'll be able to just use the
-     * attribute provided as the value for that href. Secondly: it loops over any placeholderComplexAttributes to see if any of them were waiting for
-     * this target, if their are any they will have their values changed from the placeholder value to the value provided.
+     * Register the target of any hrefs' with the target id specified, to the attribute provided.
+     * This has two effects: it puts the id and value in the discoveredComplexAttributes object so
+     * that if we come across a href pointing to this id in the future, we'll be able to just use
+     * the attribute provided as the value for that href. Secondly: it loops over any
+     * placeholderComplexAttributes to see if any of them were waiting for this target, if their are
+     * any they will have their values changed from the placeholder value to the value provided.
      * 
      * @param id The id of the gml target.
      * @param value The parsed attribute value for this id.
@@ -167,9 +174,10 @@ public class NewXmlComplexFeatureParser extends NewXmlFeatureParser<FeatureType,
     }
 
     /**
-     * Given a href and an expected type, return either the actual manifestation of that href's target or a placeholder object. The real instance will
-     * be returned if it's already been parsed, otherwise the placeholder will be returned. The placeholder will automatically be replaced upon
-     * calling RegisterGmlTarget(...) once the actual object is parsed.
+     * Given a href and an expected type, return either the actual manifestation of that href's
+     * target or a placeholder object. The real instance will be returned if it's already been
+     * parsed, otherwise the placeholder will be returned. The placeholder will automatically be
+     * replaced upon calling RegisterGmlTarget(...) once the actual object is parsed.
      * 
      * @param href The href that you wish to resolve.
      * @param expectedType The attribute type that you expect the href to point to.
@@ -187,8 +195,29 @@ public class NewXmlComplexFeatureParser extends NewXmlFeatureParser<FeatureType,
                 return discoveredComplexAttributes.get(hrefId);
             } else {
                 // If not, then we create a placeholderComplexAttribute instead:
-                Attribute placeholderComplexAttribute = new AttributeImpl(new ArrayList<Property>(),
+                Attribute placeholderComplexAttribute = null;
+                // For creating feature type
+                FeatureType featureType = null;
+                // In order to resolve Feature
+                if(expectedType instanceof ComplexType) {
+                    // If the expectedType is Property of gml:Feature, it will be a complex type
+                    // We assume that the child node is FeatureType
+                    Iterator<PropertyDescriptor> it = ((ComplexType)expectedType).getDescriptors().iterator();
+                    while(it.hasNext()) {
+                        PropertyDescriptor descriptor = it.next();
+                        if(descriptor.getType() instanceof FeatureType) {
+                            featureType = (FeatureType)descriptor.getType();
+                        }
+                    }
+                }
+                if(featureType!=null) {
+                    placeholderComplexAttribute = new FeatureImpl(new ArrayList<Property>(),
+                            featureType, CommonFactoryFinder.getFilterFactory2(null).featureId(hrefId));
+                }
+                else {
+                    placeholderComplexAttribute = new AttributeImpl(new ArrayList<Property>(),
                         expectedType, null);
+                }
 
                 // In order to replace this attribute, we check dirty.
                 placeholderComplexAttribute.getUserData().put("href", href);
@@ -216,8 +245,9 @@ public class NewXmlComplexFeatureParser extends NewXmlFeatureParser<FeatureType,
     }
 
     /**
-     * Although placeholderComplexAttribute is created in resolveHref method, it cannot be assigned. Because the value of the attribute is cloned,
-     * reference will be lost. After building an attribute using attributeBuilder, the new attribute is created. We replace the old
+     * Although placeholderComplexAttribute is created in resolveHref method, it cannot be assigned.
+     * Because the value of the attribute is cloned, reference will be lost. After building an
+     * attribute using attributeBuilder, the new attribute is created. We replace the old
      * placeholderComplexAttribute into the new attribute.
      * 
      * @param attribute
@@ -233,7 +263,12 @@ public class NewXmlComplexFeatureParser extends NewXmlFeatureParser<FeatureType,
             for (int i = list.size() - 1; i >= 0; i--) {
                 Map<Object, Object> userData = list.get(i).getUserData();
                 if (userData.containsKey("href") && userData.get("href").equals(hrefId)) {
-                    list.set(i, attribute);
+                    Collection collection = (Collection) attribute.getValue();
+                    for(Object o : collection) {
+                        if(o instanceof Feature)
+                            list.set(i, (Attribute)o);
+                    }
+                    
                     break;
                 }
             }
@@ -256,13 +291,15 @@ public class NewXmlComplexFeatureParser extends NewXmlFeatureParser<FeatureType,
     }
 
     /**
-     * This is a recursive method that returns any object that belongs to the complexType specified. The return object is wrapped in a ReturnAttribute
-     * which carries through some values related to the object. They are: its GML Id and its name.
+     * This is a recursive method that returns any object that belongs to the complexType specified.
+     * The return object is wrapped in a ReturnAttribute which carries through some values related
+     * to the object. They are: its GML Id and its name.
      * 
-     * @param complexType The complex type that the CALLER is trying to build. NB: this is NOT the type that the method will build, it's the type that
-     *        the caller wants.
-     * @return A ReturnAttribute object which groups a (Name) name, (String) id, and (Object) value that represent an attribute that belongs in the
-     *         complexType specified. Returns null once there are no more elements in the complex type you're trying to parse.
+     * @param complexType The complex type that the CALLER is trying to build. NB: this is NOT the
+     *        type that the method will build, it's the type that the caller wants.
+     * @return A ReturnAttribute object which groups a (Name) name, (String) id, and (Object) value
+     *         that represent an attribute that belongs in the complexType specified. Returns null
+     *         once there are no more elements in the complex type you're trying to parse.
      * @throws XmlPullParserException
      * @throws IOException
      */
@@ -351,7 +388,8 @@ public class NewXmlComplexFeatureParser extends NewXmlFeatureParser<FeatureType,
                         // Add the value to the list if it's not null or if
                         // nulls are allowed by the descriptor.
                         if (value != null || descriptor.isNillable()) {
-                            // add the result of buildSimpleContent(type, value) to the list and return it.
+                            // add the result of buildSimpleContent(type, value) to the list and
+                            // return it.
                             AttributeType simpleContentType = getSimpleContentType(
                                     (AttributeType) type);
 
