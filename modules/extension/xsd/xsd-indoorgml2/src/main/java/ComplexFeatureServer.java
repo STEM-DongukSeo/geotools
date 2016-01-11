@@ -2,7 +2,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -15,32 +14,35 @@ import org.geotools.data.complex.NewFeatureTypeRegistry;
 import org.geotools.data.complex.config.EmfComplexFeatureReader;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.factory.GeoTools;
+import org.geotools.factory.Hints;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.NameImpl;
-import org.geotools.feature.complex.NewComplexFeatureSource;
 import org.geotools.feature.complex.NewFeatureCollection;
 import org.geotools.feature.complex.NewXmlComplexFeatureParser;
 import org.geotools.feature.type.ComplexFeatureTypeFactoryImpl;
+import org.geotools.geometry.GeometryBuilder;
+import org.geotools.geometry.iso.io.wkt.ParseException;
+import org.geotools.geometry.iso.io.wkt.WKTReader;
 import org.geotools.gml3.complex.GmlFeatureTypeRegistryConfiguration;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.xml.SchemaIndex;
 import org.geotools.xml.resolver.SchemaResolver;
 import org.opengis.feature.Attribute;
-import org.opengis.feature.ComplexAttribute;
 import org.opengis.feature.Feature;
 import org.opengis.feature.GeometryAttribute;
 import org.opengis.feature.Property;
 import org.opengis.feature.type.AttributeDescriptor;
-import org.opengis.feature.type.ComplexType;
 import org.opengis.feature.type.FeatureType;
-import org.opengis.feature.type.GeometryType;
 import org.opengis.feature.type.Name;
 import org.opengis.feature.type.PropertyType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.filter.identity.FeatureId;
 import org.opengis.geometry.Geometry;
+import org.opengis.geometry.PositionFactory;
 import org.opengis.geometry.primitive.Point;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
  * 
@@ -60,8 +62,14 @@ public class ComplexFeatureServer {
     private FeatureType rootType;
     
     private FeatureTableGenerator table;
+    private GeometryBuilder builder = null;
     
     public ComplexFeatureServer() {
+        
+        Hints hints = GeoTools.getDefaultHints();
+        hints.put(Hints.CRS, DefaultGeographicCRS.WGS84_3D);
+        hints.put(Hints.GEOMETRY_VALIDATE, false);
+        builder = new GeometryBuilder(hints);
         
     }
 
@@ -90,8 +98,6 @@ public class ComplexFeatureServer {
         Feature feature = featureParser.parse();
         table = new FeatureTableGenerator(feature);
         types = table.getFeatureTypeMap();
-        
-        printRegisteredSchmea();
     }
     
     public Map<Name, FeatureSource> getFeatureSources() {
@@ -140,9 +146,9 @@ public class ComplexFeatureServer {
     public FeatureCollection idFilter(FeatureSource source, String ids) throws IOException {
         FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( GeoTools.getDefaultHints() );
         Set<FeatureId> fids = new HashSet<FeatureId>();
-        String[] idArr = ids.split("|");
+        String[] idArr = ids.split("\\|");
         for(String i : idArr) {
-            fids.add( ff.featureId(i ) );
+            fids.add( ff.featureId(i) );
         }
         Filter filter = ff.id( fids );
         return source.getFeatures(filter);
@@ -154,22 +160,33 @@ public class ComplexFeatureServer {
         FeatureCollection c = source.getFeatures();
         FeatureIterator it = c.features();
         
-        while(it.hasNext()) {
-            Feature f = it.next();
-            
-            Geometry g = getGeometryfromPropertyName(f, propName);
-            if(spatialEvaluate(queryType, g, geometry)) {
-                fc.add(f);
+      
+        int error = 0;
+            while(it.hasNext()) {
+                Feature f = it.next();
+                try { 
+                    GeometryAttribute ga = getGeometryfromPropertyName(f, propName);
+                    Geometry g = (Geometry) ga.getValue();
+                    if(spatialEvaluate(queryType, g, geometry)) {
+                        fc.add(f);
+                    }
+                } catch(Exception e) {
+                    System.out.println(f.getIdentifier().getID());
+                    error++;
+                }
             }
-        }
-        it.close();
+            it.close();
         
+            System.out.println("CellSpace 갯수 : " + c.size());
+            System.out.println("Error 갯수 : " + error);
+            
+            
         return fc;
     }
     
-    public Geometry getGeometryfromPropertyName(Feature feature, String propName) {
+    public GeometryAttribute getGeometryfromPropertyName(Feature feature, String propName) {
         
-        Geometry geom = null;
+        GeometryAttribute geom = null;
         
         Collection<? extends Property> values = feature.getValue();
         for(Iterator<? extends Property> it = values.iterator(); it.hasNext(); ) {
@@ -177,7 +194,7 @@ public class ComplexFeatureServer {
             
             if(GeometryAttribute.class.isAssignableFrom(p.getClass())) {
                 if(p.getDescriptor().getName().getLocalPart().equalsIgnoreCase(propName)) {
-                    geom = (Geometry) p.getValue();
+                    geom = (GeometryAttribute) p;
                     break;
                 }
             }
@@ -188,7 +205,7 @@ public class ComplexFeatureServer {
                     Attribute a = ia.next();
                     if(GeometryAttribute.class.isAssignableFrom(a.getClass())) {
                         if(a.getDescriptor().getName().getLocalPart().equalsIgnoreCase(propName)) {
-                            geom = (Geometry) a.getValue();
+                            geom = (GeometryAttribute) a;
                             break;
                         }
                     }
@@ -197,6 +214,13 @@ public class ComplexFeatureServer {
         }
         
         return geom;
+    }
+    
+    public Geometry geometryFromWKT(String wkt) throws ParseException {
+        CoordinateReferenceSystem crs = builder.getCoordinateReferenceSystem();
+        PositionFactory pf = builder.getPositionFactory();
+        WKTReader wktReader = new WKTReader( crs, pf );
+        return wktReader.read(wkt);
     }
     
     public boolean spatialEvaluate(String queryType, Geometry propGeom, Geometry geometry) {
@@ -220,6 +244,7 @@ public class ComplexFeatureServer {
             throw new IllegalArgumentException("Invalid FeatureSource. Data is invalid. Mapmaching result should be one.");
         }*/
         
+        
         FeatureIterator it = result.features();
         Feature cellspace = null;
         while(it.hasNext()) {
@@ -227,6 +252,7 @@ public class ComplexFeatureServer {
             break;
         }
         it.close();
+        
         
         return cellspace;
     }
@@ -263,5 +289,4 @@ public class ComplexFeatureServer {
         }
         return null;
     }
-    
 }

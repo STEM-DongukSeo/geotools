@@ -323,10 +323,6 @@ public class NewXmlComplexFeatureParser extends NewXmlFeatureParser<FeatureType,
             // 3. Convert the tag's name into a NameImpl and then see if
             // there's a descriptor by that name in the type:
             Name currentTagName = new NameImpl(parser.getNamespace(), parser.getName());
-
-            if(currentTagName.getLocalPart().equalsIgnoreCase("boundedBy")) {
-                System.out.println();
-            }
             
             PropertyDescriptor descriptor = complexType.getDescriptor(currentTagName);
             if (descriptor != null) {
