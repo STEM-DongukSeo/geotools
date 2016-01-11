@@ -108,6 +108,13 @@ public class ComplexFeatureServer {
         }
     }
     
+    public FeatureSource getFeatureSource(Name sourceName) {
+        if(table != null) {
+            return table.getFeatureSource(sourceName);
+        }
+        return null;
+    }
+    
     public void destorySchmea() {
         if(typeRegistry != null) {
             typeRegistry.disposeSchemaIndexes();
