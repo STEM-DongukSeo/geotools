@@ -423,9 +423,11 @@ public class NewXmlComplexFeatureParser extends
 						    // a list before sending it to the builder.
 						    ArrayList<Property> properties = new ArrayList<Property>();
 						    properties.add((Property) innerAttribute.value);
+						    
 						    Attribute resultAttribute = attributeBuilder.add(innerAttribute.id, properties,
 						            innerAttribute.name);
-						    if(innerAttribute.hrefId!=null) {
+						    
+						    if(innerAttribute.hrefId != null) {
 						        updateHref(resultAttribute, innerAttribute.hrefId);
 						    }
 							
@@ -438,7 +440,7 @@ public class NewXmlComplexFeatureParser extends
 						    Attribute resultAttribute = attributeBuilder.add(innerAttribute.id,
 						            getValue(innerAttribute), innerAttribute.name);
 
-						    if(innerAttribute.hrefId!=null) {
+						    if(innerAttribute.hrefId != null) {
 						        updateHref(resultAttribute, innerAttribute.hrefId);                                                 
 						    }
 							

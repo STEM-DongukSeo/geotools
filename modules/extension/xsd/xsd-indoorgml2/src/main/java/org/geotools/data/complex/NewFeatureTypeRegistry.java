@@ -128,6 +128,10 @@ public class NewFeatureTypeRegistry {
         schemas.add(schemaIndex);
     }
 
+    public Map<Name, AttributeType> getTypeMap() {
+        return typeRegistry;
+    }
+    
     /**
      * Destroy all schema Indexes. VERY important to that this is called to avoid memory leaks, because schema indexes are kept alive otherwise by
      * static schema's and in this way keep other schema's alive
