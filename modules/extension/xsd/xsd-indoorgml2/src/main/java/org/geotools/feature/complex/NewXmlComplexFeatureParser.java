@@ -140,11 +140,12 @@ public class NewXmlComplexFeatureParser extends NewXmlFeatureParser<FeatureType,
         } catch (XmlPullParserException e) {
             throw new DataSourceException(e);
         }
-
+        
         Feature feature = featureBuilder.buildFeature(fid);
         if (filter == null || filter.evaluate(feature)) {
             return feature;
         }
+        
         return null;
     }
 
@@ -323,6 +324,10 @@ public class NewXmlComplexFeatureParser extends NewXmlFeatureParser<FeatureType,
             // there's a descriptor by that name in the type:
             Name currentTagName = new NameImpl(parser.getNamespace(), parser.getName());
 
+            if(currentTagName.getLocalPart().equalsIgnoreCase("boundedBy")) {
+                System.out.println();
+            }
+            
             PropertyDescriptor descriptor = complexType.getDescriptor(currentTagName);
             if (descriptor != null) {
                 // 3a. We've found a descriptor for the tag's name in the
