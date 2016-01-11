@@ -32,7 +32,7 @@ public class IndoorCoreParsingTest {
             hints.put(Hints.GEOMETRY_VALIDATE, false);
             builder = new GeometryBuilder(hints);
             
-            Point point = builder.createPoint(-232212.7286485749, -71557.77357719778, 0.0);
+            Point point = builder.createPoint(-224677.66, -78498.78, 0.0);
             
             
             /*Point p = builder.createPoint(1, 1, 0.0);
@@ -44,9 +44,6 @@ public class IndoorCoreParsingTest {
                 System.out.println("result" + s.contains(p));
             }*/
             Feature f = server.mapMatching(point);
-            
-            
-            server.printRegisteredSchmea();
             
             server.destorySchmea();
         } catch (Exception e) {
