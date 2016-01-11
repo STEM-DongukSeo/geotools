@@ -1,6 +1,7 @@
 
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -14,6 +15,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import org.geotools.data.FeatureSource;
 import org.geotools.feature.FeatureCollection;
@@ -34,13 +36,13 @@ import org.opengis.geometry.primitive.Point;
 
 public class RoutingDialog {
 	public JDialog jDialog;
-	private JPanel northPanel = new JPanel();
+	private JPanel northPanel = new JPanel(new GridLayout(1, 4, 3, 3));
 	private JPanel centerPanel = new JPanel();
 	private JButton submitButton = new JButton("Submit");
 	private JComboBox<String> startStateComboBox = new JComboBox<>();
 	private JComboBox<String> endStateComboBox = new JComboBox<>();
-	private JLabel startStateLabel = new JLabel("Source");
-	private JLabel endStateLabel = new JLabel("Desination");
+	private JLabel startStateLabel = new JLabel("Source", SwingConstants.CENTER);
+	private JLabel endStateLabel = new JLabel("Desination", SwingConstants.CENTER);
 	private JTextField routingResult = new JTextField();
 	
 	private ComplexFeatureServer server = null;
@@ -49,7 +51,7 @@ public class RoutingDialog {
 		jDialog  = new JDialog(jFrame, "MapMatching used Graph Module");
 		this.server = server;
 		
-		routingResult.setColumns(30);
+		routingResult.setColumns(25);
 		
 		FeatureSource fs = server.getFeatureSource(new NameImpl("http://www.opengis.net/indoorgml/1.0/core","StateType"));
 		FeatureIterator fi = fs.getFeatures().features();
@@ -67,6 +69,7 @@ public class RoutingDialog {
 				
 				try {
 					String resultpath = calRoute((String)startStateComboBox.getSelectedItem(), (String)endStateComboBox.getSelectedItem());
+					routingResult.setText(resultpath);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -84,7 +87,7 @@ public class RoutingDialog {
 		jDialog.add(northPanel, BorderLayout.NORTH);
 		jDialog.add(centerPanel, BorderLayout.CENTER);
 		
-		jDialog.setBounds(100, 100, 400, 200);
+		jDialog.setBounds(100, 100, 400, 110);
 		
 		//jDialog.setDefaultCloseOperation(JDialog.EXIT_ON_CLOSE);
 	}
@@ -105,11 +108,11 @@ public class RoutingDialog {
         }
         
         FeatureCollection fc = server.idFilter(statefs, startStateID);
-		Feature startState = fc.features().next();
-		Point startStateGeometty = (Point) startState.getDefaultGeometryProperty();
+		Feature startState = (Feature) fc.features().next().getValue().iterator().next();
+		Point startStateGeometty = (Point) startState.getProperties("geometry").iterator().next().getValue();
 		fc = server.idFilter(statefs, endStateID);
-		Feature endState = fc.features().next();
-		Point endStateGeometty = (Point) startState.getDefaultGeometryProperty();
+		Feature endState = (Feature) fc.features().next().getValue().iterator().next();
+		Point endStateGeometty = (Point) endState.getProperties("geometry").iterator().next().getValue();
 		
         
         Graph graph = lineStringGen.getGraph();
@@ -118,9 +121,9 @@ public class RoutingDialog {
         Node destinationNode = null;
         
         Collection<Node> nodelist = graph.getNodes();
-        
-        while(nodelist.iterator().hasNext()){
-        	Node node = nodelist.iterator().next();
+        Iterator<Node> ni = nodelist.iterator();
+        while(ni.hasNext()){
+        	Node node = ni.next();
         	Point p = (Point) node.getObject();
         	if(p.equals(startStateGeometty))
         		sourceNode = node;

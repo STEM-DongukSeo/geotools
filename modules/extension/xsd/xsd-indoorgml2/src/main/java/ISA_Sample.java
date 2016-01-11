@@ -1,6 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,6 +14,7 @@ import java.util.Vector;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -20,6 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTree;
+import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -50,11 +53,13 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 	private JTable userTable;
 	private JScrollPane jScrollPane;
 	private JScrollPane jScrollPaneTree;
-	private JPanel jPanel;
+	private JPanel jMainPanel;
+	private JPanel jstatusPanel;
 	private JMenuBar menuBar;
 	private JMenu adminMenu;
 	private JMenu queryMenu;
 	private DefaultMutableTreeNode root;
+	private JLabel statusLabel;
     private JTree tree;
     
 	private DefaultTableModel model;
@@ -99,6 +104,7 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 	                File file = fileChooser.getSelectedFile();
 	                try {
 						server.registerSchema(file.toURL(), new NameImpl("http://www.opengis.net/indoorgml/1.0/core", ":", "IndoorFeatures"));
+						statusLabel.setText("Schema Import End");
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -142,7 +148,8 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 								node.add(schemaElement);
 						}
 						model.reload(node);
-			            //tree.expandPath();
+						
+						statusLabel.setText("GML Import End");
 					} catch (IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -157,11 +164,11 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				RoutingDialog routingDialog;
+				MapMatchingDialog mapMatchingDialog;
 				try {
-					routingDialog = new RoutingDialog(ISA_Sample.this, server);
-					routingDialog.jDialog.setModal(true);
-					routingDialog.jDialog.setVisible(true);
+					mapMatchingDialog = new MapMatchingDialog(ISA_Sample.this, server);
+					mapMatchingDialog.jDialog.setModal(true);
+					mapMatchingDialog.jDialog.setVisible(true);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -175,7 +182,15 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
-				
+				IntersectDialog intersectionDialog;
+				try {
+					intersectionDialog = new IntersectDialog(ISA_Sample.this, server);
+					intersectionDialog.jDialog.setModal(true);
+					intersectionDialog.jDialog.setVisible(true);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 
@@ -197,16 +212,17 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 			}
 		});
         
-        jPanel  = new JPanel(new GridLayout(0,2,5,5));
+        jMainPanel  = new JPanel();
         
         // Tree Setting
         root = new DefaultMutableTreeNode("Schema");
         tree = new JTree(root);
         jScrollPaneTree = new JScrollPane(tree);
+        jScrollPaneTree.setPreferredSize(new Dimension(430, 700));
         tree.setVisibleRowCount(10);
         tree.addTreeSelectionListener(this);
         
-        jPanel.add(jScrollPaneTree);
+        jMainPanel.add(jScrollPaneTree);
         
         // Table Setting
         userTable = new JTable();     
@@ -219,12 +235,19 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 		model = new DefaultTableModel(userColumn,0);    
         userTable.setModel(model);
         jScrollPane.setViewportView(userTable);
+        jScrollPane.setPreferredSize(new Dimension(830, 700));
+        jMainPanel.add(jScrollPane, BorderLayout.CENTER);
         
-        jPanel.add(jScrollPane, BorderLayout.CENTER);
+        jstatusPanel = new JPanel();
+        FlowLayout flowLayout = (FlowLayout) jstatusPanel.getLayout();
+        flowLayout.setAlignment(FlowLayout.LEFT);
+        statusLabel = new JLabel("init status");
+        jstatusPanel.add(statusLabel);
         
-        add(jPanel);
+        add(jMainPanel, BorderLayout.CENTER);
+        add(jstatusPanel, BorderLayout.SOUTH);
         
-        setBounds(150,100,800,400);
+        setBounds(150,100,1300,800);
         setResizable(true);
         setVisible(true);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -343,11 +366,13 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 			DefaultMutableTreeNode selNode = (DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
             if(selNode != null)
             {
-            	String name = (String) selNode.getUserObject();
-            	String[] sname = name.split(":");
-            	FeatureSource fs = server.getFeatureSource(new NameImpl(sname[0] + ":" + sname[1],sname[2]));
             	try {
-            		addFeatureCollection(fs.getFeatures());
+	            	String name = (String) selNode.getUserObject();
+	            	String[] sname = name.split(":");
+	            	if(sname.length >= 3){
+	            		FeatureSource fs = server.getFeatureSource(new NameImpl(sname[0] + ":" + sname[1],sname[2]));
+	            		addFeatureCollection(fs.getFeatures());
+	            	}
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
