@@ -200,35 +200,53 @@ public class ComplexFeatureServer {
     }
     
     public boolean spatialEvaluate(String queryType, Geometry propGeom, Geometry geometry) {
+        
         if("Intersects".equalsIgnoreCase(queryType)) {
            return propGeom.intersects(geometry);
         } else if("Contains".equalsIgnoreCase(queryType)) {
             return propGeom.contains(geometry);
+        } else if("Equals".equalsIgnoreCase(queryType)) {
+            return propGeom.equals(geometry);
         }
         
         return false;
     }
     
     public Feature mapMatching(Point point) throws IOException {
-        FeatureSource cellSpacefs = table.getFeatureSource(new NameImpl("http://www.opengis.net/indoorgml/1.0/core","CellSpace"));
+        FeatureSource cellSpacefs = table.getFeatureSource(new NameImpl("http://www.opengis.net/indoorgml/1.0/core","CellSpaceType"));
         FeatureCollection result = spatialFilter(cellSpacefs, "Contains", "Geometry3D", point);
         
-        if(result.size() > 1) {
+        /*if(result.size() > 1) {
             throw new IllegalArgumentException("Invalid FeatureSource. Data is invalid. Mapmaching result should be one.");
-        }
+        }*/
         
         FeatureIterator it = result.features();
         Feature cellspace = null;
         while(it.hasNext()) {
             cellspace = it.next();
+            break;
         }
         it.close();
         
-        if(cellspace == null) {
-            return null;
-        }
+        return cellspace;
+    }
+    
+    public Feature mapMatchingState(Point point) throws IOException {
+        FeatureSource cellSpacefs = table.getFeatureSource(new NameImpl("http://www.opengis.net/indoorgml/1.0/core","StateType"));
+        FeatureCollection result = spatialFilter(cellSpacefs, "Equals", "geometry", point);
         
-        Feature state = (Feature) getPropertyValue(cellspace, "connects");
+        /*if(result.size() > 1) {
+            throw new IllegalArgumentException("Invalid FeatureSource. Data is invalid. Mapmaching result should be one.");
+        }*/
+        
+        FeatureIterator it = result.features();
+        Feature state = null;
+        while(it.hasNext()) {
+            state = it.next();
+            break;
+        }
+        it.close();
+        
         return state;
     }
     
