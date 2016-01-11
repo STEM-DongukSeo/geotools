@@ -15,6 +15,7 @@ import org.geotools.feature.NameImpl;
 import org.geotools.feature.complex.ComplexFeatureGraphGenerator;
 import org.geotools.feature.complex.NewXmlComplexFeatureParser;
 import org.geotools.feature.type.ComplexFeatureTypeFactoryImpl;
+import org.geotools.filter.text.cql2.CQL;
 import org.geotools.geometry.GeometryBuilder;
 import org.geotools.gml3.complex.GmlFeatureTypeRegistryConfiguration;
 import org.geotools.graph.build.line.LineStringGraphGenerator;
@@ -37,6 +38,25 @@ import org.opengis.geometry.Geometry;
 import org.opengis.geometry.primitive.Point;
 
 public class IndoorCoreParsingTest {
+    
+    @Test
+    public void ServerTest() {
+        try {
+            
+            ClassLoader classLoader = getClass().getClassLoader();
+            URL schemaLocation = classLoader.getResource("org/geotools/indoorgml/core/indoorgmlcore.xsd");
+            
+            ComplexFeatureServer server = new ComplexFeatureServer();
+            
+            server.registerSchema(schemaLocation, new NameImpl("http://www.opengis.net/indoorgml/1.0/core", ":", "IndoorFeatures"));
+            
+            server.printRegisteredSchmea();
+            
+            server.destorySchmea();
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void INDOORCOREParsingTest() {
@@ -57,7 +77,8 @@ public class IndoorCoreParsingTest {
             
             AttributeDescriptor descriptor = typeRegistry
                             .getDescriptor(new NameImpl("http://www.opengis.net/indoorgml/1.0/core",
-                                            ":", "IndoorFeatures"), null);
+                                           ":", "IndoorFeatures"), null);
+            
             FeatureType featureType = (FeatureType) descriptor.getType();
             
             typeRegistry.disposeSchemaIndexes();
@@ -81,9 +102,9 @@ public class IndoorCoreParsingTest {
             FeatureSource cellSpacefs = ftg.getFeatureSource(new NameImpl("http://www.opengis.net/indoorgml/1.0/core","CellSpace"));
             FeatureSource statefs = ftg.getFeatureSource(new NameImpl("http://www.opengis.net/indoorgml/1.0/core","State"));
             
-            sample.addFeatureCollection(cellSpacefs.getFeatures());
-            sample.addFeatureCollection(statefs.getFeatures());
-            sample.addFeatureCollection(transitionfs.getFeatures());
+            //sample.addFeatureCollection(cellSpacefs.getFeatures());
+            //sample.addFeatureCollection(statefs.getFeatures());
+            //sample.addFeatureCollection(transitionfs.getFeatures());
             
             FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( GeoTools.getDefaultHints() );
             
@@ -98,7 +119,8 @@ public class IndoorCoreParsingTest {
             
             FeatureCollection tfs = transitionfs.getFeatures(filter);
             
-            //Filter filter = CQL.toFilter("name >= 5");
+            Filter cqlF = CQL.toFilter("name == 005");
+            
             
             //create a linear graph generate
             LineStringGraphGenerator lineStringGen = new LineStringGraphGenerator();

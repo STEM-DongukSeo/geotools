@@ -41,7 +41,7 @@ import org.opengis.geometry.BoundingBox;
  *
  * @source $URL$
  */
-public class FeatureImpl extends ComplexAttributeImpl implements Feature {
+public class NewFeatureImpl extends ComplexAttributeImpl implements Feature {
 
 	/**
 	 * Default geometry attribute
@@ -55,7 +55,7 @@ public class FeatureImpl extends ComplexAttributeImpl implements Feature {
 	 * @param desc Nested descriptor
 	 * @param id Feature ID
 	 */
-	public FeatureImpl(Collection<Property> properties, AttributeDescriptor desc, FeatureId id) {
+	public NewFeatureImpl(Collection<Property> properties, AttributeDescriptor desc, FeatureId id) {
 		super(properties, desc, id );
 	}
 	
@@ -66,7 +66,7 @@ public class FeatureImpl extends ComplexAttributeImpl implements Feature {
 	 * @param type Type of feature to be created
 	 * @param id Feature ID
 	 */
-	public FeatureImpl(Collection<Property> properties, FeatureType type, FeatureId id ) {
+	public NewFeatureImpl(Collection<Property> properties, FeatureType type, FeatureId id ) {
 		super(properties, type, id );
 	}
 

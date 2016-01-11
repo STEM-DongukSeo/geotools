@@ -1,24 +1,17 @@
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.geotools.data.FeatureSource;
-import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.complex.NewComplexFeatureSource;
-import org.geotools.feature.complex.NewFeatureCollection;
 import org.opengis.feature.ComplexAttribute;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
-import org.opengis.feature.type.AttributeType;
 import org.opengis.feature.type.ComplexType;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.Name;
 import org.opengis.feature.type.PropertyType;
-import org.opengis.filter.identity.FeatureId;
 
 /**
  * 
@@ -31,7 +24,8 @@ import org.opengis.filter.identity.FeatureId;
 public class FeatureTableGenerator {
     
         private Map<Name, NewComplexFeatureSource> featureSourceTable = new HashMap<Name, NewComplexFeatureSource>();
-
+        private Map<Name, FeatureType> featureTypeTable = new HashMap<Name, FeatureType>();
+        
 	public FeatureTableGenerator(Feature feature) {
 	    addFeature(feature);
 	    parseNextFeature(feature);
@@ -59,11 +53,18 @@ public class FeatureTableGenerator {
 	        if(type instanceof ComplexType) {
 	            boolean isSuccess = true;
 	            if(type instanceof FeatureType) {
+	                if(!featureTypeTable.containsKey(type.getName())) {
+	                    featureTypeTable.put(type.getName(), (FeatureType) type);
+	                }
 	                isSuccess = addFeature((Feature) p);
 	            }
 	            if(isSuccess) parseNextFeature((ComplexAttribute) p);
 	        }
 	    }
+	}
+	
+	public Map<Name, FeatureType> getFeatureTypeMap() {
+	    return featureTypeTable;
 	}
 	
 	public boolean addFeature(Feature f) {

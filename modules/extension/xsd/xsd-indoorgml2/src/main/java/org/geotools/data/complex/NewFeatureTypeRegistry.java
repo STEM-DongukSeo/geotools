@@ -51,6 +51,7 @@ import org.geotools.xs.XSSchema;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.AttributeType;
 import org.opengis.feature.type.ComplexType;
+import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.FeatureTypeFactory;
 import org.opengis.feature.type.GeometryType;
 import org.opengis.feature.type.Name;
@@ -128,8 +129,14 @@ public class NewFeatureTypeRegistry {
         schemas.add(schemaIndex);
     }
 
-    public Map<Name, AttributeType> getTypeMap() {
-        return typeRegistry;
+    public Map<Name, FeatureType> getFeatureTypeMap() {
+        Map<Name, FeatureType> features = new HashMap<Name, FeatureType>();
+        for( Map.Entry<Name, AttributeType> elem : typeRegistry.entrySet()) {
+            if(elem.getValue() instanceof FeatureType) {
+                features.put(elem.getKey(), (FeatureType) elem.getValue());
+            }
+        }
+        return features;
     }
     
     /**
@@ -152,8 +159,8 @@ public class NewFeatureTypeRegistry {
             descriptor = createAttributeDescriptor(null, elemDecl, crs);
             LOGGER.finest("Registering attribute descriptor " + descriptor.getName());
             register(descriptor);
-
         }
+        
         return descriptor;
     }
 

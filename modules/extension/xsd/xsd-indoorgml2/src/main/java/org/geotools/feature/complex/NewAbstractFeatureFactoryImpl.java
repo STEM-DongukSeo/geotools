@@ -22,7 +22,7 @@ import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.AssociationImpl;
 import org.geotools.feature.AttributeImpl;
 import org.geotools.feature.ComplexAttributeImpl;
-import org.geotools.feature.FeatureImpl;
+import org.geotools.feature.NewFeatureImpl;
 import org.geotools.feature.GeometryAttributeImpl;
 import org.geotools.feature.simple.SimpleFeatureImpl;
 import org.opengis.feature.Association;
@@ -118,11 +118,11 @@ public abstract class NewAbstractFeatureFactoryImpl implements FeatureFactory {
 	}
 	
 	public Feature createFeature(Collection value, AttributeDescriptor descriptor, String id) {
-		return new FeatureImpl(value,descriptor,ff.featureId(id));
+		return new NewFeatureImpl(value,descriptor,ff.featureId(id));
 	}
 
 	public Feature createFeature(Collection value, FeatureType type, String id) {
-		return new FeatureImpl(value,type,ff.featureId(id));
+		return new NewFeatureImpl(value,type,ff.featureId(id));
 	}
 	
     public SimpleFeature createSimpleFeature(Object[] array,

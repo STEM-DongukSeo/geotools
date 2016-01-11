@@ -169,12 +169,6 @@ public class SchemaIndexImpl implements SchemaIndex {
     protected XSDNamedComponent lookup(Map index, QName qName) {
         XSDNamedComponent component = (XSDNamedComponent) index.get(qName);
         
-        System.out.println("==" + qName + "\n");
-        for(Object o: index.keySet()) {
-            if(o.toString().startsWith("{http://www.opengis.net/indoorgml/1.0/core}"))
-                System.out.println(o.toString());
-        }
-        
         if (component != null) {
             return component;
         }
