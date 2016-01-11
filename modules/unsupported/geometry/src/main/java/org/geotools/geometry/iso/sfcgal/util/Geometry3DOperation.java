@@ -308,4 +308,3 @@ public class Geometry3DOperation {
         }
 
 }
->>>>>>> refs/remotes/origin/parsing_3d
