@@ -56,8 +56,9 @@ public class IndoorCoreParsingTest {
             URL url = getClass().getResource("testIGML_LT.gml");
             server.getResource(url);
             
-             server.printRegisteredSource();
+            server.printRegisteredSource();
             
+            /*
             GeometryBuilder builder = null;
             Hints hints = GeoTools.getDefaultHints();
             hints.put(Hints.CRS, DefaultGeographicCRS.WGS84_3D);
@@ -80,7 +81,7 @@ public class IndoorCoreParsingTest {
             server.printRegisteredSchmea();
             
             server.destorySchmea();
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

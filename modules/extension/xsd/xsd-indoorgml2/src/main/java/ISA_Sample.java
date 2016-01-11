@@ -30,6 +30,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
+import org.geotools.data.FeatureSource;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.NameImpl;
@@ -118,10 +119,18 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 						// Add Tree componenet
 						Collection<FeatureType> fc = server.getFeatureTypes().values();
 						Iterator<FeatureType> fi = fc.iterator();
-						DefaultTreeModel model = (DefaultTreeModel)tree.getModel(); //모델정보를 가져온다
+						DefaultTreeModel model = (DefaultTreeModel)tree.getModel(); 
 			            DefaultMutableTreeNode node = (DefaultMutableTreeNode)tree.getModel().getRoot();
 						while(fi.hasNext()){
-				            node.add(new DefaultMutableTreeNode(fi.next().getName().getLocalPart()));
+							FeatureType ft = fi.next();
+							DefaultMutableTreeNode schemaElement = new DefaultMutableTreeNode(ft.getName().toString());
+							boolean isInserted = false;
+							for(int i = 0; i< node.getChildCount(); i++){
+								if(node.getChildAt(i).toString().equals(schemaElement.toString()))
+									isInserted = true;
+							}
+							if(!isInserted)
+								node.add(schemaElement);
 						}
 						model.reload(node);
 			            //tree.expandPath();
@@ -169,6 +178,8 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 	@SuppressWarnings({ "rawtypes" })
 	public void addFeatureCollection(FeatureCollection features) {
 		// TODO Auto-generated method stub
+		model = new DefaultTableModel(userColumn,0);
+		
 		FeatureIterator iterator = features.features();
 		while (iterator.hasNext()) {
 			Feature feature = iterator.next();
@@ -176,41 +187,39 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 				getCellSpace(feature);
 			} else if (feature.getName().getLocalPart().equals("State")) {
 				getState(feature);
-			} else if (feature.getName().getLocalPart().equals("Transition")) {
+			} else if (feature.getName().getLocalPart().equals("TransitionType")) {
 				getTransition(feature);
 			} 
 		}
+		userTable.setModel(model);
 	}
 
 	@SuppressWarnings("unchecked")
 	private void getTransition(Feature feature) {
+        
 		userRow = new Vector<String>();
 		userRow.add(0, feature.getName().getLocalPart());
 		userRow.add(1, feature.getIdentifier().getID());
 
 		Collection<Property> pc = feature.getProperties();
 		Iterator<Property> pi = pc.iterator();
+		String attribute = "";
+		String geometry = "";
 		while (pi.hasNext()) {
 			Property p = pi.next();
-			Iterator<? extends Attribute> ia = (Iterator<? extends Attribute>) ((Collection<? extends Property>) p.getValue()).iterator();
-			String attribute = "";
-			String geometry = "";
-			while (ia.hasNext()) {
-				Attribute a = ia.next();
-				if (a.getName().getLocalPart().equals("connects")) {
-					Iterator<? extends Feature> f = ((Collection<? extends Feature>) a.getValue()).iterator();
-					attribute += "| connects : " + f.next().getIdentifier().toString() + " |";
-				} else if (a.getName().getLocalPart().equals("weight")) {
-					attribute += "| weight : " + a.getValue().toString() + " |";
-				} else if (GeometryAttribute.class.isAssignableFrom(a.getClass())) {
-					geometry = a.getValue().toString();
-				}
+			if (p.getName().getLocalPart().equals("connects")) {
+				Iterator<? extends Feature> f = ((Collection<? extends Feature>) p.getValue()).iterator();
+				attribute += "| connects : " + f.next().getIdentifier().toString() + " |";
+			} else if (p.getName().getLocalPart().equals("weight")) {
+				attribute += "| weight : " + p.getValue().toString() + " |";
+			} else if (GeometryAttribute.class.isAssignableFrom(p.getClass())) {
+				geometry = p.getValue().toString();
 			}
-			userRow.add(2, attribute);
-			userRow.add(3, geometry);
-			attribute = "";
-			geometry = "";
 		}
+		userRow.add(2, attribute);
+		userRow.add(3, geometry);
+		attribute = "";
+		geometry = "";
 		model.addRow(userRow);
 	}
 
@@ -287,7 +296,15 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 			DefaultMutableTreeNode selNode = (DefaultMutableTreeNode)tree.getLastSelectedPathComponent();
             if(selNode != null)
             {
-            	
+            	String name = (String) selNode.getUserObject();
+            	String[] sname = name.split(":");
+            	FeatureSource fs = server.getFeatureSource(new NameImpl(sname[0] + ":" + sname[1],sname[2]));
+            	try {
+            		addFeatureCollection(fs.getFeatures());
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
             }
 		}
 	}
