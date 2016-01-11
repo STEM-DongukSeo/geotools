@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -15,6 +17,7 @@ import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.factory.GeoTools;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
+import org.geotools.feature.complex.NewComplexFeatureSource;
 import org.geotools.feature.complex.NewFeatureCollection;
 import org.geotools.feature.complex.NewXmlComplexFeatureParser;
 import org.geotools.feature.type.ComplexFeatureTypeFactoryImpl;
@@ -44,13 +47,13 @@ import org.opengis.geometry.primitive.Point;
  */
 public class ComplexFeatureServer {
 
-    Map<Name, FeatureType> types;
+    private Map<Name, FeatureType> types;
 
-    NewFeatureTypeRegistry typeRegistry;
+    private NewFeatureTypeRegistry typeRegistry;
 
-    FeatureType rootType;
+    private FeatureType rootType;
     
-    FeatureTableGenerator table;
+    private FeatureTableGenerator table;
     
     public ComplexFeatureServer() {
         
@@ -72,7 +75,6 @@ public class ComplexFeatureServer {
     }
     
     public void getResource(URL url) throws IOException {
-        
         Name rootName = rootType.getName();
         
         NewXmlComplexFeatureParser featureParser = new NewXmlComplexFeatureParser(
@@ -82,9 +84,21 @@ public class ComplexFeatureServer {
         
         Feature feature = featureParser.parse();
         table = new FeatureTableGenerator(feature);
-        types = table.getFeatureTypeMap();        
+        types = table.getFeatureTypeMap();
+        
+        printRegisteredSchmea();        
     }
     
+    public Map<Name, FeatureSource> getFeatureSources() {
+        return table.getFeatureSources();
+    }
+    
+    public Map<Name, FeatureType> getFeatureTypes() {
+        if(types == null) {
+            return Collections.emptyMap();
+        }
+        return types;
+    }
     
     public void printRegisteredSchmea() {
         if(types != null) {
@@ -152,7 +166,7 @@ public class ComplexFeatureServer {
         return false;
     }
     
-    public Feature mapmatching(Point point) {
+    public Feature mapMatching(Point point) {
         
         return null;
     }
