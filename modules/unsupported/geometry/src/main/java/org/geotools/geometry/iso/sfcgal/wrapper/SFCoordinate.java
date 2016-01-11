@@ -145,5 +145,15 @@ public class SFCoordinate extends Pointer {
          */
         @Name("operator!=")
         public native @Cast("bool") boolean notEquals(@ByRef SFCoordinate c);
+        
+        public static void main(String args[]) {
+            SFCoordinate c = new SFCoordinate(1.4, 2.1);
+
+            
+             System.out.println("c.x() : " + c.x());
+             System.out.println("c.y() : " + c.y()); System.out.println("c.z() : " + c.z());
+             System.out.println("coordianteDimension : " + c.coordinateDimension());
+             
+        }
 
 }

@@ -17,7 +17,8 @@
 package org.geotools.filter.text.cql2;
 
 import org.geotools.filter.text.commons.IToken;
-import org.geotools.filter.text.generated.parsers.ParseException;
+
+import com.vividsolutions.jts.io.ParseException;
 
 
 /**

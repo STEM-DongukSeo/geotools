@@ -3,6 +3,7 @@
  */
 package org.geotools.feature.complex;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 import org.geotools.graph.build.GraphBuilder;
@@ -10,6 +11,7 @@ import org.geotools.graph.build.GraphGenerator;
 import org.geotools.graph.build.basic.BasicGraphGenerator;
 import org.geotools.graph.structure.Graph;
 import org.geotools.graph.structure.Graphable;
+import org.opengis.feature.Attribute;
 import org.opengis.feature.Feature;
 import org.opengis.feature.GeometryAttribute;
 import org.opengis.feature.Property;
@@ -66,7 +68,7 @@ public class ComplexFeatureGraphGenerator extends BasicGraphGenerator {
     }
     
     private GeometryAttribute getGeometry(Feature feature) {
-        GeometryAttribute ga = null;
+    	GeometryAttribute ga = null;
         if(feature.getDefaultGeometryProperty() != null) {
             ga = feature.getDefaultGeometryProperty();
         }
@@ -78,6 +80,18 @@ public class ComplexFeatureGraphGenerator extends BasicGraphGenerator {
                 if(GeometryAttribute.class.isAssignableFrom(p.getClass())) {
                     ga = (GeometryAttribute) p;
                     break;
+                }
+                else if(p.getValue() != null){
+                	Iterator<? extends Attribute> ia = (Iterator<? extends Attribute>) ((Collection<? extends Property>) p.getValue()).iterator();
+                	while(ia.hasNext()){
+                		Attribute a = ia.next();
+                		
+                		if(GeometryAttribute.class.isAssignableFrom(a.getClass())) {
+                            ga = (GeometryAttribute) a;
+                            ((Feature) p).setDefaultGeometryProperty(ga);
+                            break;
+                        }
+                	}
                 }
             }
         }

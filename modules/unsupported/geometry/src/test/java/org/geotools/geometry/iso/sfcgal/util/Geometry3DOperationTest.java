@@ -68,11 +68,11 @@ public class Geometry3DOperationTest extends TestCase {
                 // _testPointCurve();
                 // _testPointSurface();
                 // _testPointSolid();
-                // _testCurveCurve();
+                 _testCurveCurve();
                 // _testCurveSurface();
                 // _testCurveSolid();
                 // _testSurfaceSurface();
-                _testSurfaceSolid();
+                //_testSurfaceSolid();
                 // _testSolidSolid();
         }
 

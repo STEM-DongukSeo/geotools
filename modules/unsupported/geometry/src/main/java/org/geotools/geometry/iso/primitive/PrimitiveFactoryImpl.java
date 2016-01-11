@@ -90,7 +90,7 @@ public class PrimitiveFactoryImpl implements Serializable, Factory, PrimitiveFac
 	/** Just the defaults, use GeometryFactoryFinder for the rest */
 	public PrimitiveFactoryImpl( Hints hints ) {
 		if (hints == null) {
-			this.crs = DefaultGeographicCRS.WGS84;
+			this.crs = DefaultGeographicCRS.WGS84_3D;
 			hints = GeoTools.getDefaultHints();
 	        hints.put(Hints.CRS, crs );
 	        geomValidate = true;

@@ -1,26 +1,20 @@
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 import javax.xml.namespace.QName;
 
 import org.geotools.data.FeatureSource;
 import org.geotools.data.complex.NewFeatureTypeRegistry;
 import org.geotools.data.complex.config.EmfComplexFeatureReader;
-import org.geotools.data.complex.config.FeatureTypeRegistry;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.factory.GeoTools;
 import org.geotools.factory.Hints;
 import org.geotools.feature.FeatureCollection;
-import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.NameImpl;
 import org.geotools.feature.complex.ComplexFeatureGraphGenerator;
 import org.geotools.feature.complex.NewXmlComplexFeatureParser;
 import org.geotools.feature.type.ComplexFeatureTypeFactoryImpl;
-import org.geotools.filter.text.cql2.CQL;
 import org.geotools.geometry.GeometryBuilder;
 import org.geotools.gml3.complex.GmlFeatureTypeRegistryConfiguration;
 import org.geotools.graph.build.line.LineStringGraphGenerator;
@@ -35,16 +29,12 @@ import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.xml.resolver.SchemaResolver;
 import org.junit.Test;
 import org.opengis.feature.Feature;
-import org.opengis.feature.GeometryAttribute;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.identity.FeatureId;
+import org.opengis.geometry.Geometry;
 import org.opengis.geometry.primitive.Point;
-
-import com.vividsolutions.jts.geom.Geometry;
-
 
 public class IndoorCoreParsingTest {
 
@@ -52,6 +42,8 @@ public class IndoorCoreParsingTest {
     public void INDOORCOREParsingTest() {
         
         try {
+        	ISA_Sample sample = new ISA_Sample("GeoTools/3DIndoor");
+        	
             ClassLoader classLoader = getClass().getClassLoader();
             URL schemaLocation = classLoader.getResource("org/geotools/indoorgml/core/indoorgmlcore.xsd");
             
@@ -81,8 +73,17 @@ public class IndoorCoreParsingTest {
             Feature feature = featureParser.parse();
             
             FeatureTableGenerator ftg = new FeatureTableGenerator(feature);
+            
             FeatureSource fs = ftg.getFeatureSource( 
                     new NameImpl("http://www.opengis.net/indoorgml/1.0/core","CellSpace"));
+
+            FeatureSource transitionfs = ftg.getFeatureSource(new NameImpl("http://www.opengis.net/indoorgml/1.0/core","Transition"));
+            FeatureSource cellSpacefs = ftg.getFeatureSource(new NameImpl("http://www.opengis.net/indoorgml/1.0/core","CellSpace"));
+            FeatureSource statefs = ftg.getFeatureSource(new NameImpl("http://www.opengis.net/indoorgml/1.0/core","State"));
+            
+            sample.addFeatureCollection(cellSpacefs.getFeatures());
+            sample.addFeatureCollection(statefs.getFeatures());
+            sample.addFeatureCollection(transitionfs.getFeatures());
             
             FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( GeoTools.getDefaultHints() );
             
@@ -95,23 +96,17 @@ public class IndoorCoreParsingTest {
             Point point = builder.createPoint(445538.302498147, 5444904.79263906, -2.52);
             Filter filter = ff.intersects("Geometry3D", point);
             
-            FeatureCollection tfs = fs.getFeatures(filter);
+            FeatureCollection tfs = transitionfs.getFeatures(filter);
             
-            System.out.println();
-            
-            
-            
-            
-           //Filter filter = CQL.toFilter("name >= 5");
-            
+            //Filter filter = CQL.toFilter("name >= 5");
             
             //create a linear graph generate
             LineStringGraphGenerator lineStringGen = new LineStringGraphGenerator();
             ComplexFeatureGraphGenerator featureGen = new ComplexFeatureGraphGenerator( lineStringGen );
             
             for(int i = 0 ; i < tfs.size(); i++) {
-                //Feature transition = (Feature) tfs.get(i);
-                //featureGen.add(transition);
+                Feature transition = (Feature) tfs.toArray()[i];
+                featureGen.add(transition);
             }
             
             Graph graph = lineStringGen.getGraph();
@@ -121,10 +116,15 @@ public class IndoorCoreParsingTest {
             
             EdgeWeighter weighter = new DijkstraIterator.EdgeWeighter() {
                 public double getWeight(Edge e) {
-                   Feature feature = (Feature) e.getObject();
-                   GeometryAttribute geometry = (GeometryAttribute) feature.getDefaultGeometryProperty();
-                   Geometry g = (Geometry) geometry.getValue();
-                   return g.getLength();
+                	/*
+                   	Feature feature = (Feature) e.getObject();
+                   	GeometryAttribute geometry = (GeometryAttribute) feature.getDefaultGeometryProperty();
+                   	Geometry g = (Geometry) geometry.getValue();
+                	*/
+                	Geometry startPoint = (Geometry) e.getNodeA().getObject();
+                	Geometry endPoint = (Geometry) e.getNodeB().getObject();
+                   
+                	return startPoint.distance(endPoint);
                 }
             };
             

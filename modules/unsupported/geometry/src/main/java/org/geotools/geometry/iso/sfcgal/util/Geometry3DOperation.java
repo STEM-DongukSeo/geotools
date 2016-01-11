@@ -147,7 +147,7 @@ public class Geometry3DOperation {
                         calledIntersects = true;
                         isIntersects = SFAlgorithm.intersects3D(geometryA, geometryB);
                 }
-                return isIntersects;
+                return !isIntersects;
         }
 
         /**
