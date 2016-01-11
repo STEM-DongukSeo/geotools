@@ -56,8 +56,9 @@ public class IndoorCoreParsingTest {
             URL url = getClass().getResource("indoor.gml");
             server.getResource(url);
             
-             server.printRegisteredSource();
+            server.printRegisteredSource();
             
+            /*
             GeometryBuilder builder = null;
             Hints hints = GeoTools.getDefaultHints();
             hints.put(Hints.CRS, DefaultGeographicCRS.WGS84_3D);
@@ -76,6 +77,57 @@ public class IndoorCoreParsingTest {
             server.printRegisteredSchmea();
             
             server.destorySchmea();
+            */
+            
+            FeatureSource transitionfs = server.getFeatureSource(new NameImpl("http://www.opengis.net/indoorgml/1.0/core","Transition"));
+            FeatureCollection tfs = transitionfs.getFeatures();
+            //create a linear graph generate
+            LineStringGraphGenerator lineStringGen = new LineStringGraphGenerator();
+            ComplexFeatureGraphGenerator featureGen = new ComplexFeatureGraphGenerator( lineStringGen );
+            
+            for(int i = 0 ; i < tfs.size(); i++) {
+                Feature transition = (Feature) tfs.toArray()[i];
+                featureGen.add(transition);
+            }
+            
+            Graph graph = lineStringGen.getGraph();
+            
+            Collection<Node> destinations = graph.getNodes();
+            Node start = (Node) destinations.iterator().next();
+            
+            EdgeWeighter weighter = new DijkstraIterator.EdgeWeighter() {
+                public double getWeight(Edge e) {
+                	/*
+                   	Feature feature = (Feature) e.getObject();
+                   	GeometryAttribute geometry = (GeometryAttribute) feature.getDefaultGeometryProperty();
+                   	Geometry g = (Geometry) geometry.getValue();
+                	*/
+                	Geometry startPoint = (Geometry) e.getNodeA().getObject();
+                	Geometry endPoint = (Geometry) e.getNodeB().getObject();
+                   
+                	return startPoint.distance(endPoint);
+                }
+            };
+            
+            DijkstraShortestPathFinder pf = new DijkstraShortestPathFinder( graph, start, weighter );
+            pf.calculate();
+            
+            for ( Iterator d = destinations.iterator(); d.hasNext(); ) {
+                Node destination = (Node) d.next();
+                Path path = pf.getPath( destination );
+                
+                System.out.print("[");
+                for(int i = 0; i < path.size(); i++){
+                	Node node = (Node) path.get(i);
+                	Point p = (Point) node.getObject();
+                	Feature f = server.mapMatchingState(p);
+                	System.out.print(f.getIdentifier().getID());
+                	System.out.print(" , ");
+                }
+                System.out.print("]");
+                //System.out.println(path);
+                //do something with the path
+            }
         } catch ( Exception e ) {
             e.printStackTrace();
         }
@@ -85,7 +137,6 @@ public class IndoorCoreParsingTest {
     public void INDOORCOREParsingTest() {
         
         try {
-        	ISA_Sample sample = new ISA_Sample("GeoTools/3DIndoor");
         	
             ClassLoader classLoader = getClass().getClassLoader();
             URL schemaLocation = classLoader.getResource("org/geotools/indoorgml/core/indoorgmlcore.xsd");
@@ -140,7 +191,8 @@ public class IndoorCoreParsingTest {
             Point point = builder.createPoint(445538.302498147, 5444904.79263906, -2.52);
             Filter filter = ff.intersects("Geometry3D", point);
             
-            FeatureCollection tfs = transitionfs.getFeatures(filter);
+            //FeatureCollection tfs = transitionfs.getFeatures(filter);
+            FeatureCollection tfs = transitionfs.getFeatures();
             
             Filter cqlF = CQL.toFilter("name == 005");
             
@@ -179,7 +231,11 @@ public class IndoorCoreParsingTest {
             for ( Iterator d = destinations.iterator(); d.hasNext(); ) {
                 Node destination = (Node) d.next();
                 Path path = pf.getPath( destination );
-    
+                
+                for(int i = 0; i < path.size(); i++){
+                	Node node = (Node) path.get(i);
+                	Point p = (Point) node.getObject();
+                }
                 System.out.println(path);
                 //do something with the path
             }
