@@ -50,6 +50,18 @@ public class IndoorCoreParsingTest {
             
             server.registerSchema(schemaLocation, new NameImpl("http://www.opengis.net/indoorgml/1.0/core", ":", "IndoorFeatures"));
             
+            URL url = getClass().getResource("indoor.gml");
+            server.getResource(url);
+
+            GeometryBuilder builder = null;
+            Hints hints = GeoTools.getDefaultHints();
+            hints.put(Hints.CRS, DefaultGeographicCRS.WGS84_3D);
+            hints.put(Hints.GEOMETRY_VALIDATE, false);
+            builder = new GeometryBuilder(hints);
+            
+            Point point = builder.createPoint(445537.530360026, 5444900.32919035 , -2.02);
+            Feature f = server.mapMatching(point);
+            
             server.printRegisteredSchmea();
             
             server.destorySchmea();

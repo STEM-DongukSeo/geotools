@@ -17,6 +17,7 @@ import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.factory.GeoTools;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
+import org.geotools.feature.NameImpl;
 import org.geotools.feature.complex.NewComplexFeatureSource;
 import org.geotools.feature.complex.NewFeatureCollection;
 import org.geotools.feature.complex.NewXmlComplexFeatureParser;
@@ -24,9 +25,11 @@ import org.geotools.feature.type.ComplexFeatureTypeFactoryImpl;
 import org.geotools.gml3.complex.GmlFeatureTypeRegistryConfiguration;
 import org.geotools.xml.SchemaIndex;
 import org.geotools.xml.resolver.SchemaResolver;
+import org.opengis.feature.ComplexAttribute;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
 import org.opengis.feature.type.AttributeDescriptor;
+import org.opengis.feature.type.ComplexType;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.GeometryType;
 import org.opengis.feature.type.Name;
@@ -51,6 +54,7 @@ public class ComplexFeatureServer {
 
     private NewFeatureTypeRegistry typeRegistry;
 
+    private AttributeDescriptor rootDescriptor;
     private FeatureType rootType;
     
     private FeatureTableGenerator table;
@@ -69,13 +73,12 @@ public class ComplexFeatureServer {
         SchemaIndex schemaIdx = reader.parse(url);
         typeRegistry.addSchemas(schemaIdx);
         
-        AttributeDescriptor descriptor = typeRegistry
-                .getDescriptor(root, null);
-        rootType = (FeatureType) descriptor.getType();
+        rootDescriptor = typeRegistry.getDescriptor(root, null);
+        rootType = (FeatureType) rootDescriptor.getType();
     }
     
     public void getResource(URL url) throws IOException {
-        Name rootName = rootType.getName();
+        Name rootName = rootDescriptor.getName();
         
         NewXmlComplexFeatureParser featureParser = new NewXmlComplexFeatureParser(
                 url.openStream(),
@@ -86,7 +89,7 @@ public class ComplexFeatureServer {
         table = new FeatureTableGenerator(feature);
         types = table.getFeatureTypeMap();
         
-        printRegisteredSchmea();        
+        printRegisteredSchmea();
     }
     
     public Map<Name, FeatureSource> getFeatureSources() {
@@ -145,6 +148,8 @@ public class ComplexFeatureServer {
                 fc.add(f);
             }
         }
+        it.close();
+        
         return fc;
     }
     
@@ -155,7 +160,7 @@ public class ComplexFeatureServer {
             PropertyType type = p.getType();
             if(type instanceof GeometryType) {
                 if(p.getName().getLocalPart().equalsIgnoreCase(propName)) {
-                    return (Geometry) p;
+                    return (Geometry) p.getValue();
                 }
             }
         }
@@ -165,16 +170,50 @@ public class ComplexFeatureServer {
     public boolean spatialEvaluate(String queryType, Geometry propGeom, Geometry geometry) {
         
         if("Intersects".equalsIgnoreCase(queryType)) {
-           return propGeom.intersects(geometry);
+           return geometry.intersects(propGeom);
         } else if("Contains".equalsIgnoreCase(queryType)) {
-            return propGeom.contains(geometry);
+            return geometry.contains(propGeom);
         }
         
         return false;
     }
     
-    public Feature mapMatching(Point point) {
+    public Feature mapMatching(Point point) throws IOException {
         
+        FeatureSource cellSpacefs = table.getFeatureSource(new NameImpl("http://www.opengis.net/indoorgml/1.0/core","CellSpace"));
+        FeatureCollection result = spatialFilter(cellSpacefs, "Contains", "Geometry3D", point);
+        
+        if(result.size() > 1) {
+            throw new IllegalArgumentException("Invalid FeatureSource. Data is invalid. Mapmaching result should be one.");
+        }
+        
+        FeatureIterator it = result.features();
+        Feature cellspace = null;
+        while(it.hasNext()) {
+            cellspace = it.next();
+        }
+        it.close();
+        
+        if(cellspace == null) {
+            return null;
+        }
+        
+        Feature state = (Feature) getPropertyValue(cellspace, "connects");
+        return state;
+    }
+    
+    public Object getPropertyValue(Feature feature, String localPart) {
+        Collection<? extends Property> values = feature.getValue();
+        for(Iterator<? extends Property> it = values.iterator(); it.hasNext(); ) {
+
+            Property p = it.next();
+            PropertyType type = p.getType();
+
+            if(type.getName().getLocalPart().equalsIgnoreCase(localPart)) {
+                return p.getValue();
+            }
+        }
         return null;
     }
+    
 }
