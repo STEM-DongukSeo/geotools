@@ -29,59 +29,25 @@ import org.opengis.geometry.TransfiniteSet;
  *
  */
 public class Geometry3DOperation {
+        
+        private static OperationResource operationResource = null;
+        
+        private static void init(GeometryImpl gA, GeometryImpl gB, String initFrom) {
+                if (operationResource == null) {
+                        operationResource = new OperationResource(gA, gB, initFrom);
+                }
+        }
 
-        private GeometryImpl gA, gB;
-
-        private Geometry unionGeometry = null;
-
-        private Geometry differenceGeometry = null;
-
-        private Geometry symDifferenceGeometry = null;
-
-        private Geometry intersectionGeometry = null;
-
-        private SFGeometry geometryA = null;
-
-        private SFGeometry geometryB = null;
-
-        private IntersectionMatrix3D tIM = null;
-
-        private SFGeometry intersection = null;
-
-        private SFGeometry union = null;
-
-        private SFGeometry difference = null;
-
-        private boolean calledEquals = false;
-
-        private boolean calledIntersects = false;
-
-        private boolean calledTouches = false;
-
-        private boolean calledContains = false;
-
-        private boolean calledWithin = false;
-
-        private boolean calledCrosses = false;
-
-        private boolean calledOverlaps = false;
-
-        private boolean isEquals = false;
-
-        private boolean isIntersects = false;
-
-        private boolean isTouches = false;
-
-        private boolean isContains = false;
-
-        private boolean isWithin = false;
-
-        private boolean isCrosses = false;
-
-        private boolean isOverlaps = false;
-
+        private static void remove(String removeFrom) {
+                if (operationResource != null
+                                && operationResource.initFrom.equalsIgnoreCase(removeFrom)) {
+                        operationResource = null;
+                }
+        }
 
         /**
+         * *
+         * 
          * @param geom
          * @return ConvexHull of the geometry
          */
@@ -91,25 +57,6 @@ public class Geometry3DOperation {
 
                 return SFCGALConvertor.geometryFromSFCGALGeometry(convex);
         }
-        
-        public Geometry3DOperation(GeometryImpl gA, GeometryImpl gB) {
-                this.gA = gA;
-                this.gB = gB;
-                geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
-                geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
-                intersection = SFAlgorithm.intersection3D(geometryA, geometryB);
-        }
-
-        public IntersectionMatrix3D getIntersectionMatrix() {
-                if (tIM == null) {
-                        try {
-                                tIM = RelateOp3D.relate(gA, gB);
-                        } catch (Exception e) {
-                                e.printStackTrace();
-                        }
-                }
-                return tIM;
-        }
 
         /**
          * Compute the distance between two geometries using distance3D operation of SFCGAL
@@ -118,188 +65,247 @@ public class Geometry3DOperation {
          * @param gB
          * @return distance between two geometry objects
          */
-        public double distance() {
-                return SFAlgorithm.distance3D(geometryA, geometryB);
+        public static double distance(GeometryImpl gA, GeometryImpl gB) {
+                init(gA, gB, "distance");
+                double distance = SFAlgorithm.distance3D(operationResource.geometryA,
+                                operationResource.geometryB);
+                remove("distance");
+
+                return distance;
         }
 
-
-        public boolean relate(String intersectionPatternMatrix) {
-                IntersectionMatrix3D tIM = getIntersectionMatrix();
+        public static boolean relate(GeometryImpl gA, GeometryImpl gB, String intersectionPatternMatrix) {
+                init(gA, gB, "relate");
+                IntersectionMatrix3D tIM = operationResource.getIntersectionMatrix();
+                remove("relate");
                 return tIM.matches(intersectionPatternMatrix);
         }
 
         /**
          * @return TRUE, if the gA is equal to gB
          */
-        public boolean equals() {
-                if (!calledEquals) {
-                        calledEquals = true;
-                        isEquals = geometryA.equals(geometryB);
-                }
-                return isEquals;
+        public static boolean equals(GeometryImpl gA, GeometryImpl gB) {
+                init(gA, gB, "equals");
+                boolean result = operationResource.geometryA.equals(operationResource.geometryB);
+                remove("equals");
+
+                return result;
         }
 
         /**
          * @return TRUE, if the gA is disjoint with gB
          */
-        public boolean disjoint() {
-                if (!calledIntersects) {
-                        calledIntersects = true;
-                        isIntersects = SFAlgorithm.intersects3D(geometryA, geometryB);
-                }
-                return !isIntersects;
+        public static boolean disjoint(GeometryImpl gA, GeometryImpl gB) {
+                return !intersects(gA, gB);
         }
 
         /**
          * @return TRUE, if the gA is intersect with gB
          */
-        public boolean intersects() {
-                return !this.intersects();
+        public static boolean intersects(GeometryImpl gA, GeometryImpl gB) {
+                init(gA, gB, "intersects");
+                boolean result = SFAlgorithm.intersects3D(operationResource.geometryA,
+                                operationResource.geometryB);
+                remove("intersects");
+
+                return result;
         }
 
         /**
          * @return TRUE, if the gA touches gB.
          */
-        public boolean touches() {
-                if (!calledTouches) {
-                        calledTouches = true;
-                        IntersectionMatrix3D tIM = getIntersectionMatrix();
+        public static boolean touches(GeometryImpl gA, GeometryImpl gB) {
+                init(gA, gB, "touches");
+                IntersectionMatrix3D tIM = operationResource.getIntersectionMatrix();
 
-                        isTouches = false;
-                        if (tIM.matches("FT**") || tIM.matches("F*T*") || tIM.matches("F**T")) {
-                                isTouches = true;
-                        }
+                boolean isTouches = false;
+                if (tIM.matches("FT**") || tIM.matches("F*T*") || tIM.matches("F**T")) {
+                        isTouches = true;
                 }
+                remove("touches");
+
                 return isTouches;
         }
 
         /**
          * @return TRUE, if the gA is spatially contain gB.
          */
-        public boolean contains() {
-                if (!calledContains) {
-                        calledContains = true;
-                        isContains = !equals() && !touches()
-                                        && SFAlgorithm.covers3D(geometryA, geometryB);
-                }
-                return isContains;
+        public static boolean contains(GeometryImpl gA, GeometryImpl gB) {
+                init(gA, gB, "contains");
+                SFGeometry geometryA = operationResource.geometryA;
+                SFGeometry geometryB = operationResource.geometryB;
+                boolean result = !geometryA.equals(geometryB) && !touches(gA, gB)
+                                && SFAlgorithm.covers3D(geometryA, geometryB);
+                remove("contains");
+
+                return result;
         }
 
         /**
          * @return TRUE, if the gA is spatially within gB.
          */
-        public boolean within() {
-                if (!calledWithin) {
-                        calledWithin = true;
-                        isWithin = !equals() && !touches()
-                                        && SFAlgorithm.covers3D(geometryB, geometryA);
-                }
-                return isWithin;
+        public static boolean within(GeometryImpl gA, GeometryImpl gB) {
+                init(gA, gB, "within");
+                SFGeometry geometryA = operationResource.geometryA;
+                SFGeometry geometryB = operationResource.geometryB;
+                boolean result = !geometryA.equals(geometryB) && !touches(gB, gA)
+                                && SFAlgorithm.covers3D(geometryB, geometryA);
+                remove("within");
+
+                return result;
         }
 
         /**
          * @return TRUE, if the gA overlaps with gB.
          */
-        public boolean overlaps() {
-                if (!calledOverlaps) {
-                        calledOverlaps = true;
-                        if (equals())
-                                isOverlaps = false;
-                        else if (!intersection.isEmpty() && !contains() && !within() && !touches()) {
-                                if (geometryA.dimension() == 1 && geometryB.dimension() == 1) {
-                                        if (!intersection.isEmpty()
-                                                        && intersection.dimension() == 1) {
-                                                isOverlaps = true;
-                                        }
-                                } else
-                                        isOverlaps = true;
-                        }
+        public static boolean overlaps(GeometryImpl gA, GeometryImpl gB) {
+                init(gA, gB, "overlaps");
+                SFGeometry geometryA = operationResource.geometryA;
+                SFGeometry geometryB = operationResource.geometryB;
+                SFGeometry intersection = operationResource.getIntersection();
+                boolean result = false;
+                
+                if (equals(gA, gB))
+                        result = false;
+                else if (!intersection.isEmpty() && !contains(gA, gB) && !within(gA, gB)
+                                && !touches(gA, gB)) {
+                        if (geometryA.dimension() == 1 && geometryB.dimension() == 1) {
+                                if (!intersection.isEmpty() && intersection.dimension() == 1) {
+                                        result = true;
+                                }
+                        } else
+                                result = true;
                 }
-                return isOverlaps;
+                remove("overlaps");
+
+                return result;
         }
 
         /**
          * @return TRUE, if the gA crosses with gB.
          */
-        public boolean crosses() {
-                if (!calledCrosses) {
-                        calledCrosses = true;
+        public static boolean crosses(GeometryImpl gA, GeometryImpl gB) {
+                init(gA, gB, "crosses");
+                SFGeometry geometryA = operationResource.geometryA;
+                SFGeometry geometryB = operationResource.geometryB;
+                SFGeometry intersection = operationResource.getIntersection();
+                boolean result = false;
+                
+                if (geometryA.dimension() == 1 && geometryB.dimension() == 1) {
+                        IntersectionMatrix3D tIM = operationResource.getIntersectionMatrix();
 
-                        if (geometryA.dimension() == 1 && geometryB.dimension() == 1) {
-                                IntersectionMatrix3D tIM = getIntersectionMatrix();
-
-                                if (tIM.matches("0***")) {
-                                        isCrosses = true;
-                                }
-
-                                return isCrosses;
-                        } else if (!intersection.isEmpty() && !touches() && !contains()
-                                        && !within()) {
-                                isCrosses = true;
+                        if (tIM.matches("0***")) {
+                                result = true;
                         }
+
+                        return result;
+                } else if (!intersection.isEmpty() && !touches(gA, gB) && !contains(gA, gB)
+                                && !within(gA, gB)) {
+                        result = true;
                 }
-                return isCrosses;
+                remove("crosses");
+                
+                return result;
         }
 
         /**
          * Compute the union between two geometries using union3D operation of SFCGAL
+         * 
          * @return union between two geometry objects
          */
-        public TransfiniteSet union() {
-                if (union == null) {
-                        union = SFAlgorithm.union3D(geometryA, geometryB);
-                }
-                if (unionGeometry == null) {
+        public static TransfiniteSet union(GeometryImpl gA, GeometryImpl gB) {
+                init(gA, gB, "union");
+                SFGeometry geometryA = operationResource.geometryA;
+                SFGeometry geometryB = operationResource.geometryB;
+                SFGeometry union  = SFAlgorithm.union3D(geometryA, geometryB);
 
-                        unionGeometry = SFCGALConvertor.geometryFromSFCGALGeometry(union);
-                }
-                return unionGeometry;
+                remove("union");
+                return SFCGALConvertor.geometryFromSFCGALGeometry(union);
         }
 
         /**
          * Compute the union between two geometries using intersection3D operation of SFCGAL
+         * 
          * @return intersection between two geometry objects
          */
-        public TransfiniteSet intersection() {
-                if (intersectionGeometry == null) {
-                        intersectionGeometry = SFCGALConvertor
-                                        .geometryFromSFCGALGeometry(intersection);
-                }
-                return intersectionGeometry;
+        public static TransfiniteSet intersection(GeometryImpl gA, GeometryImpl gB) {
+                init(gA, gB, "intersection");
+                SFGeometry intersection = operationResource.getIntersection();
+
+                remove("intersection");
+                return SFCGALConvertor.geometryFromSFCGALGeometry(intersection);
         }
 
         /**
          * Compute the difference between two geometries using difference3D operation of SFCGAL
+         * 
          * @return difference between two geometry objects
          */
-        public TransfiniteSet difference() {
-                if (difference == null) {
-                        difference = SFAlgorithm.difference3D(geometryA, geometryB);
-                }
-                if (differenceGeometry == null) {
+        public static TransfiniteSet difference(GeometryImpl gA, GeometryImpl gB) {
+                init(gA, gB, "difference");
+                SFGeometry geometryA = operationResource.geometryA;
+                SFGeometry geometryB = operationResource.geometryB;
+                SFGeometry difference  = SFAlgorithm.difference3D(geometryA, geometryB);
 
-                        differenceGeometry = SFCGALConvertor.geometryFromSFCGALGeometry(difference);
-                }
-                return differenceGeometry;
+                return SFCGALConvertor.geometryFromSFCGALGeometry(difference);
         }
 
         /**
          * Compute the symmetric Difference between two geometries using 3D operations of SFCGAL
+         * 
          * @return symmetric Difference between two geometry objects
          */
-        public TransfiniteSet symmetricDifference() {
-                if (union == null) {
-                        union = SFAlgorithm.union3D(geometryA, geometryB);
+        public static TransfiniteSet symmetricDifference(GeometryImpl gA, GeometryImpl gB) {
+                init(gA, gB, "symmetricDifference");
+                SFGeometry geometryA = operationResource.geometryA;
+                SFGeometry geometryB = operationResource.geometryB;
+                SFGeometry union  = SFAlgorithm.union3D(geometryA, geometryB);
+                SFGeometry intersection = operationResource.getIntersection();
+                SFGeometry symDifference  = SFAlgorithm.difference3D(union, intersection);
+
+                remove("symmetricDifference");
+                return SFCGALConvertor.geometryFromSFCGALGeometry(symDifference);
+        }
+
+        private static class OperationResource {
+                private String initFrom = null;
+
+                private GeometryImpl gA, gB;
+
+                private SFGeometry geometryA = null;
+
+                private SFGeometry geometryB = null;
+
+                private IntersectionMatrix3D tIM = null;
+
+                private SFGeometry intersection = null;
+
+                public OperationResource(GeometryImpl gA, GeometryImpl gB, String initFrom) {
+                        this.initFrom = initFrom;
+                        this.gA = gA;
+                        this.gB = gB;
+                        geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
+                        geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
                 }
-                if (difference == null) {
-                        difference = SFAlgorithm.difference3D(geometryA, geometryB);
+
+                public IntersectionMatrix3D getIntersectionMatrix() {
+                        if (tIM == null) {
+                                try {
+                                        tIM = RelateOp3D.relate(gA, gB);
+                                } catch (Exception e) {
+                                        e.printStackTrace();
+                                }
+                        }
+                        return tIM;
                 }
-                if (symDifferenceGeometry == null) {
-                        SFGeometry symDifference = SFAlgorithm.difference3D(union, intersection);
-                        symDifferenceGeometry = SFCGALConvertor
-                                        .geometryFromSFCGALGeometry(symDifference);
+
+                public SFGeometry getIntersection() {
+                        if (intersection == null) {
+                                intersection = SFAlgorithm.intersection3D(geometryA, geometryB);
+                        }
+                        return intersection;
                 }
-                return symDifferenceGeometry;
         }
 
 }
+>>>>>>> refs/remotes/origin/parsing_3d
