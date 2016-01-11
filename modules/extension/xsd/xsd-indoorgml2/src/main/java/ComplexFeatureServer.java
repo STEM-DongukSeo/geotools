@@ -87,7 +87,7 @@ public class ComplexFeatureServer {
         rootType = (FeatureType) rootDescriptor.getType();
     }
     
-    public void getResource(URL url) throws IOException {
+    public void getResource(URL url) throws IOException, NullPointerException {
         Name rootName = rootDescriptor.getName();
         
         NewXmlComplexFeatureParser featureParser = new NewXmlComplexFeatureParser(
@@ -96,6 +96,11 @@ public class ComplexFeatureServer {
                         rootName.getLocalPart()));
         
         Feature feature = featureParser.parse();
+        
+        if(feature == null) {
+            throw new NullPointerException("feature parsing failed");
+        }
+        
         table = new FeatureTableGenerator(feature);
         types = table.getFeatureTypeMap();
     }
@@ -162,23 +167,35 @@ public class ComplexFeatureServer {
         
       
         int error = 0;
+        int result = 0;
             while(it.hasNext()) {
                 Feature f = it.next();
                 try { 
                     GeometryAttribute ga = getGeometryfromPropertyName(f, propName);
                     Geometry g = (Geometry) ga.getValue();
+                    
+                    
+                    if(f.getIdentifier().getID().equalsIgnoreCase("C98")) {
+                        System.out.println(g);
+                    }
+                    
+                    
                     if(spatialEvaluate(queryType, g, geometry)) {
                         fc.add(f);
+                        result++;
                     }
+  
                 } catch(Exception e) {
                     System.out.println(f.getIdentifier().getID());
                     error++;
                 }
+                
             }
             it.close();
         
             System.out.println("CellSpace 갯수 : " + c.size());
             System.out.println("Error 갯수 : " + error);
+            System.out.println("Result 갯수 : " + result);
             
             
         return fc;
@@ -231,9 +248,9 @@ public class ComplexFeatureServer {
             return propGeom.contains(geometry);
         } else if("Equals".equalsIgnoreCase(queryType)) {
             return propGeom.equals(geometry);
+        } else {
+            throw new UnsupportedOperationException(queryType + " query is not supported");
         }
-        
-        return false;
     }
     
     public Feature mapMatching(Point point) throws IOException {
