@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema targetNamespace="http://www.geotools.org/route" 
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+    xmlns:route="http://www.geotools.org/route" 
+    xmlns:gml="http://www.opengis.net/gml"
+    elementFormDefault="qualified">
+    
+    <xsd:import namespace="http://www.opengis.net/gml" schemaLocation="http://schemas.opengis.net/gml/3.1.1/base/gml.xsd"/>
+    
+    <xsd:complexType name="RouteFeatureType">
+        <xsd:complexContent>
+            <xsd:extension base="gml:AbstractFeatureType">
+                <xsd:sequence>
+                    <xsd:element name="geom" type="gml:LineStringPropertyType"/>
+                    <xsd:element name="count" type="xsd:int" nillable="true"/>
+                    <xsd:element name="startRouteNode" type="xsd:string" nillable="true"/>          
+                    <xsd:element name="endRouteNode" type="xsd:string" nillable="true"/>
+                </xsd:sequence>
+            </xsd:extension>
+        </xsd:complexContent>
+    </xsd:complexType>
+    <xsd:element name="RouteFeature" type="route:RouteFeatureType" substitutionGroup="gml:_Feature"/>
+    
+    <xsd:complexType name="RouteFeatureCollectionType">
+        <xsd:complexContent>
+            <xsd:extension base="gml:AbstractFeatureCollectionType"/>
+        </xsd:complexContent>
+    </xsd:complexType>
+    <xsd:element name="RouteFeatureCollection" type="route:RouteFeatureCollectionType"/>
+    
+</xsd:schema>
