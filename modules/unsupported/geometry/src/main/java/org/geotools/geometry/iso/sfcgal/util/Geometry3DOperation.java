@@ -103,10 +103,19 @@ public class Geometry3DOperation {
          * @return TRUE, if the gA is intersect with gB
          */
         public static boolean intersects(GeometryImpl gA, GeometryImpl gB) {
-                init(gA, gB, "intersects");
-                boolean result = SFAlgorithm.intersects3D(operationResource.geometryA,
-                                operationResource.geometryB);
-                remove("intersects");
+                SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry((Geometry) gA);
+                SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry((Geometry) gB);
+                
+                return intersects(geometryA, geometryB);
+        }
+
+        /**
+         * @param geometryA
+         * @param geometryB
+         * @return
+         */
+        private static boolean intersects(SFGeometry gA, SFGeometry gB) {
+                boolean result = SFAlgorithm.intersects3D(gA, gB);
 
                 return result;
         }
