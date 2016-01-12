@@ -234,9 +234,14 @@ public class ComplexFeatureServer {
     }
     
     public Geometry geometryFromWKT(String wkt) throws ParseException {
-        CoordinateReferenceSystem crs = builder.getCoordinateReferenceSystem();
-        PositionFactory pf = builder.getPositionFactory();
-        WKTReader wktReader = new WKTReader( crs, pf );
+        //CoordinateReferenceSystem crs = builder.getCoordinateReferenceSystem();
+        //PositionFactory pf = builder.getPositionFactory();
+
+        Hints hints = GeoTools.getDefaultHints();
+        hints.put(Hints.CRS, DefaultGeographicCRS.WGS84_3D);
+        hints.put(Hints.GEOMETRY_VALIDATE, false);
+       
+        WKTReader wktReader = new WKTReader(hints);
         return wktReader.read(wkt);
     }
     
@@ -255,7 +260,7 @@ public class ComplexFeatureServer {
     
     public Feature mapMatching(Point point) throws IOException {
         FeatureSource cellSpacefs = table.getFeatureSource(new NameImpl("http://www.opengis.net/indoorgml/1.0/core","CellSpaceType"));
-        FeatureCollection result = spatialFilter(cellSpacefs, "Contains", "Geometry3D", point);
+        FeatureCollection result = spatialFilter(cellSpacefs, "Intersects", "Geometry3D", point);
         
         /*if(result.size() > 1) {
             throw new IllegalArgumentException("Invalid FeatureSource. Data is invalid. Mapmaching result should be one.");
@@ -291,6 +296,32 @@ public class ComplexFeatureServer {
         it.close();
         
         return state;
+    }
+    
+    public Feature mapMatchingTransition(Point pointA, Point pointB) throws IOException {
+        FeatureSource transitionfs = table.getFeatureSource(new NameImpl("http://www.opengis.net/indoorgml/1.0/core","Transition"));
+        FeatureCollection resultA = spatialFilter(transitionfs, "Intersects", "geometry", pointA);
+        FeatureCollection resultB = spatialFilter(transitionfs, "Intersects", "geometry", pointB);
+        
+        /*if(result.size() > 1) {
+            throw new IllegalArgumentException("Invalid FeatureSource. Data is invalid. Mapmaching result should be one.");
+        }*/
+        
+        FeatureIterator itA = resultA.features();
+        Feature result = null;
+        while(itA.hasNext()) {
+        	Feature transitionA = itA.next();
+        	
+        	FeatureIterator itB = resultB.features();
+        	while(itB.hasNext()){
+        		Feature transitionB = itB.next();
+        		if(transitionA.getIdentifier().getID().equals(transitionB.getIdentifier().getID())){
+        			result = transitionA;
+        		}
+        	}
+        }
+        
+        return result;
     }
     
     public Object getPropertyValue(Feature feature, String localPart) {

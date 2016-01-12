@@ -48,7 +48,7 @@ public class RoutingDialog {
 	private ComplexFeatureServer server = null;
 	
 	public RoutingDialog(JFrame jFrame, ComplexFeatureServer server) throws IOException{
-		jDialog  = new JDialog(jFrame, "MapMatching used Graph Module");
+		jDialog  = new JDialog(jFrame, "Routing used Graph Module");
 		this.server = server;
 		
 		routingResult.setColumns(25);
@@ -126,9 +126,9 @@ public class RoutingDialog {
         	Node node = ni.next();
         	Point p = (Point) node.getObject();
         	if(p.equals(startStateGeometty))
-        		sourceNode = node;
-        	if(p.equals(endStateGeometty))
         		destinationNode = node;
+        	if(p.equals(endStateGeometty))
+        		sourceNode = node;
         }
         
         EdgeWeighter weighter = new DijkstraIterator.EdgeWeighter() {
@@ -146,17 +146,18 @@ public class RoutingDialog {
         Path path = pf.getPath( destinationNode );
         
         String resultPath = "[";
-        System.out.print("[");
-        for(int i = 0; i < path.size(); i++){
-        	Node node = (Node) path.get(i);
-        	Point p = (Point) node.getObject();
-        	Feature f = server.mapMatchingState(p);
-        	resultPath += f.getIdentifier().getID() + ",";
-        	System.out.print(f.getIdentifier().getID());
-        	System.out.print(" , ");
+        
+        for(int i = 0; i < path.size() - 1; i++){
+        	Node nodeA= (Node) path.get(i);
+        	Node nodeB= (Node) path.get(i+1);
+        	Point pA = (Point) nodeA.getObject();
+        	Point pB = (Point) nodeB.getObject();
+        	Feature f = server.mapMatchingTransition(pA, pB);
+        	resultPath += f.getIdentifier().getID();
+        	if(i != path.size() - 2)
+        		resultPath += ",";
         }
         resultPath += "]";
-        System.out.print("]");
         
         return resultPath;
 	}

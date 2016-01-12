@@ -28,6 +28,7 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -251,6 +252,12 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
         setResizable(true);
         setVisible(true);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        
+        TableColumnModel tcm = userTable.getColumnModel();
+        tcm.getColumn(0).setPreferredWidth(20);
+        tcm.getColumn(1).setPreferredWidth(20);
+        tcm.getColumn(2).setPreferredWidth(200);
+        tcm.getColumn(3).setPreferredWidth(250);
     }
 
 	@SuppressWarnings({ "rawtypes" })
@@ -372,6 +379,12 @@ public class ISA_Sample extends JFrame implements TreeSelectionListener {
 	            	if(sname.length >= 3){
 	            		FeatureSource fs = server.getFeatureSource(new NameImpl(sname[0] + ":" + sname[1],sname[2]));
 	            		addFeatureCollection(fs.getFeatures());
+	            		
+	            		TableColumnModel tcm = userTable.getColumnModel();
+	                    tcm.getColumn(0).setPreferredWidth(20);
+	                    tcm.getColumn(1).setPreferredWidth(20);
+	                    tcm.getColumn(2).setPreferredWidth(200);
+	                    tcm.getColumn(3).setPreferredWidth(250);
 	            	}
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block

@@ -34,7 +34,7 @@ public class IntersectDialog {
 	private ComplexFeatureServer server = null;
 	
 	public IntersectDialog(JFrame jFrame, ComplexFeatureServer server) throws IOException{
-		jDialog  = new JDialog(jFrame, "Intersection Query");
+		jDialog  = new JDialog(jFrame, "3D Intersection Query");
 		this.server = server;
 		
 		queryGeometryWKT.setColumns(35);
@@ -85,7 +85,8 @@ public class IntersectDialog {
 		while(fi.hasNext()){
 			Feature f = fi.next();
 			intersectResult += f.getIdentifier().getID();
-			intersectResult += ", ";
+			if(fi.hasNext())
+				intersectResult += ", ";
 		}
 		return intersectResult;
 	}

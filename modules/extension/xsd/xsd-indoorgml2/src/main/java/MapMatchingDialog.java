@@ -36,7 +36,7 @@ public class MapMatchingDialog implements ActionListener{
 	private ComplexFeatureServer server = null;
 	
 	public MapMatchingDialog(JFrame jFrame, ComplexFeatureServer server) throws IOException{
-		jDialog  = new JDialog(jFrame, "MapMatching used Graph Module");
+		jDialog  = new JDialog(jFrame, "MapMatching used 3D contain operation");
 		this.server = server;
 		
 		queryPointWKT.setColumns(35);
@@ -85,7 +85,7 @@ public class MapMatchingDialog implements ActionListener{
 		jDialog.add(northPanel, BorderLayout.NORTH);
 		jDialog.add(centerPanel, BorderLayout.CENTER);
 		
-		jDialog.setBounds(100, 100, 500, 90);
+		jDialog.setBounds(100, 100, 560, 90);
 	}
 
 	protected String getMapMatchingResult(String pointWKT) throws ParseException, IOException {
