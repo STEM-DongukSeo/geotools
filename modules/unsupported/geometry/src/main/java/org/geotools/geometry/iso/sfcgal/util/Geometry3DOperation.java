@@ -126,20 +126,43 @@ public class Geometry3DOperation {
 
                 return isTouches;
         }
+        
+
+        /**
+         * @param gA
+         * @param gB
+         * @return
+         */
+        private static boolean touches(SFGeometry gA, SFGeometry gB) {
+                IntersectionMatrix3D tIM = null;
+                try {
+                        tIM = RelateOp3D.relate(gA, gB);
+                } catch (Exception e) {
+                        e.printStackTrace();
+                }
+                boolean isTouches = false;
+                if (tIM.matches("FT**") || tIM.matches("F*T*") || tIM.matches("F**T")) {
+                        isTouches = true;
+                }
+                return false;
+        }
 
         /**
          * @return TRUE, if the gA is spatially contain gB.
          */
-        public static boolean contains(GeometryImpl gA, GeometryImpl gB) {
-                init(gA, gB, "contains");
-                SFGeometry geometryA = operationResource.geometryA;
-                SFGeometry geometryB = operationResource.geometryB;
-                boolean result = !geometryA.equals(geometryB) && !touches(gA, gB)
-                                && SFAlgorithm.covers3D(geometryA, geometryB);
-                remove("contains");
+        public static boolean contains(GeometryImpl gA, GeometryImpl gB) {                
+                SFGeometry geometryA = SFCGALConvertor.geometryToSFCGALGeometry((Geometry) gA);
+                SFGeometry geometryB = SFCGALConvertor.geometryToSFCGALGeometry((Geometry) gB);
 
+                return contains(geometryA, geometryB);
+        }
+        
+        private static boolean contains(SFGeometry gA, SFGeometry gB) {
+                boolean result = !gA.equals(gB) && !touches(gA, gB)
+                                && SFAlgorithm.covers3D(gA, gB);
                 return result;
         }
+
 
         /**
          * @return TRUE, if the gA is spatially within gB.
@@ -246,7 +269,7 @@ public class Geometry3DOperation {
                 SFGeometry geometryA = operationResource.geometryA;
                 SFGeometry geometryB = operationResource.geometryB;
                 SFGeometry difference  = SFAlgorithm.difference3D(geometryA, geometryB);
-
+                remove("difference");
                 return SFCGALConvertor.geometryFromSFCGALGeometry(difference);
         }
 
@@ -291,7 +314,7 @@ public class Geometry3DOperation {
                 public IntersectionMatrix3D getIntersectionMatrix() {
                         if (tIM == null) {
                                 try {
-                                        tIM = RelateOp3D.relate(gA, gB);
+                                        //tIM = RelateOp3D.relate(gA, gB);
                                 } catch (Exception e) {
                                         e.printStackTrace();
                                 }

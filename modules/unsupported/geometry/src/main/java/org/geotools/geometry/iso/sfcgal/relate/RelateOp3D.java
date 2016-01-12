@@ -17,13 +17,14 @@
 package org.geotools.geometry.iso.sfcgal.relate;
 
 import org.geotools.geometry.iso.root.GeometryImpl;
+import org.geotools.geometry.iso.sfcgal.wrapper.SFGeometry;
 
 /**
  * @author Donguk Seo
  *
  */
 public class RelateOp3D {
-        public static IntersectionMatrix3D relate(GeometryImpl a, GeometryImpl b) {
+        public static IntersectionMatrix3D relate(SFGeometry a, SFGeometry b) {
                 RelateOp3D relOp = new RelateOp3D(a, b);
                 IntersectionMatrix3D im = relOp.getIntersectionMatrix();
                 return im;
@@ -31,7 +32,7 @@ public class RelateOp3D {
 
         private RelateComputer3D relate;
 
-        RelateOp3D(GeometryImpl gA, GeometryImpl gB) {
+        RelateOp3D(SFGeometry gA, SFGeometry gB) {
                 this.relate = new RelateComputer3D(gA, gB);
         }
 

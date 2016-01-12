@@ -63,9 +63,9 @@ public class RelateComputer3D {
          * @param gA
          * @param gB
          */
-        public RelateComputer3D(GeometryImpl gA, GeometryImpl gB) {
-                geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
-                geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
+        public RelateComputer3D(SFGeometry gA, SFGeometry gB) {
+                geometryA = gA;
+                geometryB = gB;
                 boundaryA = getBoundary(geometryA);
                 boundaryB = getBoundary(geometryB);
 
