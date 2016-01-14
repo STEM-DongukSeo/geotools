@@ -146,12 +146,12 @@ public class Geometry3DOperation {
                 IntersectionMatrix3D tIM = null;
                 try {
                         tIM = RelateOp3D.relate(gA, gB);
+                        boolean isTouches = false;
+                        if (tIM.matches("FT**") || tIM.matches("F*T*") || tIM.matches("F**T")) {
+                                isTouches = true;
+                        }
                 } catch (Exception e) {
                         e.printStackTrace();
-                }
-                boolean isTouches = false;
-                if (tIM.matches("FT**") || tIM.matches("F*T*") || tIM.matches("F**T")) {
-                        isTouches = true;
                 }
                 return false;
         }
