@@ -26,13 +26,15 @@ import org.opengis.geometry.Geometry;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
- * The GeometryAttribute Implementation providing geometry model based on ISO19107
+ * The GeometryAttribute Implementation providing geometry model based on ISO19107 specification.
  * @author HyungGyu Ryoo (Pusan National University)
  *
  */
 public class ISOGeometryAttributeImpl extends AttributeImpl implements GeometryAttribute {
     
     protected BoundingBox bounds;
+    
+    protected Geometry isoGeometry;
     
     public ISOGeometryAttributeImpl(Object content, GeometryDescriptor descriptor, Identifier id) {
         super(content, descriptor, id);
@@ -59,7 +61,7 @@ public class ISOGeometryAttributeImpl extends AttributeImpl implements GeometryA
 
     @Override
     public Object getValue() {
-        return (Geometry) super.getValue();
+        return super.getValue();
     }
 
     @Override
