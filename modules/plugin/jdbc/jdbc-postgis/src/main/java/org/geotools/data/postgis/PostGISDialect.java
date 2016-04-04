@@ -2,7 +2,7 @@
  *    GeoTools - The Open Source Java GIS Toolkit
  *    http://geotools.org
  *
- *    (C) 2002-2015, Open Source Geospatial Foundation (OSGeo)
+ *    (C) 2002-2016, Open Source Geospatial Foundation (OSGeo)
  *
  *    This library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -153,6 +153,10 @@ public class PostGISDialect extends BasicSQLDialect {
 
     static final Version V_2_0_0 = new Version("2.0.0");
 
+    static final Version V_2_1_0 = new Version("2.1.0");
+
+    static final Version V_2_2_0 = new Version("2.2.0");
+
     static final Version PGSQL_V_9_0 = new Version("9.0");
     
     static final Version PGSQL_V_9_1 = new Version("9.1");
@@ -227,6 +231,7 @@ public class PostGISDialect extends BasicSQLDialect {
     public void initializeConnection(Connection cx) throws SQLException {
         super.initializeConnection(cx);
         getPostgreSQLVersion(cx);
+        getVersion(cx);
     }
 
     @Override
@@ -304,7 +309,7 @@ public class PostGISDialect extends BasicSQLDialect {
                 Boolean.TRUE.equals(hints.get(Hints.FEATURE_2D));
 
             if (force2D) {
-                sql.append("encode(ST_AsBinary(ST_Force_2D(");
+                sql.append("encode(ST_AsBinary(" + getForce2DFunction() + "(");
                 encodeColumnName(prefix, gatt.getLocalName(), sql);
                 sql.append(")),'base64')");
             } else {
@@ -321,6 +326,10 @@ public class PostGISDialect extends BasicSQLDialect {
         if(!isSimplifyEnabled()) {
             super.encodeGeometryColumnSimplified(gatt, prefix, srid, sql, distance);
         } else {
+            // add preserveCollapsed argument if it's supported (PostGIS 2.2+)
+            // http://postgis.net/docs/manual-2.2/ST_Simplify.html
+            String preserveCollapsed = version.compareTo(V_2_2_0) >= 0 ? ", true" : "";
+
             boolean geography = "geography".equals(gatt.getUserData().get(
                     JDBCDataStore.JDBC_NATIVE_TYPENAME));
     
@@ -330,9 +339,9 @@ public class PostGISDialect extends BasicSQLDialect {
                 sql.append("),'base64')");
             } else {
                 if (NON_CURVED_GEOMETRY_CLASSES.contains(gatt.getType().getBinding())) {
-                    sql.append("encode(ST_AsBinary(ST_Simplify(ST_Force_2D(");
+                    sql.append("encode(ST_AsBinary(ST_Simplify(" + getForce2DFunction() + "(");
                     encodeColumnName(prefix, gatt.getLocalName(), sql);
-                    sql.append("), " + distance + ")),'base64')");
+                    sql.append("), " + distance + preserveCollapsed + ")),'base64')");
                 } else {
                     // we can have curves mixed in
                     sql.append("encode(ST_AsBinary(");
@@ -341,9 +350,9 @@ public class PostGISDialect extends BasicSQLDialect {
                     sql.append(") THEN ");
                     encodeColumnName(prefix, gatt.getLocalName(), sql);
                     sql.append(" ELSE ");
-                    sql.append("ST_Simplify(ST_Force_2D(");
+                    sql.append("ST_Simplify(" + getForce2DFunction() + "(");
                     encodeColumnName(prefix, gatt.getLocalName(), sql);
-                    sql.append("), " + distance + ") END),'base64')");
+                    sql.append("), " + distance + preserveCollapsed + ") END),'base64')");
                 }
 
             }
@@ -353,7 +362,7 @@ public class PostGISDialect extends BasicSQLDialect {
     @Override
     public void encodeGeometryEnvelope(String tableName, String geometryColumn,
             StringBuffer sql) {
-        sql.append("ST_AsText(ST_Force_2D(ST_Envelope(");
+        sql.append("ST_AsText(" + getForce2DFunction() + "(ST_Envelope(");
         sql.append("ST_Extent(\"" + geometryColumn + "\"::geometry))))");
     }
     
@@ -383,7 +392,8 @@ public class PostGISDialect extends BasicSQLDialect {
                 if (att instanceof GeometryDescriptor) {
                     // use estimated extent (optimizer statistics)
                     StringBuffer sql = new StringBuffer();
-                    sql.append("select ST_AsText(ST_force_2d(ST_Envelope(ST_Estimated_Extent('");
+                    sql.append("select ST_AsText(" + getForce2DFunction() + "(ST_Envelope("
+                            + getEstimatedExtentFunction() + "('");
                     if(schema != null) {
                         sql.append(schema);
                         sql.append("', '");
@@ -412,7 +422,8 @@ public class PostGISDialect extends BasicSQLDialect {
             if(savePoint != null) {
                 cx.rollback(savePoint);
             }
-            LOGGER.log(Level.WARNING, "Failed to use ST_Estimated_Extent, falling back on envelope aggregation", e);
+            LOGGER.log(Level.WARNING, "Failed to use " + getEstimatedExtentFunction()
+                    + ", falling back on envelope aggregation", e);
             return null;
         } finally {
             if(savePoint != null) {
@@ -653,7 +664,7 @@ public class PostGISDialect extends BasicSQLDialect {
                 } catch(SQLException e) {
                     LOGGER.log(Level.WARNING, "Failed to retrieve information about " 
                             + schemaName + "." + tableName + "."  + columnName 
-                            + " from the geometry_columns table, checking geometry_columns instead", e);
+                            + " from the geography_columns table, checking geometry_columns instead", e);
                 } finally {
                     dataStore.closeSafe(result);
                 }
@@ -680,29 +691,55 @@ public class PostGISDialect extends BasicSQLDialect {
             } finally {
                 dataStore.closeSafe(result);
             }
-            
-            // fall back on inspection of the first geometry, assuming uniform srid (fair assumption
-            // an unpredictable srid makes the table un-queriable)
-            if(dimension == null) {
-                String sqlStatement = "SELECT DIMENSION(\"" + columnName + "\") " +
-                               "FROM \"" + schemaName + "\".\"" + tableName + "\" " +
-                               "WHERE " + columnName + " IS NOT NULL " +
-                               "LIMIT 1";
-                result = statement.executeQuery(sqlStatement);
-                if (result.next()) {
-                    dimension = result.getInt(1);
-                }
-            }
         } finally {
             dataStore.closeSafe(result);
             dataStore.closeSafe(statement);
         }
-        
+
+        // fall back on inspection of the first geometry, assuming uniform srid (fair assumption
+        // an unpredictable srid makes the table un-queriable)
+        if(dimension == null) {
+            dimension = getDimensionFromFirstGeo(schemaName, tableName, columnName, cx);
+        }
+
         if(dimension == null) {
             dimension = 2;
         }
 
         return dimension;
+    }
+
+    protected Integer getDimensionFromFirstGeo(String schemaName, String tableName, String columnName,
+            Connection cx) throws SQLException {
+
+        // If PostGIS >= 2.0.0, use ST_DIMENSION
+        // http://postgis.net/docs/ST_Dimension.html
+        // If PostGIS < 2.0.0, use DIMENSION
+        String dimFunction = getVersion(cx).compareTo(V_2_0_0) >= 0 ? "ST_DIMENSION" : "DIMENSION";
+
+        Statement statement = null;
+        ResultSet result = null;
+        try {
+            // cast column to a geometry so this will work on both geometry and geography columns
+            String sqlStatement = "SELECT " + dimFunction + "(\"" + columnName + "\"::geometry) " +
+                    "FROM \"" + schemaName + "\".\"" + tableName + "\" " +
+                    "WHERE " + columnName + " IS NOT NULL " +
+                    "LIMIT 1";
+            statement = cx.createStatement();
+            result = statement.executeQuery(sqlStatement);
+            if (result.next()) {
+                return result.getInt(1);
+            }
+        } catch(SQLException e) {
+            LOGGER.log(Level.WARNING, "Failed to retrieve information about "
+                    + schemaName + "." + tableName + "."  + columnName
+                    + " by examining the first sample geometry", e);
+        } finally {
+            dataStore.closeSafe(result);
+            dataStore.closeSafe(statement);
+        }
+        // unable to determine dimension from sample geometry
+        return null;
     }
 
     @Override
@@ -1180,5 +1217,23 @@ public class PostGISDialect extends BasicSQLDialect {
             hints.add(Hints.GEOMETRY_SIMPLIFICATION);
         }
     }
-    
+
+    /**
+     * Returns "ST_Force2D" if PostGIS version is >= 2.1.0, otherwise "ST_Force_2D"
+     * @return Force2D function name
+     */
+    protected String getForce2DFunction() {
+        return version == null || version.compareTo(V_2_1_0) >= 0
+                ? "ST_Force2D" : "ST_Force_2D";
+    }
+
+    /**
+     * Returns "ST_EstimatedExtent" if PostGIS version is >= 2.1.0, otherwise "ST_Estimated_Extent"
+     * @return EstimatedExtent function name
+     */
+    protected String getEstimatedExtentFunction() {
+        return version == null || version.compareTo(V_2_1_0) >= 0
+                ? "ST_EstimatedExtent" : "ST_Estimated_Extent";
+    }
+
 }
