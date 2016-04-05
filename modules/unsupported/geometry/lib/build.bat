@@ -47,6 +47,10 @@ java -jar javacpp.jar -cp ../src/main/java org/geotools/geometry/iso/sfcgal/wrap
 java -jar javacpp.jar -cp ../src/main/java org/geotools/geometry/iso/sfcgal/wrapper/SFCAPI -Xcompiler -I%BOOST_INCLUDEDIR% -Xcompiler -I%CGAL_INCLUDEDIR% -Xcompiler -I%SFCGAL_INCLUDEDIR% -Xcompiler -I%GMP_INC_DIR% -Xcompiler -I%MPFR_INC_DIR% -Xcompiler -L%BOOST_LIBRARYDIR% -Xcompiler -L%CGAL_LIBRARYDIR% -Xcompiler -L%SFCGAL_LIBRARYDIR% -Xcompiler -L%GMP_LIB_DIR% -Xcompiler -L%MPFR_LIB_DIR% -Xcompiler -lboost_system-mgw52-mt-1_55 -Xcompiler -lCGAL -Xcompiler -lCGAL_Core -Xcompiler -lSFCGAL -Xcompiler -lgmp-10 -Xcompiler -lmpfr-4 -properties windows-x86_64-mingw
 java -jar javacpp.jar -cp ../src/main/java org/geotools/geometry/iso/sfcgal/wrapper/SFAlgorithm -Xcompiler -I%BOOST_INCLUDEDIR% -Xcompiler -I%CGAL_INCLUDEDIR% -Xcompiler -I%SFCGAL_INCLUDEDIR% -Xcompiler -I%GMP_INC_DIR% -Xcompiler -I%MPFR_INC_DIR% -Xcompiler -L%BOOST_LIBRARYDIR% -Xcompiler -L%CGAL_LIBRARYDIR% -Xcompiler -L%SFCGAL_LIBRARYDIR% -Xcompiler -L%GMP_LIB_DIR% -Xcompiler -L%MPFR_LIB_DIR% -Xcompiler -lboost_system-mgw52-mt-1_55 -Xcompiler -lboost_thread-mgw52-mt-1_55 -Xcompiler -lCGAL -Xcompiler -lCGAL_Core -Xcompiler -lSFCGAL -Xcompiler -lgmp-10 -Xcompiler -lmpfr-4 -properties windows-x86_64-mingw
 
+copy %SFCGAL_LIBRARYDIR%/libSFCGAL.dll C:/Windows/System/
+copy %GMP_LIB_DIR%%/gmp4.dll C:/Windows/System/
+copy %SFCGAL_LIBRARYDIR%/libSFCGAL.dll C:/Windows/System/
+
 @echo off
 rem java -cp javacpp.jar;../src/main/java org/geotools/geometry/iso/sfcgal/wrapper/PointerVector
 rem java -cp javacpp.jar;../src/main/java org/geotools/geometry/iso/sfcgal/wrapper/SFGeometry

@@ -2,7 +2,7 @@
  *    GeoTools - The Open Source Java GIS Toolkit
  *    http://geotools.org
  *
- *    (C) 2015, Spatio-temporal Databases Laboratory (STEMLab)
+ *    (C) 2015, Open Source Geospatial Foundation (OSGeo)
  *
  *    the library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -151,5 +151,5 @@ public class SFGeometry extends Pointer {
          */
         @Name("operator==")
         public native @Cast("bool") boolean equals(@ByRef SFGeometry other);
-
+        
 }

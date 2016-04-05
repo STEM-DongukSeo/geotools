@@ -72,8 +72,18 @@ public class Geometry3DOperationTest extends TestCase {
                 // _testCurveSurface();
                 // _testCurveSolid();
                 // _testSurfaceSurface();
-                _testSurfaceSolid();
+                // _testSurfaceSolid();
                 // _testSolidSolid();
+                testPointInSolid();
+        }
+        
+        public void testPointInSolid() {
+                Solid solid = getSolids(builder).get(8);
+                
+                Point point = builder.createPoint(-161949.5098996643, 8871.603480360383, 0.0);
+                
+                System.out.println(solid.toString());
+                System.out.println(solid.contains(point));
         }
 
         public void _testPointPoint() {
@@ -1158,6 +1168,25 @@ public class Geometry3DOperationTest extends TestCase {
                 points8.add(p76);
                 points8.add(p77);
                 points8.add(p78);
+                
+                DirectPosition p81 = builder.createDirectPosition(new double[] { -125745.58224841699, 3813.6302470150695, 0.0 });
+                DirectPosition p82 = builder.createDirectPosition(new double[] { -125738.91237563781, 4813.464779595859, 0.0 });
+                DirectPosition p83 = builder.createDirectPosition(new double[] { -126731.71448564173, 4815.075754128498, 0.0 });
+                DirectPosition p84 = builder.createDirectPosition(new double[] { -126738.38435842091, 3815.241221547709, 0.0 });
+                DirectPosition p85 = builder.createDirectPosition(new double[] { -125745.58224841699, 3813.6302470150695, 3000.0 });
+                DirectPosition p86 = builder.createDirectPosition(new double[] { -125738.91237563781, 4813.464779595859, 3000.0 });
+                DirectPosition p87 = builder.createDirectPosition(new double[] { -126731.71448564173, 4815.075754128498, 3000.0 });
+                DirectPosition p88 = builder.createDirectPosition(new double[] { -126738.38435842091, 3815.241221547709, 3000.0 });
+
+                ArrayList<DirectPosition> points9 = new ArrayList<DirectPosition>();
+                points9.add(p81);
+                points9.add(p82);
+                points9.add(p83);
+                points9.add(p84);
+                points9.add(p85);
+                points9.add(p86);
+                points9.add(p87);
+                points9.add(p88);
 
                 solidPoints.add(points1);
                 solidPoints.add(points2);
@@ -1167,6 +1196,7 @@ public class Geometry3DOperationTest extends TestCase {
                 solidPoints.add(points6);
                 solidPoints.add(points7);
                 solidPoints.add(points8);
+                solidPoints.add(points9);
 
                 return solidPoints;
         }
@@ -1313,7 +1343,7 @@ public class Geometry3DOperationTest extends TestCase {
                 ArrayList<Solid> solids = new ArrayList<Solid>();
                 ArrayList<ArrayList<DirectPosition>> solidPoints = getSolidPoints(builder);
 
-                for (int i = 0; i < 8; i++) {
+                for (int i = 0; i < 9; i++) {
                         solids.add(makeSolid(builder, solidPoints.get(i)));
                 }
 

@@ -2,7 +2,7 @@
  *    GeoTools - The Open Source Java GIS Toolkit
  *    http://geotools.org
  *
- *    (C) 2015, Spatio-temporal Databases Laboratory (STEMLab)
+ *    (C) 2015, Open Source Geospatial Foundation (OSGeo)
  *
  *    This library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -146,4 +146,8 @@ public class SFCoordinate extends Pointer {
         @Name("operator!=")
         public native @Cast("bool") boolean notEquals(@ByRef SFCoordinate c);
 
+        public static void main(String args[]) {
+                SFCoordinate coord = new SFCoordinate(1.1, 2.2, 3.3);
+                System.out.println(coord.x() + " " + coord.y() + " " + coord.z());
+        }
 }

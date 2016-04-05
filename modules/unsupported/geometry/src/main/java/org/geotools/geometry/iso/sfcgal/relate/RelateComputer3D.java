@@ -2,7 +2,7 @@
  *    GeoTools - The Open Source Java GIS Toolkit
  *    http://geotools.org
  *
- *    (C) 2015, Spatio-temporal Databases Laboratory(STEMLab)
+ *    (C) 2015, Open Source Geospatial Foundation (OSGeo)
  *
  *    This library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -63,9 +63,9 @@ public class RelateComputer3D {
          * @param gA
          * @param gB
          */
-        public RelateComputer3D(GeometryImpl gA, GeometryImpl gB) {
-                geometryA = SFCGALConvertor.geometryToSFCGALGeometry(gA);
-                geometryB = SFCGALConvertor.geometryToSFCGALGeometry(gB);
+        public RelateComputer3D(SFGeometry gA, SFGeometry gB) {
+                geometryA = gA;
+                geometryB = gB;
                 boundaryA = getBoundary(geometryA);
                 boundaryB = getBoundary(geometryB);
 
