@@ -44,7 +44,6 @@ import org.geotools.geometry.iso.primitive.RingImplUnsafe;
 import org.geotools.geometry.iso.primitive.SurfaceBoundaryImpl;
 import org.geotools.geometry.iso.primitive.SurfaceImpl;
 import org.geotools.geometry.iso.sfcgal.util.Geometry3DOperation;
-import org.geotools.geometry.iso.sfcgal.util.Geometry3DOperationTest;
 import org.geotools.geometry.iso.topograph2D.Coordinate;
 import org.geotools.geometry.iso.topograph2D.IntersectionMatrix;
 import org.geotools.geometry.iso.util.Assert;
