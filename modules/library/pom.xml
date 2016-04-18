@@ -56,7 +56,8 @@
     <module>render</module>
     <module>xml</module>
     <module>jdbc</module>
-    <module>gt-main-new</module>
+    
+    <module>main-iso</module>
   </modules>
 
 
