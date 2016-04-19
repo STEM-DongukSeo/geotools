@@ -23,6 +23,7 @@ import org.opengis.feature.type.GeometryType;
 import org.opengis.filter.identity.Identifier;
 import org.opengis.geometry.BoundingBox;
 import org.opengis.geometry.Geometry;
+import org.opengis.geometry.primitive.Solid;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 /**
@@ -52,11 +53,14 @@ public class ISOGeometryAttributeImpl extends AttributeImpl implements GeometryA
     
     @Override
     public void setValue(Object newValue) throws IllegalArgumentException, IllegalStateException {
-        super.setValue( (Geometry) newValue );
-    }
-    
-    public void setValue(Geometry geometry) {
-        this.setValue(geometry);
+        if(newValue instanceof Solid) {
+            super.setValue( (Solid) newValue );
+        }
+        else if(newValue instanceof Geometry) {
+            super.setValue( (Geometry) newValue );
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override
