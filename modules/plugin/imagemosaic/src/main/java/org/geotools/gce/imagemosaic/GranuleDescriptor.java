@@ -326,14 +326,15 @@ public class GranuleDescriptor {
                 File granuleFile = DataUtilities.urlToFile(granuleUrl);
                 AbstractGridFormat format = GridFormatFinder.findFormat(granuleFile,
                         EXCLUDE_MOSAIC);
-                AbstractGridCoverage2DReader gcReader = format.getReader(granuleFile, hints);
-                // Getting Dataset Layout
-                layout = gcReader.getDatasetLayout();
-
 		// create the base grid to world transformation
+                AbstractGridCoverage2DReader gcReader = null; 
 		ImageInputStream inStream = null;
 		ImageReader reader = null;
 		try {
+		    
+		    gcReader = format.getReader(granuleFile, hints);
+		    // Getting Dataset Layout
+	                layout = gcReader.getDatasetLayout();
 			//
 			//get info about the raster we have to read
 			//
@@ -444,6 +445,14 @@ public class GranuleDescriptor {
 					reader.dispose();
 				}
 			}
+			if (gcReader != null) {
+			    try {
+			        gcReader.dispose();
+			    } catch (Throwable t) {
+			        // Ignore it
+			    }
+			}
+			
 		}
 	}
 	
@@ -642,8 +651,7 @@ public class GranuleDescriptor {
 		// If the granuleDescriptor is not there, dump a message and continue
 		final URL rasterFile = pathType.resolvePath(parentLocation, granuleLocation);
 		if (rasterFile == null) {
-	                throw new IllegalArgumentException(Errors.format(ErrorKeys.ILLEGAL_ARGUMENT_$2,"granuleLocation",granuleLocation));		    
-			
+		    throw new IllegalArgumentException(Errors.format(ErrorKeys.ILLEGAL_ARGUMENT_$2,"granuleLocation",granuleLocation));
 		}
 		if (LOGGER.isLoggable(Level.FINE))
 			LOGGER.fine("File found "+granuleLocation);
@@ -730,6 +738,7 @@ public class GranuleDescriptor {
 
 		ImageInputStream inStream=null;
 		ImageReader reader=null;
+		boolean cleanupInFinally = request.getReadType() != ReadType.JAI_IMAGEREAD;
 		try {
 			//
 			//get info about the raster we have to read
@@ -835,7 +844,13 @@ public class GranuleDescriptor {
 			// take into account the fact that we might also decimate therefore
 			// we cannot just use the crop grid to world but we need to correct
 			// it.
-			final Rectangle sourceArea = CRS.transform(cropWorldToGrid, intersection).toRectangle2D().getBounds();
+			Rectangle2D r2d = CRS.transform(cropWorldToGrid, intersection).toRectangle2D();
+			// if we are reading basically nothing, bail out immediately
+			if(r2d.getWidth() < 0.1 || r2d.getHeight() < 0.1) {
+			    cleanupInFinally = true;
+			    return null;
+			}
+            final Rectangle sourceArea = r2d.getBounds();
 			//gutter
 			if(selectedlevel.baseToLevelTransform.isIdentity()){
 			    sourceArea.grow(2, 2);
@@ -1075,11 +1090,11 @@ public class GranuleDescriptor {
 
                 } finally {
                     try {
-                        if (request.getReadType() != ReadType.JAI_IMAGEREAD && inStream != null) {
+                        if (cleanupInFinally && inStream != null) {
                             inStream.close();
                         }
                     } finally {
-                        if (request.getReadType() != ReadType.JAI_IMAGEREAD && reader != null) {
+                        if (cleanupInFinally && reader != null) {
                             reader.dispose();
                         }
                     }

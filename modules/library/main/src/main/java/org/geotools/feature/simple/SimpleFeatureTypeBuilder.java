@@ -55,7 +55,7 @@ import com.vividsolutions.jts.geom.Geometry;
  * <pre>
  *  <code>
  *  //create the builder
- *  SimpleTypeBuilder builder = new SimpleTypeBuilder();
+ *  SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
  *  
  *  //set global state
  *  builder.setName( "testType" );
@@ -1119,7 +1119,7 @@ public class SimpleFeatureTypeBuilder {
          * Create a SimpleFeatureType with the same content; just updating the geometry
          * attribute to match the provided coordinate reference system.
          * @param original SimpleFeatureType
-         * @param crs CoordianteReferenceSystem of result
+         * @param crs CoordinateReferenceSystem of result
          * @return SimpleFeatureType updated with the provided CoordinateReferenceSystem
          */
         public static SimpleFeatureType retype( SimpleFeatureType original,CoordinateReferenceSystem crs ) {

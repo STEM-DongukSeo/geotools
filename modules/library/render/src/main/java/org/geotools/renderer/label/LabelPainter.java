@@ -2,7 +2,7 @@
  *    GeoTools - The Open Source Java GIS Toolkit
  *    http://geotools.org
  * 
- *    (C) 2002-2015, Open Source Geospatial Foundation (OSGeo)
+ *    (C) 2002-2016, Open Source Geospatial Foundation (OSGeo)
  *
  *    This library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -188,7 +188,9 @@ public class LabelPainter {
      * @param bounds
      */
     void normalizeBounds(Rectangle2D bounds) {
-        if(bounds.isEmpty()) {
+        if(bounds == null) {
+            bounds = new Rectangle2D.Float(-1, -1, 2, 2);
+        } else if(bounds.isEmpty()) {
             bounds.setRect(bounds.getCenterX() -1 , bounds.getCenterY() -1, 2, 2);
         }
     }
@@ -367,10 +369,10 @@ public class LabelPainter {
                 // for multiline labels we have to go thru the lines and apply
                 // the proper transformation
                 // to position each row within the label bounds
-                AffineTransform lineTx = new AffineTransform(transform);
+                AffineTransform lineTx = new AffineTransform();
                 for (LineInfo line : lines) {
                     for (LineComponent component : line.getComponents()) {
-                        lineTx.setTransform(transform);
+                        lineTx.setTransform(newTransform);
                         lineTx.translate(component.getX(), line.getY());
                         graphics.setTransform(lineTx);
                         drawGlyphVector(component.getGlyphVector());
@@ -594,8 +596,8 @@ public class LabelPainter {
                             ? glyphVector.getGlyphMetrics(i + 1).getAdvance() * 0.5f : 0;
 
                     c = cursor.getCurrentPosition(c);
-                    AffineTransform t = new AffineTransform();
-                    t.setToTranslation(c.x, c.y);
+                    AffineTransform t = new AffineTransform(graphics.getTransform());
+                    t.translate(c.x, c.y);
                     t.rotate(cursor.getCurrentAngle());
                     t.translate(-p.getX() - advance, -p.getY() + getLineHeight() * anchorY);
                     transforms[i] = t;

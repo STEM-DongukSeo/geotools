@@ -29,12 +29,6 @@
   <name>XML Parsing</name>
   
 
-  <scm>
-    <connection>
-      scm:svn:http://svn.osgeo.org/geotools/trunk/modules/extension/xsd/xsd-core/
-    </connection>
-    <url>http://svn.osgeo.org/geotools/trunk/modules/extension/xsd/xsd-core/</url>
-  </scm>
 
   <description>
     Schema based xml parsing. This module contains tools for creating 
@@ -100,6 +94,12 @@
       <groupId>picocontainer</groupId>
       <artifactId>picocontainer</artifactId>
       <version>1.2</version>
+      <exclusions>
+        <exclusion>
+         <groupId>xml-apis</groupId>
+         <artifactId>xml-apis</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>commons-jxpath</groupId>

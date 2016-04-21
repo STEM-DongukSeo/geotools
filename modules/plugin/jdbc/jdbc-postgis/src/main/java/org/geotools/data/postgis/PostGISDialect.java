@@ -738,7 +738,7 @@ public class PostGISDialect extends BasicSQLDialect {
             Connection cx) throws SQLException {
         Statement st = cx.createStatement();
         try {
-            String sql = "SELECT nextval('" + sequenceName + "')";
+            String sql = "SELECT " + encodeNextSequenceValue(schemaName, sequenceName);
 
             dataStore.getLogger().fine(sql);
             ResultSet rs = st.executeQuery(sql);
@@ -754,6 +754,11 @@ public class PostGISDialect extends BasicSQLDialect {
         }
 
         return null;
+    }
+
+    @Override
+    public String encodeNextSequenceValue(String schemaName, String sequenceName) {
+        return "nextval('" + sequenceName + "')";
     }
 
     @Override
@@ -832,6 +837,7 @@ public class PostGISDialect extends BasicSQLDialect {
             Map<Integer, String> overrides) {
         overrides.put(Types.VARCHAR, "VARCHAR");
         overrides.put(Types.BOOLEAN, "BOOL");
+        overrides.put(Types.BLOB, "BYTEA");
     }
 
     @Override

@@ -27,6 +27,7 @@ import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.awt.image.ComponentColorModel;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
@@ -84,6 +85,9 @@ import org.opengis.referencing.operation.MathTransform;
 
 import com.vividsolutions.jts.geom.Envelope;
 
+import it.geosolutions.jaiext.JAIExt;
+import it.geosolutions.rendered.viewer.RenderedImageBrowser;
+
 /**
  * @author Simone Giannecchini
  *
@@ -115,7 +119,22 @@ public class GridCoverageRendererTest  {
 
     private GridCoverage2DReader rainReader;
 
+    private GridCoverage2DReader worldPaletteReader;
+
     private GeoTiffReader worldReader_0_360;
+
+    private GeoTiffReader worldRoiReader;
+
+    // @BeforeClass
+    // public static void enableJaiExt() {
+    // final String JAIEXT_ENABLED_KEY = "org.geotools.coverage.jaiext.enabled";
+    // System.setProperty(JAIEXT_ENABLED_KEY, "true");
+    // }j
+
+    @Before
+    public void disableJaiExt() {
+        JAIExt.initJAIEXT(false);
+    }
 
     @Before
     public void getData() throws IOException {
@@ -128,6 +147,10 @@ public class GridCoverageRendererTest  {
         assertTrue(coverageFile.exists());
         worldReader_0_360 = new GeoTiffReader(coverageFile);
 
+        coverageFile = TestData.copy(this, "geotiff/worldPalette.tiff");
+        assertTrue(coverageFile.exists());
+        worldPaletteReader = new GeoTiffReader(coverageFile);
+
         // grab also the global precipitation
         File file = TestData.copy(this, "arcgrid/arcgrid.zip");
         assertTrue(file.exists());
@@ -138,6 +161,11 @@ public class GridCoverageRendererTest  {
                 .getResource("test-data/arcgrid/precip30min.asc");
         File rainFile = DataUtilities.urlToFile(rainURL);
         rainReader = new ArcGridReader(rainFile);
+
+        // read a image with a roi (mask)
+        coverageFile = TestData.copy(this, "geotiff/world-roi.tiff");
+        assertTrue(coverageFile.exists());
+        worldRoiReader = new GeoTiffReader(coverageFile);
     }
 
     @After
@@ -658,6 +686,23 @@ public class GridCoverageRendererTest  {
     }
 
     @Test
+    public void testIndexedWithNoBackground() throws Exception {
+        CoordinateReferenceSystem googleMercator = CRS.decode("EPSG:3857");
+        ReferencedEnvelope mapExtent = new ReferencedEnvelope(-20037508.34, 20037508.34,
+                -20037508.34, 20037508.34, googleMercator);
+        Rectangle screenSize = new Rectangle(200, (int) (mapExtent.getHeight()
+                / mapExtent.getWidth() * 200));
+        AffineTransform w2s = RendererUtilities.worldToScreenTransform(mapExtent, screenSize);
+        GridCoverageRenderer renderer = new GridCoverageRenderer(googleMercator, mapExtent,
+                screenSize, w2s);
+        RasterSymbolizer rasterSymbolizer = new StyleBuilder().createRasterSymbolizer();
+        RenderedImage image = renderer.renderImage(worldPaletteReader, null, rasterSymbolizer,
+                Interpolation.getInstance(Interpolation.INTERP_BICUBIC), null, 256, 256);
+
+        assertNotNull(image);
+    }
+
+    @Test
     public void testPolarCutLowCorner() throws Exception {
         // we request a small area, oversampling, and the output has some white pixels in a corner
         CoordinateReferenceSystem crs = CRS.decode("EPSG:3031", true);
@@ -788,10 +833,39 @@ public class GridCoverageRendererTest  {
         RenderedImage image = renderer.renderImage(reader, null, rasterSymbolizer,
                 Interpolation.getInstance(Interpolation.INTERP_NEAREST), Color.RED, 256, 256);
         assertNotNull(image);
+        // we have performed color expansion to allow for red background (it's not in the palette)
+        assertTrue(image.getColorModel() instanceof ComponentColorModel);
         // Check the image
         File reference = new File(
                 "src/test/resources/org/geotools/renderer/lite/gridcoverage2d/africa-conic-palette.png");
-        ImageAssert.assertEquals(reference, image, 0);
+        ImageAssert.assertEquals(reference, image, 10);
+    }
+
+    @Test
+    public void testAfricaEquidistantConicRoi() throws Exception {
+        JAIExt.initJAIEXT(true);
+        CoordinateReferenceSystem crs = CRS.parseWKT(AFRICA_EQUIDISTANT_CONIC_WKT);
+        // across the dateline
+        ReferencedEnvelope mapExtent = new ReferencedEnvelope(-15814047.554122284,
+                24919762.252195686, -14112074.925190449, 11688610.748676982, crs);
+        // Setting Screen size
+        Rectangle screenSize = new Rectangle(400,
+                (int) (mapExtent.getHeight() / mapExtent.getWidth() * 400));
+        AffineTransform w2s = RendererUtilities.worldToScreenTransform(mapExtent, screenSize);
+        GridCoverageRenderer renderer = new GridCoverageRenderer(
+                mapExtent.getCoordinateReferenceSystem(), mapExtent, screenSize, w2s);
+        // Apply the symbolizer
+        RasterSymbolizer rasterSymbolizer = new StyleBuilder().createRasterSymbolizer();
+
+        // Get the reader
+        // Render the image
+        RenderedImage image = renderer.renderImage(worldRoiReader, null, rasterSymbolizer,
+                Interpolation.getInstance(Interpolation.INTERP_NEAREST), Color.RED, 256, 256);
+        assertNotNull(image);
+        // Check the image
+        File reference = new File(
+                "src/test/resources/org/geotools/renderer/lite/gridcoverage2d/africa-conic-roi.png");
+        ImageAssert.assertEquals(reference, image, 10);
     }
 
     @Test
@@ -836,7 +910,6 @@ public class GridCoverageRendererTest  {
         RenderedImage image = renderer.renderImage(worldReader_0_360, null, rasterSymbolizer,
                 Interpolation.getInstance(Interpolation.INTERP_NEAREST), Color.BLACK, 256, 256);
         assertNotNull(image);
-        // RenderedImageBrowser.showChain(image);
         File reference = new File(
                 "src/test/resources/org/geotools/renderer/lite/gridcoverage2d/world_0_360.png");
         ImageAssert.assertEquals(reference, image, 10);

@@ -146,7 +146,12 @@ public class H2DialectBasic extends BasicSQLDialect {
             Connection cx) throws SQLException {
         return delegate.getNextSequenceValue(schemaName, sequenceName, cx);
     }
-    
+
+    @Override
+    public String encodeNextSequenceValue(String schemaName, String sequenceName) {
+        return delegate.encodeNextSequenceValue(schemaName, sequenceName);
+    }
+
     @Override
     public boolean lookupGeneratedValuesPostInsert() {
         return delegate.lookupGeneratedValuesPostInsert();
@@ -254,6 +259,12 @@ public class H2DialectBasic extends BasicSQLDialect {
     @Override
     protected boolean supportsSchemaForIndex() {
         return delegate.supportsSchemaForIndex();
+    }
+
+    @Override
+    public void registerSqlTypeToSqlTypeNameOverrides(
+            Map<Integer, String> overrides) {
+        delegate.registerSqlTypeToSqlTypeNameOverrides(overrides);
     }
 
 }

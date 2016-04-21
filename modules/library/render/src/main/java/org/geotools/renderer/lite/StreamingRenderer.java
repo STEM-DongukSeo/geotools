@@ -16,6 +16,8 @@
  */
 package org.geotools.renderer.lite;
 
+import static java.lang.Math.abs;
+
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
@@ -79,6 +81,7 @@ import org.geotools.geometry.jts.JTS;
 import org.geotools.geometry.jts.LiteCoordinateSequence;
 import org.geotools.geometry.jts.LiteCoordinateSequenceFactory;
 import org.geotools.geometry.jts.LiteShape2;
+import org.geotools.geometry.jts.OffsetCurveBuilder;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.map.DirectLayer;
 import org.geotools.map.Layer;
@@ -101,6 +104,7 @@ import org.geotools.renderer.label.LabelCacheImpl;
 import org.geotools.renderer.label.LabelCacheImpl.LabelRenderingMode;
 import org.geotools.renderer.lite.gridcoverage2d.GridCoverageReaderHelper;
 import org.geotools.renderer.lite.gridcoverage2d.GridCoverageRenderer;
+import org.geotools.renderer.style.LineStyle2D;
 import org.geotools.renderer.style.SLDStyleFactory;
 import org.geotools.renderer.style.Style2D;
 import org.geotools.resources.coverage.FeatureUtilities;
@@ -144,7 +148,15 @@ import org.opengis.style.PolygonSymbolizer;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+import com.vividsolutions.jts.geom.PrecisionModel;
+import com.vividsolutions.jts.geom.TopologyException;
+import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
+import com.vividsolutions.jts.simplify.DouglasPeuckerSimplifier;
+import com.vividsolutions.jts.simplify.TopologyPreservingSimplifier;
 
 /**
  * A streaming implementation of the GTRenderer interface.
@@ -208,7 +220,7 @@ public class StreamingRenderer implements GTRenderer {
     int error = 0;
 
     /** Filter factory for creating bounding box filters */
-    private final static FilterFactory2 filterFactory = CommonFactoryFinder.getFilterFactory2(null);
+    protected final static FilterFactory2 filterFactory = CommonFactoryFinder.getFilterFactory2(null);
 
     private final static PropertyName gridPropertyName = filterFactory.property("grid");
 
@@ -829,7 +841,6 @@ public class StreamingRenderer implements GTRenderer {
                 
                 // have we been painting on a back buffer? If so, merge on the main graphic
                 if (compositingGraphic instanceof DelayedBackbufferGraphic) {
-                    DelayedBackbufferGraphic delayedGraphic = (DelayedBackbufferGraphic) compositingGraphic;
                     RenderingRequest request = new MargeCompositingGroupRequest(graphics,
                             compositingGroup);
                     try {
@@ -1600,8 +1611,8 @@ public class StreamingRenderer implements GTRenderer {
             // DJB:geos-469 if the default geometry was used in the style, we
             // need to grab it.
             if (sae.getDefaultGeometryUsed()
-                    && (!attributeNames.contains(schema.getGeometryDescriptor().getName().toString()))
-                    ) {
+                    && !attributeNames.contains(schema.getGeometryDescriptor().getName().toString())
+                    && !attributeNames.contains("")) {
                 atts.add(filterFactory.property ( schema.getGeometryDescriptor().getName() ));
             }
         } catch (Exception e) {
@@ -2534,7 +2545,7 @@ public class StreamingRenderer implements GTRenderer {
                     Style2D style = styleFactory.createStyle(drawMe.feature, symbolizer);
                     
                     // clip to the visible area + the size of the symbolizer (with some extra 
-                    // to make sure we get no artefacts from polygon new borders)
+                    // to make sure we get no artifacts from polygon new borders)
                     double size = RendererUtilities.getStyle2DSize(style);
                     // take into account the meta buffer to try and clip all geometries by the same
                     // amount
@@ -2542,11 +2553,39 @@ public class StreamingRenderer implements GTRenderer {
                     Envelope env = new Envelope(screenSize.getMinX(), screenSize.getMaxX(), screenSize.getMinY(), screenSize.getMaxY());
                     env.expandBy(clipBuffer);
                     final GeometryClipper clipper = new GeometryClipper(env);
-                    Geometry g = clipper.clip(shape.getGeometry(), false);
+                    Geometry source = shape.getGeometry();
+                    // we need to preserve the topology if we end up applying buffer for perp. offset
+                    boolean preserveTopology = style instanceof LineStyle2D && ((LineStyle2D) style).getPerpendicularOffset() != 0 &&
+                            (source instanceof Polygon || source instanceof MultiPolygon);
+                    
+                    Geometry g = clipper.clipSafe(shape.getGeometry(), preserveTopology, 1);
+                    
+                    // handle perpendincular offset as needed
+                    if(style instanceof LineStyle2D && ((LineStyle2D) style).getPerpendicularOffset() != 0) {
+                        LineStyle2D ls = (LineStyle2D) style;
+                        double offset = ls.getPerpendicularOffset();
+                        // people applying an offset on a polygon really expect a buffer instead,
+                        // do so... however buffering is damn expensive, so let's apply some heuristics
+                        // to still run the offset curve builder for the simplest cases
+                        if(source instanceof Polygon || source instanceof MultiPolygon && abs(offset) > 3) {
+                            // buffering is expensive, we can be a bit off with the 
+                            // result, do simplify the geometry first 
+                            Geometry simplified = TopologyPreservingSimplifier.simplify(source, Math.max(abs(offset) / 10, 1));
+                            try {
+                                g = simplified.buffer(offset);
+                            } catch(Exception e) {
+                                LOGGER.log(Level.FINE, "Failed to apply JTS buffer to the geometry, falling back on the offset curve builder", e);
+                                OffsetCurveBuilder offseter = new OffsetCurveBuilder(offset);
+                                g = offseter.offset(g);
+                            }
+                        } else {
+                            OffsetCurveBuilder offseter = new OffsetCurveBuilder(offset);
+                            g = offseter.offset(g);
+                        }
+                    }
                     if(g == null) {
                         continue;
-                    }
-                    if(g != shape.getGeometry()) {
+                    } else {
                         shape = new LiteShape2(g, null, null, false);
                     }
                     
@@ -2939,7 +2978,7 @@ public class StreamingRenderer implements GTRenderer {
         public LiteShape2 getShape(Symbolizer symbolizer, AffineTransform at) throws FactoryException {
             Geometry g = findGeometry(feature, symbolizer); // pulls the geometry
 
-            if ( g == null )
+            if (g == null || g.isEmpty())
                 return null;
             
             try {
@@ -3143,7 +3182,7 @@ public class StreamingRenderer implements GTRenderer {
      * A request sent to the painting thread 
      * @author aaime
      */
-    abstract class RenderingRequest {
+    protected abstract class RenderingRequest {
         abstract void execute();
     }
     
@@ -3152,7 +3191,7 @@ public class StreamingRenderer implements GTRenderer {
      * @author aaime
      *
      */
-    class PaintShapeRequest extends RenderingRequest {
+    protected class PaintShapeRequest extends RenderingRequest {
         Graphics2D graphic;
         
         LiteShape2 shape;
@@ -3193,7 +3232,7 @@ public class StreamingRenderer implements GTRenderer {
      * @author aaime
      *
      */
-    class FeatureRenderedRequest extends RenderingRequest {
+    protected class FeatureRenderedRequest extends RenderingRequest {
         Object content; 
         
         public FeatureRenderedRequest(Object content) {
@@ -3211,7 +3250,7 @@ public class StreamingRenderer implements GTRenderer {
      * @author aaime
      *
      */
-    class MergeLayersRequest extends RenderingRequest {
+    protected class MergeLayersRequest extends RenderingRequest {
         Graphics2D graphics;
         List<LiteFeatureTypeStyle> lfts;
 
@@ -3249,7 +3288,7 @@ public class StreamingRenderer implements GTRenderer {
         }
     }
     
-    class MargeCompositingGroupRequest extends RenderingRequest {
+    protected class MargeCompositingGroupRequest extends RenderingRequest {
         Graphics2D graphics;
 
         CompositingGroup compositingGroup;
@@ -3286,7 +3325,7 @@ public class StreamingRenderer implements GTRenderer {
      * A request to render a raster
      * @author aaime
      */
-    public class RenderRasterRequest extends RenderingRequest {
+    protected class RenderRasterRequest extends RenderingRequest {
 
         private Graphics2D graphics;
         private boolean disposeCoverage;
@@ -3357,7 +3396,7 @@ public class StreamingRenderer implements GTRenderer {
      * 
      * @author aaime
      */
-    public class RenderCoverageReaderRequest extends RenderingRequest {
+    protected class RenderCoverageReaderRequest extends RenderingRequest {
 
         private Graphics2D graphics;
 
@@ -3427,7 +3466,7 @@ public class StreamingRenderer implements GTRenderer {
 
     }
 
-    class RenderDirectLayerRequest extends RenderingRequest {
+    protected class RenderDirectLayerRequest extends RenderingRequest {
         private final Graphics2D graphics;
         private final DirectLayer layer;
 
@@ -3464,7 +3503,7 @@ public class StreamingRenderer implements GTRenderer {
      * Marks the end of the request flow, instructs the painting thread to exit
      * @author Andrea Aime - OpenGeo
      */
-    class EndRequest extends RenderingRequest {
+    protected class EndRequest extends RenderingRequest {
 
         @Override
         void execute() {
@@ -3504,7 +3543,7 @@ public class StreamingRenderer implements GTRenderer {
                         request.execute();
                     }
                 } catch(InterruptedException e) {
-                    // ok, we might have been interupped to stop processing
+                    // ok, we might have been interrupted to stop processing
                     if(renderingStopRequested) {
                         done = true;
                     }
@@ -3526,7 +3565,8 @@ public class StreamingRenderer implements GTRenderer {
      * @author Andrea Aime - GeoSolutions
      *
      */
-    class RenderingBlockingQueue extends ArrayBlockingQueue<RenderingRequest> {
+    public class RenderingBlockingQueue extends ArrayBlockingQueue<RenderingRequest> {
+        private static final long serialVersionUID = 4908029658595573833L;
 
         public RenderingBlockingQueue(int capacity) {
             super(capacity);

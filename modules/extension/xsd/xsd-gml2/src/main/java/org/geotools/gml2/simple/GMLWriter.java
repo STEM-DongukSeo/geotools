@@ -2,7 +2,7 @@
  *    GeoTools - The Open Source Java GIS Toolkit
  *    http://geotools.org
  *
- *    (C) 2015, Open Source Geospatial Foundation (OSGeo)
+ *    (C) 2015 - 2016, Open Source Geospatial Foundation (OSGeo)
  *
  *    This library is free software; you can redistribute it and/or
  *    modify it under the terms of the GNU Lesser General Public
@@ -26,6 +26,7 @@ import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.AttributesImpl;
 import org.xml.sax.helpers.NamespaceSupport;
 
 import com.vividsolutions.jts.geom.CoordinateSequence;
@@ -117,8 +118,14 @@ public class GMLWriter {
             boolean forceDecimal, String gmlPrefix) {
         this.handler = delegate;
         this.namespaces = namespaces;
-        this.coordinates = COORDINATES.derive(gmlPrefix);
-        this.posList = POS_LIST.derive(gmlPrefix);
+
+        String gmlUri = namespaces.getURI(gmlPrefix);
+        if (gmlUri == null) {
+            gmlUri = GML.NAMESPACE;
+        }
+
+        this.coordinates = COORDINATES.derive(gmlPrefix, gmlUri);
+        this.posList = POS_LIST.derive(gmlPrefix, gmlUri);
 
         this.coordFormatter.setMaximumFractionDigits(numDecimals);
         this.coordFormatter.setGroupingUsed(false);
@@ -184,8 +191,15 @@ public class GMLWriter {
         if (qualifiedName == null) {
             qualifiedName = qualify(qn.getNamespaceURI(), qn.getLocalPart(), null);
         }
+        if (atts == null) {
+            atts =new AttributesImpl();
+        }
         if (qualifiedName != null) {
-            handler.startElement(null, null, qualifiedName, atts);
+            String localName = null;
+            if (qualifiedName.contains(":")) {
+                localName = qualifiedName.split(":")[1];
+            }
+            handler.startElement(qn.getNamespaceURI(), localName, qualifiedName, atts);
         } else {
             handler.startElement(qn.getNamespaceURI(), qn.getLocalPart(), null, atts);
         }
