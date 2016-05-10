@@ -439,10 +439,10 @@ public class GML3MockData {
         }
 
         Element exterior = element(qName("exterior"), document, polygon);
-        linearRingWithPosList3D(document, exterior, false);
+        linearRingWithPosList3D(document, exterior, true);
         
         Element interior = element(qName("interior"), document, polygon);
-        linearRingWithPosList3D(document, interior, false);
+        linearRingWithPosList3D(document, interior, true);
 
         return polygon;
     }
@@ -639,6 +639,42 @@ public class GML3MockData {
         polygon(document,patches,qName("PolygonPatch"),true);
         
         return surface;
+    }
+    
+    /* 
+     * for SolidTypeBindingTest
+     * */
+    public static Element compositeSurface(Document document, Node parent) {
+        Element compositeSurface = element(qName("CompositeSurface"), document, parent);
+        Element surfaceMember = element(qName("surfaceMember"), document, compositeSurface);
+        polygonWithPosList3D(document, surfaceMember, true);
+        
+        surfaceMember = element(qName("surfaceMember"), document, compositeSurface);
+        polygonWithPosList3D(document, surfaceMember, true);
+        
+        surfaceMember = element(qName("surfaceMember"), document, compositeSurface);
+        polygonWithPosList3D(document, surfaceMember, true);
+        
+        return compositeSurface;
+    }
+    
+    public static Element solid(Document document, Node parent) {
+        return solid(document, parent, false);
+    }
+    
+    public static Element solid(Document document, Node parent, boolean withInterior) {
+        Element solid = element(qName("Solid"), document, parent);
+        solid.setAttribute("srsDimension", "3");
+        
+        Element exterior = element(qName("exterior"), document, solid);
+        compositeSurface(document, exterior);
+        
+        if(withInterior) {
+            Element interior = element(qName("interior"), document, solid);
+            compositeSurface(document, interior);
+        }
+        
+        return solid;
     }
     
     public static Element feature(Document document, Node parent) {

@@ -18,6 +18,9 @@ package org.geotools.gml3;
 
 import javax.xml.namespace.QName;
 
+import org.geotools.factory.GeoTools;
+import org.geotools.factory.Hints;
+import org.geotools.geometry.GeometryBuilder;
 import org.geotools.gml2.FeatureTypeCache;
 import org.geotools.gml2.SrsSyntax;
 import org.geotools.gml2.bindings.GMLCoordTypeBinding;
@@ -31,6 +34,7 @@ import org.geotools.gml3.bindings.ArcTypeBinding;
 import org.geotools.gml3.bindings.BoundingShapeTypeBinding;
 import org.geotools.gml3.bindings.CircleTypeBinding;
 import org.geotools.gml3.bindings.ComplexSupportXSAnyTypeBinding;
+import org.geotools.gml3.bindings.CompositeSurfaceTypeBinding;
 import org.geotools.gml3.bindings.CurveArrayPropertyTypeBinding;
 import org.geotools.gml3.bindings.CurvePropertyTypeBinding;
 import org.geotools.gml3.bindings.CurveSegmentArrayPropertyTypeBinding;
@@ -72,6 +76,7 @@ import org.geotools.gml3.bindings.PolygonPropertyTypeBinding;
 import org.geotools.gml3.bindings.PolygonTypeBinding;
 import org.geotools.gml3.bindings.ReferenceTypeBinding;
 import org.geotools.gml3.bindings.RingTypeBinding;
+import org.geotools.gml3.bindings.SolidTypeBinding;
 import org.geotools.gml3.bindings.SurfaceArrayPropertyTypeBinding;
 import org.geotools.gml3.bindings.SurfacePatchArrayPropertyTypeBinding;
 import org.geotools.gml3.bindings.SurfacePropertyTypeBinding;
@@ -84,10 +89,12 @@ import org.geotools.gml3.bindings.TimePositionUnionBinding;
 import org.geotools.gml3.bindings.ext.CompositeCurveTypeBinding;
 import org.geotools.gml3.smil.SMIL20Configuration;
 import org.geotools.gml3.smil.SMIL20LANGConfiguration;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.xlink.XLINKConfiguration;
 import org.geotools.xml.Configuration;
 import org.geotools.xml.Parser;
 import org.geotools.xs.XS;
+import org.opengis.geometry.primitive.PrimitiveFactory;
 import org.picocontainer.MutablePicoContainer;
 
 import com.vividsolutions.jts.geom.CoordinateSequenceFactory;
@@ -148,6 +155,11 @@ public class GMLConfiguration extends Configuration {
      * The factory used to create geometries
      */
     private GeometryFactory geometryFactory;
+    
+    /**
+     * The builder used to create geometries 
+     */
+    private PrimitiveFactory primitiveFactory;
 
 
     public GMLConfiguration() {
@@ -330,7 +342,12 @@ public class GMLConfiguration extends Configuration {
                     org.geotools.gml3.bindings.ext.SurfacePropertyTypeBinding.class);
             container.registerComponentImplementation(GML.SurfaceType, 
                     org.geotools.gml3.bindings.ext.SurfaceTypeBinding.class);
+            
+            // extended bindings for solid support
+            container.registerComponentImplementation(GML.CompositeSurfaceType, CompositeSurfaceTypeBinding.class);
+            container.registerComponentImplementation(GML.SolidType, SolidTypeBinding.class);
         }
+        
     }
 
     /**
@@ -354,6 +371,9 @@ public class GMLConfiguration extends Configuration {
             CoordinateArraySequenceFactory.instance());
         container.registerComponentInstance(geometryFactory == null ? new GeometryFactory()
                 : geometryFactory);
+        
+        //geometry builder
+        container.registerComponentInstance(getPrimitiveFactory());
         
         container.registerComponentInstance(new GML3EncodingUtils());
         
@@ -398,4 +418,31 @@ public class GMLConfiguration extends Configuration {
         this.geometryFactory = geometryFactory;
     }
 
+    /**
+     * Retrieves the primitive factory used to build geometries
+     * 
+     * @return the primitiveFactory
+     */
+    public PrimitiveFactory getPrimitiveFactory() {
+        /*
+        if(primitiveFactory == null) {
+            Hints hints = GeoTools.getDefaultHints();
+            hints.put(Hints.CRS, DefaultGeographicCRS.WGS84_3D);
+            hints.put(Hints.GEOMETRY_VALIDATE, false);
+            GeometryBuilder geometryBuilder = new GeometryBuilder(hints);
+            primitiveFactory = geometryBuilder.getPrimitiveFactory();
+        }
+        */
+        
+        return primitiveFactory;
+    }
+    
+    /**
+     * Sets the geometry builder used to build geometry
+     * 
+     * @param primitiveFactory the geometryBuilder to set
+     */
+    public void setPrimitiveFactory(PrimitiveFactory primitiveFactory) {
+        this.primitiveFactory = primitiveFactory;
+    }
 }

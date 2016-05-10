@@ -16,23 +16,15 @@
  */
 package org.geotools.geometry.jts;
 
-/*import com.polexis.go.FactoryManager;
-import com.polexis.go.typical.coord.LatLonAlt;
-import com.polexis.referencing.cs.CSUtils;
-*/
-
-// there are many more vividsolutions JTS depedecies further in the code
-import com.vividsolutions.jts.geom.Coordinate;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import javax.measure.unit.NonSI;
-
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.cs.AxisDirection;
-import org.opengis.referencing.cs.CoordinateSystem;
+import org.geotools.factory.Hints;
+import org.geotools.geometry.GeometryFactoryFinder;
+import org.geotools.geometry.jts.spatialschema.geometry.DirectPositionImpl;
+import org.geotools.geometry.jts.spatialschema.geometry.geometry.GeometryFactoryImpl;
+import org.geotools.geometry.jts.spatialschema.geometry.primitive.PrimitiveFactoryImpl;
 import org.opengis.geometry.DirectPosition;
 import org.opengis.geometry.Envelope;
 import org.opengis.geometry.Geometry;
@@ -45,19 +37,19 @@ import org.opengis.geometry.primitive.Curve;
 import org.opengis.geometry.primitive.Point;
 import org.opengis.geometry.primitive.PrimitiveFactory;
 import org.opengis.geometry.primitive.Ring;
+import org.opengis.geometry.primitive.Surface;
 import org.opengis.geometry.primitive.SurfaceBoundary;
-import org.geotools.geometry.jts.spatialschema.geometry.DirectPositionImpl;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.cs.AxisDirection;
+import org.opengis.referencing.cs.CoordinateSystem;
 
-//**This comment is left from the polexis implementation**
-// This class depends on only two non-GO1 objects.  FactoryManager is used to
-// get the factories we need to create the objects.  CSUtils is used to get
-// the right axis (for EAST, NORTH, and UP) when assigning the ordinates of
-// a result DiretPosition.
+/*import com.polexis.go.FactoryManager;
+import com.polexis.go.typical.coord.LatLonAlt;
+import com.polexis.referencing.cs.CSUtils;
+*/
 
-//geotools dependencies
-import org.geotools.factory.BasicFactories;
-import org.geotools.factory.Hints;
-import org.geotools.geometry.GeometryFactoryFinder;
+// there are many more vividsolutions JTS depedecies further in the code
+import com.vividsolutions.jts.geom.Coordinate;
 
 /**
  * Class with static methods to help the conversion process between JTS
@@ -231,7 +223,10 @@ public final class JTSUtils {
             CoordinateReferenceSystem crs) {
         
         Hints hints = new Hints( Hints.CRS, crs );
-        GeometryFactory gf = GeometryFactoryFinder.getGeometryFactory(hints);        
+        GeometryFactory gf = GeometryFactoryFinder.getGeometryFactory(hints);
+        if (gf.getCoordinateReferenceSystem() != crs) {
+            gf = new GeometryFactoryImpl(crs);
+        }
          
         double [] vertices;
         if (crs == null)
@@ -303,6 +298,12 @@ public final class JTSUtils {
         Hints hints = new Hints( Hints.CRS, crs );
         PrimitiveFactory pf = GeometryFactoryFinder.getPrimitiveFactory(hints);
         GeometryFactory gf = GeometryFactoryFinder.getGeometryFactory(hints);
+        if (pf.getCoordinateReferenceSystem() != crs) {
+            pf = new PrimitiveFactoryImpl(crs);
+        }
+        if (gf.getCoordinateReferenceSystem() != crs) {
+            gf = new GeometryFactoryImpl(crs);
+        }
         
         LineString ls = gf.createLineString(new ArrayList());
         List pointList = ls.getControlPoints();
@@ -316,6 +317,31 @@ public final class JTSUtils {
         // Cast below can be removed when GeoAPI will be allowed to abandon Java 1.4 support.
         ((List) result.getGenerators()).add(curve);
         return result;
+    }
+    
+    public static Surface polygonToSurface(com.vividsolutions.jts.geom.Polygon jtsPolygon,
+            CoordinateReferenceSystem crs) {
+        Hints hints = new Hints( Hints.CRS, crs );
+        PrimitiveFactory pf = GeometryFactoryFinder.getPrimitiveFactory(hints);
+        if (pf.getCoordinateReferenceSystem() != crs) {
+            pf = new PrimitiveFactoryImpl(crs);
+        }
+        
+        Ring externalRing = linearRingToRing(
+                (com.vividsolutions.jts.geom.LinearRing) jtsPolygon.getExteriorRing(),
+                crs);
+        int n = jtsPolygon.getNumInteriorRing();
+        ArrayList internalRings = new ArrayList();
+        for (int i=0; i<n; i++) {
+            internalRings.add(linearRingToRing(
+                (com.vividsolutions.jts.geom.LinearRing) jtsPolygon.getInteriorRingN(i),
+                crs));
+        }
+        SurfaceBoundary boundary = pf.createSurfaceBoundary(externalRing,
+                internalRings);
+        Surface surface = pf.createSurface(boundary);
+
+        return surface;
     }
 
     /**

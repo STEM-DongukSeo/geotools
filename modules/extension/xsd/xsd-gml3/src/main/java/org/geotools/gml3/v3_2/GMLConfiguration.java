@@ -72,6 +72,9 @@ import org.geotools.gml3.v3_2.bindings.DoubleListBinding;
 import org.geotools.gml3.v3_2.bindings.EnvelopeTypeBinding;
 import org.geotools.gml3.v3_2.bindings.GML32EncodingUtils;
 import org.geotools.gml3.v3_2.bindings.LinearRingTypeBinding;
+import org.geotools.gml3.v3_2.bindings.ShellPropertyTypeBinding;
+import org.geotools.gml3.v3_2.bindings.ShellTypeBinding;
+import org.geotools.gml3.v3_2.bindings.SolidTypeBinding;
 import org.geotools.xml.Configuration;
 import org.geotools.xs.XS;
 import org.picocontainer.MutablePicoContainer;
@@ -279,6 +282,11 @@ public class GMLConfiguration extends Configuration {
                     org.geotools.gml3.bindings.ext.SurfacePropertyTypeBinding.class);
             container.registerComponentImplementation(GML.SurfaceType, 
                     org.geotools.gml3.bindings.ext.SurfaceTypeBinding.class);
+            
+            // extended bindings for solid support
+            container.registerComponentImplementation(GML.ShellType, ShellTypeBinding.class);
+            container.registerComponentImplementation(GML.ShellPropertyType, ShellPropertyTypeBinding.class);
+            container.registerComponentImplementation(GML.SolidType, SolidTypeBinding.class);
         }
     }
     
