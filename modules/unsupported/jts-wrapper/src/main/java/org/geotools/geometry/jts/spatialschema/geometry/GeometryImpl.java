@@ -38,6 +38,7 @@ import org.opengis.referencing.operation.TransformException;
 import org.opengis.util.Cloneable;
 
 import com.vividsolutions.jts.geom.CoordinateSequence;
+import com.vividsolutions.jts.geom.LineString;
 
 /**
  * Base class for our JTS-based implementation of the various ISO 19107 geometry
@@ -256,8 +257,19 @@ public abstract class GeometryImpl
             // If d == 2, then the boundary is a collection of rings.
             // In particular, the JTS tests indicate that it'll be a
             // MultiLineString.
-            com.vividsolutions.jts.geom.MultiLineString mls =
-                (com.vividsolutions.jts.geom.MultiLineString) jtsBoundary;
+            
+            // Donguk Seo
+            // Original code didn't consider when the jtsBoundary is LineString.
+            // If the jtsBoundary is LineString, create a MultiLineString with the jtsBoundary.
+            com.vividsolutions.jts.geom.MultiLineString mls = null;
+            if (jtsBoundary instanceof com.vividsolutions.jts.geom.MultiLineString) {
+                mls = (com.vividsolutions.jts.geom.MultiLineString) jtsBoundary;
+            } else if (jtsBoundary instanceof com.vividsolutions.jts.geom.LineString) {
+                mls = new com.vividsolutions.jts.geom.MultiLineString(
+                        new com.vividsolutions.jts.geom.LineString[]{
+                                (com.vividsolutions.jts.geom.LineString) jtsBoundary },
+                                jtsBoundary.getFactory());
+            }
             int n = mls.getNumGeometries();
             CoordinateReferenceSystem crs = getCoordinateReferenceSystem();
             Ring exteriorRing = JTSUtils.linearRingToRing(
@@ -265,7 +277,7 @@ public abstract class GeometryImpl
                 crs);
             Ring [] interiorRings = new Ring[n-1];
             for (int i=1; i<n; i++) {
-                interiorRings[n-1] = JTSUtils.linearRingToRing(
+                interiorRings[i-1] = JTSUtils.linearRingToRing(
                     (com.vividsolutions.jts.geom.LineString)
                     	mls.getGeometryN(i),
                     crs);
@@ -454,6 +466,9 @@ public abstract class GeometryImpl
         return result;
     }
     
+    /**
+     * Expands a envelope with a 3-dimension geometry
+     */
     public Envelope expandEnvelopeWithZ(com.vividsolutions.jts.geom.Geometry jtsGeom, Envelope envelope) {
         if (jtsGeom instanceof com.vividsolutions.jts.geom.Point) {
             envelope = expandEnvelopeWithZ((com.vividsolutions.jts.geom.Point) jtsGeom, envelope);
