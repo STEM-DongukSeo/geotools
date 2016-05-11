@@ -20,14 +20,13 @@ import javax.xml.namespace.QName;
 
 import org.geotools.factory.GeoTools;
 import org.geotools.factory.Hints;
-import org.geotools.geometry.GeometryBuilder;
 import org.geotools.gml2.FeatureTypeCache;
 import org.geotools.gml2.SrsSyntax;
 import org.geotools.gml2.bindings.GMLCoordTypeBinding;
 import org.geotools.gml2.bindings.GMLCoordinatesTypeBinding;
 import org.geotools.gml3.bindings.AbstractFeatureCollectionTypeBinding;
 import org.geotools.gml3.bindings.AbstractFeatureTypeBinding;
-import org.geotools.gml3.bindings.AbstractGeometryTypeBinding;
+import org.geotools.gml3.bindings.AbstractGeometryTypeBindingExt;
 import org.geotools.gml3.bindings.AbstractRingPropertyTypeBinding;
 import org.geotools.gml3.bindings.ArcStringTypeBinding;
 import org.geotools.gml3.bindings.ArcTypeBinding;
@@ -218,7 +217,7 @@ public class GMLConfiguration extends Configuration {
         container.registerComponentImplementation(GML.AbstractFeatureCollectionType,
             AbstractFeatureCollectionTypeBinding.class);
         container.registerComponentImplementation(GML.AbstractGeometryType,
-            AbstractGeometryTypeBinding.class);
+            AbstractGeometryTypeBindingExt.class);
         container.registerComponentImplementation(GML.AbstractRingPropertyType,
             AbstractRingPropertyTypeBinding.class);
         container.registerComponentImplementation(GML.BoundingShapeType,
@@ -344,6 +343,8 @@ public class GMLConfiguration extends Configuration {
                     org.geotools.gml3.bindings.ext.SurfaceTypeBinding.class);
             
             // extended bindings for solid support
+            container.registerComponentImplementation(GML.SurfacePropertyType,
+                    org.geotools.gml3.bindings.ext.SurfacePropertyTypeBindingExt.class);
             container.registerComponentImplementation(GML.CompositeSurfaceType, CompositeSurfaceTypeBinding.class);
             container.registerComponentImplementation(GML.SolidType, SolidTypeBinding.class);
         }
@@ -424,15 +425,18 @@ public class GMLConfiguration extends Configuration {
      * @return the primitiveFactory
      */
     public PrimitiveFactory getPrimitiveFactory() {
-        /*
-        if(primitiveFactory == null) {
+        // Class of primitiveFactory must be org.geotools.geometry.iso.primitive.PrimitiveFactoryImpl
+        if(primitiveFactory == null ||
+                !(primitiveFactory instanceof org.geotools.geometry.iso.primitive.PrimitiveFactoryImpl)) {
             Hints hints = GeoTools.getDefaultHints();
             hints.put(Hints.CRS, DefaultGeographicCRS.WGS84_3D);
             hints.put(Hints.GEOMETRY_VALIDATE, false);
+            /*
             GeometryBuilder geometryBuilder = new GeometryBuilder(hints);
             primitiveFactory = geometryBuilder.getPrimitiveFactory();
+            */
+            primitiveFactory = new org.geotools.geometry.iso.primitive.PrimitiveFactoryImpl(hints);
         }
-        */
         
         return primitiveFactory;
     }

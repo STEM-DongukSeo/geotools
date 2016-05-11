@@ -17,6 +17,8 @@
 package org.geotools.geometry.jts;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -31,9 +33,12 @@ import org.opengis.geometry.Geometry;
 import org.opengis.geometry.aggregate.MultiPrimitive;
 import org.opengis.geometry.coordinate.GeometryFactory;
 import org.opengis.geometry.coordinate.LineString;
+import org.opengis.geometry.coordinate.PointArray;
 import org.opengis.geometry.coordinate.Polygon;
 import org.opengis.geometry.coordinate.PolyhedralSurface;
+import org.opengis.geometry.coordinate.Position;
 import org.opengis.geometry.primitive.Curve;
+import org.opengis.geometry.primitive.OrientableCurve;
 import org.opengis.geometry.primitive.Point;
 import org.opengis.geometry.primitive.PrimitiveFactory;
 import org.opengis.geometry.primitive.Ring;
@@ -278,6 +283,79 @@ public final class JTSUtils {
                     }
                 }
             }
+        }
+    }
+    
+    public static com.vividsolutions.jts.geom.LinearRing ringToLinearRing(Ring ring) {
+        List<OrientableCurve> generators = ring.getGenerators();
+        Iterator elementIter = generators.iterator();
+
+        Curve element = (Curve) elementIter.next();
+        LineString result = element.asLineString(0.0, 0.0);
+        PointArray resultPoints = result.getControlPoints();
+        while (elementIter.hasNext()) {
+            element = (Curve) elementIter.next();
+            LineString nextLine = element.asLineString(0.0, 0.0);
+            
+            if (nextLine.getEndPoint().equals(result.getStartPoint())) {
+                LinkedList<Position> posToAdd = new LinkedList<Position>(nextLine.getControlPoints());
+                posToAdd.removeLast();
+                resultPoints.addAll(0, posToAdd);
+            } else if (result.getEndPoint().equals(nextLine.getStartPoint())) {
+                LinkedList<Position> posToAdd = new LinkedList<Position>(nextLine.getControlPoints());
+                posToAdd.removeFirst();
+                resultPoints.addAll(posToAdd);
+            } else {
+                throw new IllegalArgumentException("The LineString do not agree in a start and end point");
+            }
+        }
+        
+        Coordinate[] coordinates = new Coordinate[resultPoints.size()];
+        for (int i = 0; i < resultPoints.size(); i++) {
+            coordinates[i] = directPositionToCoordinate((DirectPosition) resultPoints.get(i));
+        }
+        
+        return GEOMETRY_FACTORY.createLinearRing(coordinates);
+    }
+    
+    public static com.vividsolutions.jts.geom.Polygon polygonToJTSPolygon(Polygon polygon) {
+        SurfaceBoundary boundary = polygon.getBoundary();
+        Ring exteriorRing = boundary.getExterior();                
+        List<Ring> interiorRings = boundary.getInteriors();
+
+        com.vividsolutions.jts.geom.LinearRing jtsExteriorRing = ringToLinearRing(exteriorRing);
+        com.vividsolutions.jts.geom.LinearRing[] jtsInteriorRings = null;
+        if (interiorRings != null) {
+            jtsInteriorRings = new com.vividsolutions.jts.geom.LinearRing[interiorRings.size()];
+            for (int i = 0; i < interiorRings.size(); i++) {
+                jtsInteriorRings[i] = ringToLinearRing(interiorRings.get(i));
+            }
+        }
+        
+        return GEOMETRY_FACTORY.createPolygon(jtsExteriorRing, jtsInteriorRings);
+    }
+    
+    public static com.vividsolutions.jts.geom.Geometry surfaceToPolygon(Surface surface) {
+        List patches = surface.getPatches();
+        List polygons = new ArrayList();
+        
+        Iterator patchIter = patches.iterator();
+        while (patchIter.hasNext()) {
+            Object patch = patchIter.next();
+            if (patch instanceof Polygon) {
+                Polygon polygon = (Polygon) patch;
+                com.vividsolutions.jts.geom.Polygon jtsPolygon = polygonToJTSPolygon(polygon);
+                
+                polygons.add(jtsPolygon);
+            }
+        }
+        
+        if (polygons.size() == 1) {
+            return (com.vividsolutions.jts.geom.Polygon) polygons.get(0);
+        } else {
+            com.vividsolutions.jts.geom.Polygon[] polygonMembers = new com.vividsolutions.jts.geom.Polygon[polygons.size()];
+            polygons.toArray(polygonMembers);
+            return GEOMETRY_FACTORY.createMultiPolygon(polygonMembers);
         }
     }
 
