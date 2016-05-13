@@ -125,6 +125,10 @@ public class AbstractGeometryTypeBinding extends AbstractComplexBinding {
     
     public Object getProperty(Object object, QName name)
         throws Exception {
+        if(object instanceof org.geotools.geometry.iso.root.GeometryImpl) {
+            return null;
+        }        
+        
         Geometry geometry = (Geometry) object;
         
         if ("srsName".equals(name.getLocalPart())) {
