@@ -424,15 +424,17 @@ public class GMLConfiguration extends Configuration {
      * @return the primitiveFactory
      */
     public PrimitiveFactory getPrimitiveFactory() {
-        /*
+        // Class of primitiveFactory must be org.geotools.geometry.iso.primitive.PrimitiveFactoryImpl
         if(primitiveFactory == null) {
             Hints hints = GeoTools.getDefaultHints();
             hints.put(Hints.CRS, DefaultGeographicCRS.WGS84_3D);
             hints.put(Hints.GEOMETRY_VALIDATE, false);
+            /*
             GeometryBuilder geometryBuilder = new GeometryBuilder(hints);
             primitiveFactory = geometryBuilder.getPrimitiveFactory();
+            */
+            primitiveFactory = new org.geotools.geometry.iso.primitive.PrimitiveFactoryImpl(hints);
         }
-        */
         
         return primitiveFactory;
     }
