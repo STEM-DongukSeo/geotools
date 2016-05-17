@@ -18,6 +18,8 @@ package org.geotools.gml3.v3_2;
 
 import javax.xml.namespace.QName;
 
+import org.geotools.factory.GeoTools;
+import org.geotools.factory.Hints;
 import org.geotools.gml2.SrsSyntax;
 import org.geotools.gml2.bindings.GMLCoordinatesTypeBinding;
 import org.geotools.gml3.bindings.AbstractFeatureCollectionTypeBinding;
@@ -75,8 +77,10 @@ import org.geotools.gml3.v3_2.bindings.LinearRingTypeBinding;
 import org.geotools.gml3.v3_2.bindings.ShellPropertyTypeBinding;
 import org.geotools.gml3.v3_2.bindings.ShellTypeBinding;
 import org.geotools.gml3.v3_2.bindings.SolidTypeBinding;
+import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.xml.Configuration;
 import org.geotools.xs.XS;
+import org.opengis.geometry.primitive.PrimitiveFactory;
 import org.picocontainer.MutablePicoContainer;
 
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -282,12 +286,12 @@ public class GMLConfiguration extends Configuration {
                     org.geotools.gml3.bindings.ext.SurfacePropertyTypeBinding.class);
             container.registerComponentImplementation(GML.SurfaceType, 
                     org.geotools.gml3.bindings.ext.SurfaceTypeBinding.class);
-            
-            // extended bindings for solid support
-            container.registerComponentImplementation(GML.ShellType, ShellTypeBinding.class);
-            container.registerComponentImplementation(GML.ShellPropertyType, ShellPropertyTypeBinding.class);
-            container.registerComponentImplementation(GML.SolidType, SolidTypeBinding.class);
         }
+
+        // extended bindings for solid support
+        container.registerComponentImplementation(GML.ShellType, ShellTypeBinding.class);
+        container.registerComponentImplementation(GML.ShellPropertyType, ShellPropertyTypeBinding.class);
+        container.registerComponentImplementation(GML.SolidType, SolidTypeBinding.class);
     }
     
     @Override
@@ -333,5 +337,24 @@ public class GMLConfiguration extends Configuration {
      */
     public void setGeometryFactory(GeometryFactory geometryFactory) {
         delegate.setGeometryFactory(geometryFactory);
+    }
+    
+    /**
+     * Retrieves the primitive factory used to build geometries
+     * 
+     * @return the primitiveFactory
+     */
+    public PrimitiveFactory getPrimitiveFactory() {
+        // Class of primitiveFactory must be org.geotools.geometry.iso.primitive.PrimitiveFactoryImpl        
+        return delegate.getPrimitiveFactory();
+    }
+    
+    /**
+     * Sets the geometry builder used to build geometry
+     * 
+     * @param primitiveFactory the geometryBuilder to set
+     */
+    public void setPrimitiveFactory(PrimitiveFactory primitiveFactory) {
+        delegate.setPrimitiveFactory(primitiveFactory);
     }
 } 
