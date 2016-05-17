@@ -20,7 +20,7 @@ import org.geotools.factory.GeoTools;
 import org.geotools.factory.Hints;
 import org.geotools.geometry.iso.primitive.PrimitiveFactoryImpl;
 import org.geotools.gml3.GML;
-import org.geotools.gml3.GML3TestSupportExtendedArcSurface;
+import org.geotools.gml3.GML3TestSupport;
 import org.geotools.gml3.GMLConfiguration;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.xml.Configuration;
@@ -36,10 +36,15 @@ import org.w3c.dom.NodeList;
  *
  * @source $URL$
  */
-public class SolidTypeBindingTest extends GML3TestSupportExtendedArcSurface {
+public class SolidTypeBindingTest extends GML3TestSupport {
+    
+    @Override
+    protected boolean enableExtendedArcSurfaceSupport() {
+        return true;
+    }
 
     public void testEncode() throws Exception {    
-        GML3SolidMockData.solid(document, document);
+        GML3SolidMockData.solid(document, document, false);
         Solid solid = (Solid) parse();
         Geometry geometry = (Geometry) solid;
         //GML3EncodingUtils.setID(geometry, "geometry");
@@ -77,7 +82,7 @@ public class SolidTypeBindingTest extends GML3TestSupportExtendedArcSurface {
     }
     
     public void testParse() throws Exception {
-        GML3SolidMockData.solid(document, document);
+        GML3SolidMockData.solid(document, document, false);
         Solid solid = (Solid) parse();
         
         assertNotNull(solid);
