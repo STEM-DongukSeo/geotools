@@ -38,8 +38,6 @@ import org.opengis.geometry.primitive.Surface;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.GeometryFactory;
-import com.vividsolutions.jts.geom.LineString;
-import com.vividsolutions.jts.geom.Polygon;
 
 /**
  * Binding object for the type http://www.opengis.net/gml:SolidType.
@@ -50,8 +48,8 @@ import com.vividsolutions.jts.geom.Polygon;
  */
 public class SolidTypeBinding extends AbstractComplexBinding {
 
-    GeometryFactory gf;
-    PrimitiveFactory pf;
+    protected GeometryFactory gf;
+    protected PrimitiveFactory pf;
     
     /*
     public SolidTypeBinding(GeometryFactory gf) {
@@ -103,14 +101,16 @@ public class SolidTypeBinding extends AbstractComplexBinding {
         }
         
         CoordinateReferenceSystem crs = (CoordinateReferenceSystem) exterior.getUserData();
-        if (crs == null) {
+        if (crs == null || !(crs instanceof CoordinateReferenceSystem)) {
             crs = (CoordinateReferenceSystem) DefaultGeographicCRS.WGS84_3D;
         }
         
-        // Convert the Polygon from the JTSGeometry object to the ISO Geometry
-        // Create the exterior Shell by the converted polygons
+        /**
+         * Convert a Polygon from the JTSGeometry to a Surface of ISOGeometry.
+         * Create the exterior Shell by the converted surfaces.
+         */
         List<OrientableSurface> exteriorSurfaces = new ArrayList<OrientableSurface>();
-        for (int i = 0; i < exterior.getNumGeometries(); i++) {         
+        for (int i = 0; i < exterior.getNumGeometries(); i++) {
             Surface surface = JTSUtils.polygonToSurface((com.vividsolutions.jts.geom.Polygon) exterior.getGeometryN(i), crs);
             exteriorSurfaces.add(surface);
         }
@@ -118,11 +118,11 @@ public class SolidTypeBinding extends AbstractComplexBinding {
         
         // Create the interior Shells
         List<Shell> interiorShells = null;
-        if(interiors != null) {
+        if (interiors != null) {
             for (int i = 0; i < interiors.length; i++) {
                 List<OrientableSurface> interiorSurfaces = new ArrayList<OrientableSurface>();
                 com.vividsolutions.jts.geom.MultiPolygon interior = interiors[i];
-                for (int j = 0; j < interior.getNumGeometries(); j++) {         
+                for (int j = 0; j < interior.getNumGeometries(); j++) {
                     Surface surface = JTSUtils.polygonToSurface((com.vividsolutions.jts.geom.Polygon) interior.getGeometryN(j), crs);
                     interiorSurfaces.add(surface);
                 }
@@ -130,8 +130,8 @@ public class SolidTypeBinding extends AbstractComplexBinding {
                 interiorShells.add(interiorShell);
             }
         }
-                
-        // Create the SolidBoundary and Solid Object of ISOGeometry
+        
+        // Create a SolidBoundary and a Solid Object of ISOGeometry
         SolidBoundary solidBoundary = pfImpl.createSolidBoundary(exteriorShell, interiorShells);
         Solid solid = pfImpl.createSolid(solidBoundary);
         
@@ -144,6 +144,9 @@ public class SolidTypeBinding extends AbstractComplexBinding {
         SolidBoundary boundary = solid.getBoundary();
 
         if ("exterior".equals(name.getLocalPart())) {
+            Shell exterior = boundary.getExterior();
+            List<OrientableSurface> generators = (List<OrientableSurface>) exterior.getGenerators();
+            
             return boundary.getExterior();
         }
 

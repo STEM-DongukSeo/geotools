@@ -425,7 +425,8 @@ public class GMLConfiguration extends Configuration {
      */
     public PrimitiveFactory getPrimitiveFactory() {
         // Class of primitiveFactory must be org.geotools.geometry.iso.primitive.PrimitiveFactoryImpl
-        if(primitiveFactory == null) {
+        if(primitiveFactory == null ||
+                !(primitiveFactory instanceof org.geotools.geometry.iso.primitive.PrimitiveFactoryImpl)) {
             Hints hints = GeoTools.getDefaultHints();
             hints.put(Hints.CRS, DefaultGeographicCRS.WGS84_3D);
             hints.put(Hints.GEOMETRY_VALIDATE, false);

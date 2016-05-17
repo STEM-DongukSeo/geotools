@@ -64,7 +64,7 @@ public class CompositeSurfaceTypeBinding extends AbstractComplexBinding {
      * @generated modifiable
      */
     public Class getType() {
-        return Polygon.class;
+        return MultiPolygon.class;
     }
 
     public int getExecutionMode() {
