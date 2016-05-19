@@ -68,26 +68,16 @@ public class SolidTypeBindingTest extends GML32TestSupport {
         System.out.println(volume);
     }
     
-    public void testEncode() throws Exception {    
+    public void testEncode() throws Exception {
         GML3SolidMockData.solid(document, document, true);
         Solid solid = (Solid) parse();
         Geometry geometry = (Geometry) solid;
-        //GML3EncodingUtils.setID(geometry, "geometry");
         Document dom = encode(geometry, GML.Solid);
         
         NodeList children = dom.getElementsByTagNameNS(GML.NAMESPACE, GML.Solid.getLocalPart());
-        assertEquals(0, children.getLength());
-        /*
-        Geometry geometry = GML3MockData.multiPolygon();
-        GML3EncodingUtils.setID(geometry, "geometry");
-        Document dom = encode(geometry, GML.MultiSurface);
-        // print(dom);
-        assertEquals("geometry", getID(dom.getDocumentElement()));
-        assertEquals(2, dom.getElementsByTagNameNS(GML.NAMESPACE, "surfaceMember").getLength());
-        NodeList children = dom.getElementsByTagNameNS(GML.NAMESPACE, GML.Polygon.getLocalPart());
-        assertEquals(2, children.getLength());
-        assertEquals("geometry.1", getID(children.item(0)));
-        assertEquals("geometry.2", getID(children.item(1)));
-        */
+        assertEquals(1, children.getLength());
+        assertEquals(6, dom.getElementsByTagNameNS(GML.NAMESPACE, "surfaceMember").getLength());
+        
+        print(dom);
     }
 }

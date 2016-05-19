@@ -16,27 +16,20 @@
  */
 package org.geotools.gml3.v3_2.bindings;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.namespace.QName;
 
-import org.geotools.geometry.GeometryBuilder;
 import org.geotools.geometry.iso.primitive.PrimitiveFactoryImpl;
-import org.geotools.geometry.jts.JTSUtils;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.util.UnsupportedImplementationException;
 import org.geotools.xml.ElementInstance;
 import org.geotools.xml.Node;
-import org.opengis.geometry.primitive.OrientableSurface;
 import org.opengis.geometry.primitive.PrimitiveFactory;
 import org.opengis.geometry.primitive.Shell;
 import org.opengis.geometry.primitive.Solid;
 import org.opengis.geometry.primitive.SolidBoundary;
-import org.opengis.geometry.primitive.Surface;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.GeometryFactory;
 
 /**
  * Binding object for the type http://www.opengis.net/gml:SurfaceType.
@@ -96,8 +89,8 @@ import com.vividsolutions.jts.geom.MultiPolygon;
  */
 public class SolidTypeBinding extends org.geotools.gml3.bindings.SolidTypeBinding {
     
-    public SolidTypeBinding(PrimitiveFactory pf) {
-        super(pf);
+    public SolidTypeBinding(GeometryFactory gf, PrimitiveFactory pf) {
+        super(gf, pf);
     }
 
     @Override
@@ -111,7 +104,7 @@ public class SolidTypeBinding extends org.geotools.gml3.bindings.SolidTypeBindin
         Node interiorNode = node.getChild("interior");
         List interiorShells = null;
         if(interiorNode != null) {
-            interiorShells = node.getChild("interior").getChildValues("Shell");
+            interiorShells = interiorNode.getChildValues("Shell");
         }
         
         // Create a SolidBoundary and a Solid Object of ISOGeometry

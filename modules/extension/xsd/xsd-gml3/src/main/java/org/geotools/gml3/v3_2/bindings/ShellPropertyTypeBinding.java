@@ -16,6 +16,8 @@
  */
 package org.geotools.gml3.v3_2.bindings;
 
+import java.util.List;
+
 import javax.xml.namespace.QName;
 
 import org.geotools.gml3.XSDIdRegistry;
@@ -25,6 +27,8 @@ import org.geotools.gml3.v3_2.GML;
 import org.geotools.xml.ElementInstance;
 import org.geotools.xml.Node;
 import org.opengis.geometry.primitive.Shell;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
@@ -49,6 +53,11 @@ public class ShellPropertyTypeBinding extends GeometryPropertyTypeBinding {
     public QName getTarget() {
         return GML.ShellPropertyType;
     }
+    
+    @Override
+    public int getExecutionMode() {
+        return OVERRIDE;
+    }
 
     public Class getGeometryType() {
         return Shell.class;
@@ -60,15 +69,27 @@ public class ShellPropertyTypeBinding extends GeometryPropertyTypeBinding {
         
         return surface;
     }
-
+    
+    @Override
+    public Element encode(Object object, Document document, Element value) throws Exception {
+        return value;
+    }
+    
     @Override
     public Object getProperty(Object object, QName name) throws Exception {
-        if ("_Surface".equals(name.getLocalPart()) || "AbstractSurface".equals(name.getLocalPart())) {
-            MultiPolygon multiPolygon = (MultiPolygon) object;
-            // this MultiPolygon consists of a single Polygon wrapped in a MultiPolygon:
-            return multiPolygon.getGeometryN(0);
+        if ("Shell".equals(name.getLocalPart())) {
+            return (Shell) object;
         }
 
-        return super.getProperty(object, name);
+        return null;
     }
+
+    @Override
+    /**
+     * A ISOGeometry can't have properties.
+     */
+    public List getProperties(Object object) throws Exception {
+        return null;
+    }    
+    
 }

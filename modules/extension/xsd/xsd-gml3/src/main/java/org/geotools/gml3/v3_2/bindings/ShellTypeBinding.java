@@ -17,6 +17,7 @@
 package org.geotools.gml3.v3_2.bindings;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.namespace.QName;
@@ -47,13 +48,9 @@ public class ShellTypeBinding extends AbstractComplexBinding {
 
     GeometryFactory gf;
     PrimitiveFactory pf;
-    /*
-    public ShellTypeBinding(GeometryFactory gf) {
-        this.gf = gf;
-    }
-    */
     
-    public ShellTypeBinding(PrimitiveFactory pf) {
+    public ShellTypeBinding(GeometryFactory gf, PrimitiveFactory pf) {
+        this.gf = gf;
         this.pf = pf;
     }
     
@@ -119,6 +116,37 @@ public class ShellTypeBinding extends AbstractComplexBinding {
 
     @Override
     public Object getProperty(Object object, QName name) throws Exception {
+        Shell shell = (Shell) object;
+        
+        if ("surfaceMember".equals(name.getLocalPart())) {
+            List elements = (List) shell.getElements();
+            
+            List polygons = new ArrayList();
+            Iterator iter = elements.iterator();
+            while (iter.hasNext()) {
+                OrientableSurface surface = (OrientableSurface) iter.next();
+                Object geometry = JTSUtils.surfaceToPolygon((Surface) surface);
+                
+                if (geometry instanceof com.vividsolutions.jts.geom.Polygon) {
+                    polygons.add(geometry);
+                } else if (geometry instanceof com.vividsolutions.jts.geom.MultiPolygon) {
+                    com.vividsolutions.jts.geom.MultiPolygon multiPolygon =
+                            (com.vividsolutions.jts.geom.MultiPolygon) geometry;
+                    
+                    for (int i = 0; i < multiPolygon.getNumGeometries(); i++) {
+                        polygons.add(multiPolygon.getGeometryN(i));
+                    }
+                }
+            }
+            
+            com.vividsolutions.jts.geom.Polygon[] polygonMembers =
+                    new com.vividsolutions.jts.geom.Polygon[polygons.size()];
+            polygons.toArray(polygonMembers);
+            //com.vividsolutions.jts.geom.MultiPolygon multiPolygon =
+                    gf.createMultiPolygon(polygonMembers);
+            return polygonMembers;
+        }
+        
         return null;
     }
 }
