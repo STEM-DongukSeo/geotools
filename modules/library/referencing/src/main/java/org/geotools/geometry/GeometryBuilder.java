@@ -419,33 +419,6 @@ public class GeometryBuilder {
 		 */
 		return getPrimitiveFactory().createRing(orientableCurves);
 	}
-	/*
-	public Shell createShell(List<OrientableSurface> orientableSurfaces)
-	        throws MismatchedReferenceSystemException, MismatchedDimensionException {
-	    PrimitiveFactory pf = getPrimitiveFactory();
-            
-            if(!(pf instanceof PrimitiveFactoryImpl)) {
-                //throw new UnsupportedImplementationException("Not implemented createShell(Shell exterior, List<Shell> interiors)");
-            }
-
-            PrimitiveFactoryImpl pfImpl = (PrimitiveFactoryImpl) pf;
-            
-            return pfImpl.createShell(orientableSurfaces);
-	}
-
-        public SolidBoundary createSolidBoundary(Shell exterior, List<Shell> interiors)
-                throws MismatchedReferenceSystemException, MismatchedDimensionException {
-            PrimitiveFactory pf = getPrimitiveFactory();
-            
-            if(!(pf instanceof PrimitiveFactoryImpl)) {
-                //throw new UnsupportedImplementationException("Not implemented createSolidBoundary(Shell exterior, List<Shell> interiors)");
-            }
-
-            PrimitiveFactoryImpl pfImpl = (PrimitiveFactoryImpl) pf;
-            
-            return pfImpl.createSolidBoundary(exterior, interiors);
-        }
-        */
 
 	public Solid createSolid(SolidBoundary boundary) throws MismatchedReferenceSystemException, MismatchedDimensionException {
 		return getPrimitiveFactory().createSolid(boundary);
