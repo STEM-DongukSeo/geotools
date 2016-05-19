@@ -43,29 +43,6 @@ public class SolidTypeBindingTest extends GML3TestSupport {
         return true;
     }
 
-    public void testEncode() throws Exception {    
-        GML3SolidMockData.solid(document, document, false);
-        Solid solid = (Solid) parse();
-        Geometry geometry = (Geometry) solid;
-        //GML3EncodingUtils.setID(geometry, "geometry");
-        Document dom = encode(geometry, GML.Solid);
-        
-        NodeList children = dom.getElementsByTagNameNS(GML.NAMESPACE, GML.Solid.getLocalPart());
-        assertEquals(0, children.getLength());
-        /*
-        Geometry geometry = GML3MockData.multiPolygon();
-        GML3EncodingUtils.setID(geometry, "geometry");
-        Document dom = encode(geometry, GML.MultiSurface);
-        // print(dom);
-        assertEquals("geometry", getID(dom.getDocumentElement()));
-        assertEquals(2, dom.getElementsByTagNameNS(GML.NAMESPACE, "surfaceMember").getLength());
-        NodeList children = dom.getElementsByTagNameNS(GML.NAMESPACE, GML.Polygon.getLocalPart());
-        assertEquals(2, children.getLength());
-        assertEquals("geometry.1", getID(children.item(0)));
-        assertEquals("geometry.2", getID(children.item(1)));
-        */
-    }
-
     @Override
     protected Configuration createConfiguration() {
         Hints hints = GeoTools.getDefaultHints();
@@ -84,6 +61,7 @@ public class SolidTypeBindingTest extends GML3TestSupport {
     public void testParse() throws Exception {
         GML3SolidMockData.solid(document, document, false);
         Solid solid = (Solid) parse();
+        //print(document);
         
         assertNotNull(solid);
         System.out.println(solid.toString());
@@ -91,6 +69,18 @@ public class SolidTypeBindingTest extends GML3TestSupport {
         double volume = solid.getVolume();
         System.out.println(volume);
     }
-    
+
+    public void testEncode() throws Exception {    
+        GML3SolidMockData.solid(document, document, false);
+        Solid solid = (Solid) parse();
+        Geometry geometry = (Geometry) solid;
+        //GML3EncodingUtils.setID(geometry, "geometry");
+        Document dom = encode(geometry, GML.Solid);
+        
+        NodeList children = dom.getElementsByTagNameNS(GML.NAMESPACE, GML.Solid.getLocalPart());
+        assertEquals(1, children.getLength());
+        
+        print(dom);
+    }    
     
 }

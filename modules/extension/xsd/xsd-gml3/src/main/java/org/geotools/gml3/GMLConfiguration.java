@@ -344,6 +344,8 @@ public class GMLConfiguration extends Configuration {
                     org.geotools.gml3.bindings.ext.SurfaceTypeBinding.class);
             
             // extended bindings for solid support
+            container.registerComponentImplementation(GML.SurfacePropertyType,
+                    org.geotools.gml3.bindings.ext.SurfacePropertyTypeBindingExt.class);
             container.registerComponentImplementation(GML.CompositeSurfaceType, CompositeSurfaceTypeBinding.class);
             container.registerComponentImplementation(GML.SolidType, SolidTypeBinding.class);
         }

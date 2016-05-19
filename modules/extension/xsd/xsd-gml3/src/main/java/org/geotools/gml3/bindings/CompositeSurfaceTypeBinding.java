@@ -43,7 +43,7 @@ import com.vividsolutions.jts.geom.Polygon;
  *
  * @source $URL$
  */
-public class CompositeSurfaceTypeBinding extends AbstractComplexBinding {
+public class CompositeSurfaceTypeBinding extends AbstractComplexBinding implements Comparable {
     protected GeometryFactory gf;
 
     public CompositeSurfaceTypeBinding(GeometryFactory gf) {
@@ -97,6 +97,10 @@ public class CompositeSurfaceTypeBinding extends AbstractComplexBinding {
     public Object getProperty(Object object, QName name)
         throws Exception {
         if ("surfaceMember".equals(name.getLocalPart())) {
+            /**
+             *  If Binding class is in substitution group, Encoder class calls getProperty in superior Binding class(SurfaceTypeBinding).
+             *  To use this method, Adding compareTo method of Comparable interface is necessary.
+             */
             MultiPolygon multiSurface = (MultiPolygon) object;
             Polygon[] members = new Polygon[multiSurface.getNumGeometries()];
 
@@ -104,11 +108,19 @@ public class CompositeSurfaceTypeBinding extends AbstractComplexBinding {
                 members[i] = (Polygon) multiSurface.getGeometryN(i);
             }
 
-            GML3EncodingUtils.setChildIDs(multiSurface);
+            //GML3EncodingUtils.setChildIDs(multiSurface);
 
             return members;
         }
         
         return null;
     }
+    
+    public int compareTo(Object o) {
+        if (o instanceof org.geotools.gml3.bindings.ext.SurfaceTypeBinding) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }    
 }

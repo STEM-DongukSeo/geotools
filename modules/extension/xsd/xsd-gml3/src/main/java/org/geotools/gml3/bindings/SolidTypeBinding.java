@@ -17,6 +17,7 @@
 package org.geotools.gml3.bindings;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.xml.namespace.QName;
@@ -51,12 +52,8 @@ public class SolidTypeBinding extends AbstractComplexBinding {
     protected GeometryFactory gf;
     protected PrimitiveFactory pf;
     
-    /*
-    public SolidTypeBinding(GeometryFactory gf) {
+    public SolidTypeBinding(GeometryFactory gf, PrimitiveFactory pf) {
         this.gf = gf;
-    }
-    */
-    public SolidTypeBinding(PrimitiveFactory pf) {
         this.pf = pf;
     }
     
@@ -106,7 +103,7 @@ public class SolidTypeBinding extends AbstractComplexBinding {
         }
         
         /**
-         * Convert a Polygon from the JTSGeometry to a Surface of ISOGeometry.
+         * Convert a Polygon of JTSGeometry to a Surface of ISOGeometry.
          * Create the exterior Shell by the converted surfaces.
          */
         List<OrientableSurface> exteriorSurfaces = new ArrayList<OrientableSurface>();
@@ -144,16 +141,51 @@ public class SolidTypeBinding extends AbstractComplexBinding {
         SolidBoundary boundary = solid.getBoundary();
 
         if ("exterior".equals(name.getLocalPart())) {
-            Shell exterior = boundary.getExterior();
-            List<OrientableSurface> generators = (List<OrientableSurface>) exterior.getGenerators();
-            
-            return boundary.getExterior();
+            return shellToPolygons(boundary.getExterior());
         }
 
         if ("interior".equals(name.getLocalPart())) {
-            return boundary.getInteriors();
+            Shell[] interiors = boundary.getInteriors();
+            if (interiors != null) {
+                com.vividsolutions.jts.geom.MultiPolygon[] multiPolygons =
+                        new com.vividsolutions.jts.geom.MultiPolygon[interiors.length];
+                
+                for (int i = 0; i < interiors.length; i++) {
+                    multiPolygons[i] = shellToPolygons(interiors[i]);
+                }
+                return multiPolygons;
+            }
         }
 
         return null;
+    }
+    
+    private com.vividsolutions.jts.geom.MultiPolygon shellToPolygons(Shell shell) {
+        List elements = (List) shell.getElements();
+        
+        List polygons = new ArrayList();
+        Iterator iter = elements.iterator();
+        while (iter.hasNext()) {
+            OrientableSurface surface = (OrientableSurface) iter.next();
+            Object geometry = JTSUtils.surfaceToPolygon((Surface) surface);
+            
+            if (geometry instanceof com.vividsolutions.jts.geom.Polygon) {
+                polygons.add(geometry);
+            } else if (geometry instanceof com.vividsolutions.jts.geom.MultiPolygon) {
+                com.vividsolutions.jts.geom.MultiPolygon multiPolygon =
+                        (com.vividsolutions.jts.geom.MultiPolygon) geometry;
+                
+                for (int i = 0; i < multiPolygon.getNumGeometries(); i++) {
+                    polygons.add(multiPolygon.getGeometryN(i));
+                }
+            }
+        }
+        
+        com.vividsolutions.jts.geom.Polygon[] polygonMembers =
+                new com.vividsolutions.jts.geom.Polygon[polygons.size()];
+        polygons.toArray(polygonMembers);
+        com.vividsolutions.jts.geom.MultiPolygon multiPolygon =
+                gf.createMultiPolygon(polygonMembers);
+        return multiPolygon;
     }
 }
