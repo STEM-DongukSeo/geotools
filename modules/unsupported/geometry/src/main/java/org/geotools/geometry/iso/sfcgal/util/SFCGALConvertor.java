@@ -227,7 +227,8 @@ public class SFCGALConvertor {
                 ArrayList<SFPoint> points = new ArrayList<SFPoint>();
                 Iterator iter = resultPoints.iterator();
                 while (iter.hasNext()) {
-                    points.add(directPositionToSFCGALPoint((DirectPosition) iter.next()));
+                    Position position = (Position) iter.next();
+                    points.add(directPositionToSFCGALPoint(position.getDirectPosition()));
                 }
                 lineString = new SFLineString(points);
                 
