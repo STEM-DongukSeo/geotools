@@ -20,14 +20,13 @@ import javax.xml.namespace.QName;
 
 import org.geotools.factory.GeoTools;
 import org.geotools.factory.Hints;
-import org.geotools.geometry.GeometryBuilder;
 import org.geotools.gml2.FeatureTypeCache;
 import org.geotools.gml2.SrsSyntax;
 import org.geotools.gml2.bindings.GMLCoordTypeBinding;
 import org.geotools.gml2.bindings.GMLCoordinatesTypeBinding;
 import org.geotools.gml3.bindings.AbstractFeatureCollectionTypeBinding;
 import org.geotools.gml3.bindings.AbstractFeatureTypeBinding;
-import org.geotools.gml3.bindings.AbstractGeometryTypeBinding;
+import org.geotools.gml3.bindings.AbstractGeometryTypeBindingExt;
 import org.geotools.gml3.bindings.AbstractRingPropertyTypeBinding;
 import org.geotools.gml3.bindings.ArcStringTypeBinding;
 import org.geotools.gml3.bindings.ArcTypeBinding;
@@ -218,7 +217,7 @@ public class GMLConfiguration extends Configuration {
         container.registerComponentImplementation(GML.AbstractFeatureCollectionType,
             AbstractFeatureCollectionTypeBinding.class);
         container.registerComponentImplementation(GML.AbstractGeometryType,
-            AbstractGeometryTypeBinding.class);
+            AbstractGeometryTypeBindingExt.class);
         container.registerComponentImplementation(GML.AbstractRingPropertyType,
             AbstractRingPropertyTypeBinding.class);
         container.registerComponentImplementation(GML.BoundingShapeType,

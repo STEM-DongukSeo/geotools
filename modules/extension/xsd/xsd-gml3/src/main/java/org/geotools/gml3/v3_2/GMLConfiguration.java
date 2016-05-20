@@ -18,13 +18,11 @@ package org.geotools.gml3.v3_2;
 
 import javax.xml.namespace.QName;
 
-import org.geotools.factory.GeoTools;
-import org.geotools.factory.Hints;
 import org.geotools.gml2.SrsSyntax;
 import org.geotools.gml2.bindings.GMLCoordinatesTypeBinding;
 import org.geotools.gml3.bindings.AbstractFeatureCollectionTypeBinding;
 import org.geotools.gml3.bindings.AbstractFeatureTypeBinding;
-import org.geotools.gml3.bindings.AbstractGeometryTypeBinding;
+import org.geotools.gml3.bindings.AbstractGeometryTypeBindingExt;
 import org.geotools.gml3.bindings.AbstractRingPropertyTypeBinding;
 import org.geotools.gml3.bindings.ArcStringTypeBinding;
 import org.geotools.gml3.bindings.ArcTypeBinding;
@@ -77,7 +75,6 @@ import org.geotools.gml3.v3_2.bindings.LinearRingTypeBinding;
 import org.geotools.gml3.v3_2.bindings.ShellPropertyTypeBinding;
 import org.geotools.gml3.v3_2.bindings.ShellTypeBinding;
 import org.geotools.gml3.v3_2.bindings.SolidTypeBinding;
-import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.geotools.xml.Configuration;
 import org.geotools.xs.XS;
 import org.opengis.geometry.primitive.PrimitiveFactory;
@@ -171,7 +168,7 @@ public class GMLConfiguration extends Configuration {
         container.registerComponentImplementation(GML.AbstractFeatureCollectionType,
             AbstractFeatureCollectionTypeBinding.class);
         container.registerComponentImplementation(GML.AbstractGeometryType,
-            AbstractGeometryTypeBinding.class);
+            AbstractGeometryTypeBindingExt.class);
         container.registerComponentImplementation(GML.AbstractRingPropertyType,
             AbstractRingPropertyTypeBinding.class);
         container.registerComponentImplementation(GML.AbstractRingType,
@@ -286,12 +283,12 @@ public class GMLConfiguration extends Configuration {
                     org.geotools.gml3.bindings.ext.SurfacePropertyTypeBinding.class);
             container.registerComponentImplementation(GML.SurfaceType, 
                     org.geotools.gml3.bindings.ext.SurfaceTypeBinding.class);
+            
+            // extended bindings for solid support
+            container.registerComponentImplementation(GML.ShellType, ShellTypeBinding.class);
+            container.registerComponentImplementation(GML.ShellPropertyType, ShellPropertyTypeBinding.class);
+            container.registerComponentImplementation(GML.SolidType, SolidTypeBinding.class);
         }
-
-        // extended bindings for solid support
-        container.registerComponentImplementation(GML.ShellType, ShellTypeBinding.class);
-        container.registerComponentImplementation(GML.ShellPropertyType, ShellPropertyTypeBinding.class);
-        container.registerComponentImplementation(GML.SolidType, SolidTypeBinding.class);
     }
     
     @Override
