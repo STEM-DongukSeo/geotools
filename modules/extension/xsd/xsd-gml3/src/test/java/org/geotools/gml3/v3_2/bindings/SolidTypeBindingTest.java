@@ -64,8 +64,8 @@ public class SolidTypeBindingTest extends GML32TestSupport {
         assertNotNull(solid);
         System.out.println(solid.toString());
         
-        double volume = solid.getVolume();
-        System.out.println(volume);
+        //double volume = solid.getVolume();
+        //System.out.println(volume);
     }
     
     public void testEncode() throws Exception {
