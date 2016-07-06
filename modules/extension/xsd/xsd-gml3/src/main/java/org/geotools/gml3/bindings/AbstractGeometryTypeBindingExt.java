@@ -16,10 +16,17 @@
  */
 package org.geotools.gml3.bindings;
 
+import java.util.HashMap;
+
 import javax.xml.namespace.QName;
 
 import org.geotools.gml2.SrsSyntax;
 import org.geotools.xml.Configuration;
+import org.geotools.xml.ElementInstance;
+import org.geotools.xml.Node;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 /**
  * @author Donguk Seo
@@ -34,6 +41,31 @@ public class AbstractGeometryTypeBindingExt extends AbstractGeometryTypeBinding 
     public AbstractGeometryTypeBindingExt(Configuration config, SrsSyntax srsSyntax) {
         super(config, srsSyntax);
     }
+
+        
+    @Override
+    public Object parse(ElementInstance instance, Node node, Object value) throws Exception {
+        //set the crs
+        if (value instanceof Geometry) {
+            CoordinateReferenceSystem crs = GML3ParsingUtils.crs(node);
+
+            if (crs != null) {
+                Geometry geometry = (Geometry) value;
+                geometry.setUserData(crs);
+                /*
+                if (geometry.getUserData() == null) {
+                    geometry.setUserData(new HashMap());
+                }
+                if (geometry.getUserData() instanceof Map) {
+                    ((Map) geometry.getUserData()).put("crs", crs);
+                }
+                */
+            }
+        }
+
+        return value;
+    }
+
 
     @Override
     public Object getProperty(Object object, QName name) throws Exception {

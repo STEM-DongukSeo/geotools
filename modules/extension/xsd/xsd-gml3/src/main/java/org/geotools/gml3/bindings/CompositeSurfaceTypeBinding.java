@@ -98,8 +98,8 @@ public class CompositeSurfaceTypeBinding extends AbstractComplexBinding implemen
         throws Exception {
         if ("surfaceMember".equals(name.getLocalPart())) {
             /**
-             *  If Binding class is in substitution group, Encoder class calls getProperty in superior Binding class(SurfaceTypeBinding).
-             *  To use this method, Adding compareTo method of Comparable interface is necessary.
+             *  If Binding class is in substitution group, Encoder class calls getProperty() in superior Binding class(SurfaceTypeBinding).
+             *  To use this method, implementing compareTo method of Comparable interface is necessary.
              */
             MultiPolygon multiSurface = (MultiPolygon) object;
             Polygon[] members = new Polygon[multiSurface.getNumGeometries()];

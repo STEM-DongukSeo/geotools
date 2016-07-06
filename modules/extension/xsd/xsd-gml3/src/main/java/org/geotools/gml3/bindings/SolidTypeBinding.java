@@ -116,6 +116,7 @@ public class SolidTypeBinding extends AbstractComplexBinding {
         // Create the interior Shells
         List<Shell> interiorShells = null;
         if (interiors != null) {
+            interiorShells = new ArrayList<Shell>();
             for (int i = 0; i < interiors.length; i++) {
                 List<OrientableSurface> interiorSurfaces = new ArrayList<OrientableSurface>();
                 com.vividsolutions.jts.geom.MultiPolygon interior = interiors[i];
